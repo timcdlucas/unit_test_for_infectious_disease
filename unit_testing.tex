@@ -1,0 +1,49 @@
+
+% use covid Ferguson as mitigating example.
+% https://twitter.com/neil_ferguson/status/1241835454707699713?s=19
+
+% frameworks
+%.  testthat and packages
+%.  test in Julia
+%.  add python
+
+% continuous integration
+
+% good practice
+%.   small functions
+
+% what to test
+%.  edge cases. 0, others?
+%.  types
+%.  dims
+%.  bounds
+
+
+% how to test random
+%.   non random bit. p= 0
+%.   separate the random bit
+%.   large numbers and bounds
+
+
+\section{ example}
+
+Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step. 
+Each individual is defined by the strain they are currently infected with $I_{it} \in \{'a', 'b', 'c'\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I_t}$.
+Then each time step, the infection status of each individual is updated
+$$I_{it} = Unif(\mathbf{I{t-1}).$$
+
+Here then is our first attempt at implementing this model.
+
+N <- 99
+T <- 200
+I <- matrix(NA, ncom = N, nrow = T)
+I[1, ] <- rep(c("a", "b", "c"), N / 3)
+
+for(t in seq(2, T)){
+  I[t, ] <- sample(I[t - 1, ], N)
+}
+
+
+
+
+
