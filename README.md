@@ -16,3 +16,8 @@ Aim to publish in Epidemics.
 There are basically no formatting requirements for first submission to epidemics.
 So just a simple tex doc with as little extra as possible.
 We will need code so need to work out the best way to do that.
+
+We can base quite a lot of this on the workshop and any lessons we learn while giving that workshop.
+
+[The workshop](https://docs.google.com/presentation/d/1_cCBOQBi6lGh6Dey41c72AvrN7yVGa6oUJyOIFZivF0/edit?usp=sharing
+)
