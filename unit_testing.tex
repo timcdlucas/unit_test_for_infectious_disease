@@ -1,4 +1,17 @@
 
+\documentclass{article}
+
+
+\usepackage{listings}
+
+\title{Test, test me do: unit testing for infectious disease modelling}
+\author{Tim CD Lucas, Tim Pollington, Deirdre Hollingsworth, et al.}
+
+
+\begin{document}
+
+
+
 % use covid Ferguson as mitigating example.
 % https://twitter.com/neil_ferguson/status/1241835454707699713?s=19
 
@@ -24,15 +37,19 @@
 %.   separate the random bit
 %.   large numbers and bounds
 
+\maketitle
+
 
 \section{ example}
 
 Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step. 
 Each individual is defined by the strain they are currently infected with $I_{it} \in \{'a', 'b', 'c'\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I_t}$.
 Then each time step, the infection status of each individual is updated
-$$I_{it} = Unif(\mathbf{I{t-1}).$$
+$$I_{it} = Unif(\mathbf{I{t-1}}).$$
 
 Here then is our first attempt at implementing this model.
+
+\begin{lstlisting}
 
 N <- 99
 T <- 200
@@ -42,7 +59,10 @@ I[1, ] <- rep(c("a", "b", "c"), N / 3)
 for(t in seq(2, T)){
   I[t, ] <- sample(I[t - 1, ], N)
 }
+\end{lstlisting}
 
+
+\end{document}
 
 
 
