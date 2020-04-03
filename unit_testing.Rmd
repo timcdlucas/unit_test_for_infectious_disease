@@ -1,0 +1,110 @@
+---
+output:
+  pdf_document:
+    number_sections: true
+    keep_tex: true
+title: "Test, test me do: unit testing for infectious disease modelling"
+author: Tim CD Lucas, Tim Pollington, Deirdre Hollingsworth, et al.
+geometry: margin=1in
+---
+
+
+<!-- 
+To build run
+rmarkdown::render('unit_testing.Rmd')
+-->
+
+
+
+
+<!-- 
+# use covid Ferguson as motivating example.
+# https://twitter.com/neil_ferguson/status/1241835454707699713?s=19
+
+
+# good practice
+#.   small functions
+
+# what to test
+#.  edge cases. 0, others?
+  #.  types
+#.  dims
+#.  bounds
+
+
+# how to test random
+#.   non random pars. p= 0
+#.   separate the random bit
+#.   large numbers and bounds
+#.   Test for rare events again with large number
+
+
+# frameworks
+#.  testthat and packages
+#.  test in Julia
+#.  add python
+
+# continuous integration
+-->
+
+
+# Abstract
+
+We use code.
+
+Noone is bug free.
+
+it is important that out code is correct because people live or die
+
+buggy code is biased code
+
+people currently use as hoc testing
+
+really we should be doing unit testing
+
+unit testing is formally defined tests in a framework that encourages them to be regularly run.
+
+# Introduction
+
+Infectious disease modellers write lots of code.
+That code is important because it directs policy.
+examples include covid and another example where models have directly influenced policy.
+
+Given that modelling is important, it is important for the code to be correct.
+Neil Ferguson got flack for code that wasn't written with software best practices.
+Furthermore, buggy code is biased code, with an example.
+However, most researchers currently do tests as hoc and only once.
+
+unit testing is a framework for doing this properly.
+useful frameworks are readily available in r and Julia and python.
+infectious disease modelling presents some specific challenges such as stochastic code.
+in this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
+we give specific recommendations for the problems specific to infectious disease modelling.
+we also give an overview of the testing frameworks and continuous integration options available.
+
+
+
+
+# Example
+
+# this example should 
+#.  demonstrate that bugs can be subtle
+
+Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step. 
+Each individual is defined by the strain they are currently infected with $I_{it} \in \{'a', 'b', 'c'\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
+Then each time step, the infection status of each individual is updated
+$$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
+
+Here then is our first attempt at implementing this model.
+
+```{r, first_code, results = 'hide'}
+N <- 99
+T <- 200
+I <- matrix(NA, ncol = N, nrow = T)
+I[1, ] <- rep(c("a", "b", "c"), N / 3)
+
+for(t in seq(2, T)){
+  I[t, ] <- sample(I[t - 1, ], N)
+}
+```
+
