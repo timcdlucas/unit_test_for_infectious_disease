@@ -17,6 +17,11 @@ rmarkdown::render('unit_testing.Rmd')
 
 
 
+<!--
+Title: A beginners guide to unit testing for infectious disease epidemiologists
+Title: A guide for effective unit testing for robust, infectious disease code.
+--> 
+
 
 <!-- 
 # use covid Ferguson as motivating example.
@@ -59,7 +64,9 @@ it is important that out code is correct because people live or die
 
 buggy code is biased code
 
-people currently use as hoc testing
+people currently use as hoc testing.
+
+We did a review and few people were writing tests.
 
 really we should be doing unit testing
 
@@ -117,6 +124,33 @@ for(t in seq(2, T)){
 ```
 
 
+```{r, first_code, results = 'hide'}
+N <- 6
+T <- 20
+I <- matrix(NA, ncol = N, nrow = T)
+I[1, ] <- rep(c("a", "b", "c"), N / 3)
+
+for(t in seq(2, T)){
+  I[t, ] <- sample(I[t - 1, ], N)
+}
+```
+
+
+
+```{r, correct_code, results = 'hide'}
+N <- 99
+T <- 200
+I <- matrix(NA, ncol = N, nrow = T)
+I[1, ] <- rep(c("a", "b", "c"), N / 3)
+
+for(t in seq(2, T)){
+  I[t, ] <- sample(I[t - 1, ], N, replace = TRUE)
+}
+```
+
+I[, 1] %>% factor %>% as.numeric() %>% plot
+apply(I, 1, table)
+
 # Tips and best practice
 
 ## Write functions
@@ -145,7 +179,7 @@ Consider defensive programming.
 
 ## Test deterministic parameters for stochastic code
 
-## Use very large samples for stohastic part
+## Use very large samples for stochastic part
 
 This includes testing large numbers so that you can get a very likely range.
 But also includes testing many runs to check for rare events.
