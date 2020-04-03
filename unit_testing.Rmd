@@ -6,6 +6,7 @@ output:
 title: "Test, test me do: unit testing for infectious disease modelling"
 author: Tim CD Lucas, Tim Pollington, Deirdre Hollingsworth, et al.
 geometry: margin=1in
+bibliography: unit_testing.bib
 ---
 
 
@@ -83,12 +84,17 @@ we give specific recommendations for the problems specific to infectious disease
 we also give an overview of the testing frameworks and continuous integration options available.
 
 
+# Unit testing basics
 
 
 # Example
 
+<!--
 # this example should 
 #.  demonstrate that bugs can be subtle
+-->
+
+Here we define a simple epidemiological model and then present R code [@R]
 
 Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step. 
 Each individual is defined by the strain they are currently infected with $I_{it} \in \{'a', 'b', 'c'\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
@@ -108,3 +114,18 @@ for(t in seq(2, T)){
 }
 ```
 
+
+# Tips and best practice
+
+
+# Unit testing frameworks
+
+
+# Continuous integration
+
+
+
+# Conclusions
+
+
+# References
