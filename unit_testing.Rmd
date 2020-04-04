@@ -110,7 +110,7 @@ Finally, you can write tests before you write code.
 This can be a helpful way to force yourself to plan what some new code or functionality is expected to do.
 Write tests that define the wanted functionality, and keep on programming until all the tests pass.
 This is known as test-driven development.
-
+Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
 
 
 
@@ -215,7 +215,7 @@ Remember to set the seed.
 
 
 
-# Unit testing frameworks
+# Unit testing frameworks {#frameworks}
 
 Does this need to go at the beginning as we are already introducing testthat? I would rather not put it at the beginning...
 
@@ -231,7 +231,7 @@ devtools::check runs checks that the r package is built correctly and runs unit 
 Test in a Julia package
 
 
-# Continuous integration
+# Continuous integration {#ci}
 
 If the code is hosted as a remote repo, we can deploy continuous integration so that tests are run every time we push changes.
 
