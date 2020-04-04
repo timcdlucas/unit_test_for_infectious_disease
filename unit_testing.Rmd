@@ -83,8 +83,8 @@ Neil Ferguson got flack for code that wasn't written with software best practice
 Furthermore, buggy code is biased code, with an example.
 However, most researchers currently do tests as hoc and only once.
 
-unit testing is a framework for doing this properly.
-useful frameworks are readily available in r and Julia and python.
+unit testing is a framework for doing this properly (@wickham2015r Chapter 7).
+useful frameworks are readily available in R and Julia and python.
 infectious disease modelling presents some specific challenges such as stochastic code.
 in this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
 we give specific recommendations for the problems specific to infectious disease modelling.
@@ -92,6 +92,26 @@ we also give an overview of the testing frameworks and continuous integration op
 
 
 # Unit testing basics
+
+
+Unit testing consists of pairs of function calls and known/expected outputs.
+So far a function that computes the square root of a number, we would write a test that runs our function on the number 4 and compares it to the known, correct answer (2).
+We would write tests that cover various possible inputs: what do we want our function to do if it is given a negative number, or a string instead of a numeric object?
+
+In R [@R], the testthat package [@testthat], provides a simple interface for testing.
+While there are a number of test functions, the main function is expect_equal and takes two arguments, the expression to run and the expected output.
+So for our square root example above we would write expect_equal(sqrt(4), 2).
+
+There are a number of ways that unit testing can be incorporated into programming workflow.
+The first and clearest is that as you write code, you should write tests that test the code does what you think it does.
+The second, is that these same tests should then be regularly run as you continue to develop code.
+If a change elsewhere in the code causes the older tests to break, something has gone wrong and needs to be fixed.
+Finally, you can write tests before you write code.
+This can be a helpful way to force yourself to plan what some new code or functionality is expected to do.
+Write tests that define the wanted functionality, and keep on programming until all the tests pass.
+This is known as test-driven development.
+
+
 
 
 # Example
@@ -102,7 +122,7 @@ we also give an overview of the testing frameworks and continuous integration op
 #  Have elements that are fixable by all the ideas later
 -->
 
-Here we define a simple epidemiological model and then present R code [@R] for it.
+Here we define a simple epidemiological model and then present R code for it.
 We will then use this as a working example to demonstrate how to effectively write unit tests for infectious disease modelling code.
 
 Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step.
@@ -124,7 +144,7 @@ for(t in seq(2, T)){
 ```
 
 
-```{r, first_code, results = 'hide'}
+```{r, first_code2, results = 'hide'}
 N <- 6
 T <- 20
 I <- matrix(NA, ncol = N, nrow = T)
@@ -196,6 +216,8 @@ Remember to set the seed.
 
 
 # Unit testing frameworks
+
+Does this need to go at the beginning as we are already introducing testthat? I would rather not put it at the beginning...
 
 testthat we already introduced
 
