@@ -10,7 +10,7 @@ bibliography: unit_testing.bib
 ---
 
 
-<!-- 
+<!--
 To build run
 rmarkdown::render('unit_testing.Rmd')
 -->
@@ -20,10 +20,10 @@ rmarkdown::render('unit_testing.Rmd')
 <!--
 Title: A beginners guide to unit testing for infectious disease epidemiologists
 Title: A guide for effective unit testing for robust, infectious disease code.
---> 
+-->
 
 
-<!-- 
+<!--
 # use covid Ferguson as motivating example.
 # https://twitter.com/neil_ferguson/status/1241835454707699713?s=19
 
@@ -97,15 +97,15 @@ we also give an overview of the testing frameworks and continuous integration op
 # Example
 
 <!--
-# this example should 
+# this example should
 #  demonstrate that bugs can be subtle
 #  Have elements that are fixable by all the ideas later
 -->
 
-Here we define a simple epidemiological model and then present R code [@R] for it. 
+Here we define a simple epidemiological model and then present R code [@R] for it.
 We will then use this as a working example to demonstrate how to effectively write unit tests for infectious disease modelling code.
 
-Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step. 
+Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step.
 Each individual is defined by the strain they are currently infected with $I_{it} \in \{'a', 'b', 'c'\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
 Then each time step, the infection status of each individual is updated
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
@@ -155,7 +155,13 @@ apply(I, 1, table)
 
 ## Write functions
 
+In order to guarantee that a unit test is checking the same code as used in the model, the code needs to be defined once, in a function.
+This same function is then used in the larger model code and used by the unit test itself.
+
 ## Write small functions
+
+In order to effectively write unit tests it helps to make your functions small, such that they do one, clearly defined operation.
+This makes it easier to reason through a few examples to be confident you know exactly what the output should be.
 
 ## Combine smaller functions and test the upper-level functions
 
@@ -191,8 +197,26 @@ Remember to set the seed.
 
 # Unit testing frameworks
 
+testthat we already introduced
+
+Test in Julia
+
+If we build our code as packages this is set up as well
+
+testthat in an r package
+devtools::check runs checks that the r package is built correctly and runs unit tests.
+
+Test in a Julia package
+
 
 # Continuous integration
+
+If the code is hosted as a remote repo, we can deploy continuous integration so that tests are run every time we push changes.
+
+For open source packages, services like Travis ci are free.
+simply add a traits yml file, sign up, point travis to your repo.
+Similarly, services like codecov measure how much of your code is tested.
+
 
 
 
