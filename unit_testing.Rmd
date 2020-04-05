@@ -83,7 +83,7 @@ Neil Ferguson got flack for code that wasn't written with software best practice
 Furthermore, buggy code is biased code, with an example.
 However, most researchers currently do tests as hoc and only once.
 
-unit testing is a framework for doing this properly (@wickham2015r Chapter 7).
+unit testing is a framework for doing this properly (@wickham2015r Chapter 7, @osborne2014ten).
 useful frameworks are readily available in R and Julia and python.
 infectious disease modelling presents some specific challenges such as stochastic code.
 in this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
