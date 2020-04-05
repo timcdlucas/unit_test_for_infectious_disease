@@ -1,6 +1,6 @@
 ---
 output:
-  pdf_document:
+  bookdown::pdf_document2:
     number_sections: true
     keep_tex: true
 title: "Test, test me do: unit testing for infectious disease modelling"
@@ -54,6 +54,11 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 -->
 
 
+```{r, setup, echo = FALSE}
+library(ggplot2)
+knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 5, out.extra = '')
+```
+
 # Abstract
 
 We use code.
@@ -75,7 +80,7 @@ unit testing is formally defined tests in a framework that encourages them to be
 # Introduction
 
 Infectious disease modellers write lots of code.
-Code is getting more complex as IBMs become more popular [@willem2017lessons, @ferguson2006strategies].
+Code is getting more complex as IBMs become more popular [@willem2017lessons; @ferguson2006strategies].
 That code is important because it directs policy.
 examples include covid and another example where models have directly influenced policy.
 
@@ -133,7 +138,7 @@ $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 
 Here then is our first attempt at implementing this model.
 
-```{r, setup, results = 'hide', echa = FALSE}
+```{r, simsetup, results = 'hide', echa = FALSE}
 set.seed(3132)
 ```
 
@@ -141,23 +146,47 @@ set.seed(3132)
 ```{r, first_code, results = 'hide'}
 N <- 12
 t <- 20
+# create the matrix to store the simulation data
 I <- matrix(NA, ncol = N, nrow = t)
+
+# Initialise the population
 I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
+# For each time step, each person is reinfected
+#   by someone randomly sampled from the population.
 for(t in seq(2, t)){
   I[t, ] <- sample(I[t - 1, ], N)
 }
 ```
 
+We might then make some plots to explore whether our code is doing something sensible.
+For example we might plot the time course of one or more individuals and see that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
 
-
-```{r, firstplots}
-I[, 1] %>% factor %>% as.numeric() %>% plot(type = 'l')
-apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
-
+```{r, firstplots, echo = FALSE, fig.cap = 'The infection status of one individual though time.'}
+d1 <- data.frame(time = seq(t), strain = I[, 1])
+d1$strain_num <- as.numeric(factor(d1$strain))
+ggplot(d1, aes(time, strain_num)) + 
+  geom_path() +
+  scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) +
+  labs(y = 'Strain', x = 'Time')
 ```
 
 
+```{r, firstplots2, echo = FALSE, result = 'hide', include = FALSE}
+d1 <- data.frame(time = rep(seq(t), 3), 
+                 strain = as.vector(I[, 1:3]),
+                 individual = factor(rep(1:3, each = t)))
+d1$strain_num <- as.numeric(factor(d1$strain))
+ggplot(d1, aes(time, strain_num, colour = individual, group = individual)) + 
+  geom_path() +
+  scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) +
+  labs(y = 'Strain', x = 'Time', colour = 'Indiv.')
+```
+
+
+```{r, bug_show_plot, include = FALSE}
+apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
+```
 
 ```{r, correct_code, results = 'hide'}
 N <- 12
@@ -171,9 +200,11 @@ for(t in seq(2, t)){
 ```
 
 
-```{r, correct_plots}
+
+```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each strain drifting.'}
 apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
 ```
+
 
 # Tips and best practice
 
