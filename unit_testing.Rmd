@@ -240,12 +240,13 @@ This same function is then used in the larger model code and used by the unit te
 It helps to make your functions small, such that they do one, clearly defined operation.
 This makes it easier to reason through a few examples to be confident you know exactly what the output should be.
 In our example we could define one function to initialise the population and another to run the simulation.
-
+In doing so we can more carefully consider the structure of our code more generally.
+Here we have modified the code that initialises the population so that we can vary the number of strains and so that the number of individuals does not have to be a multiple of the number of strains.
 
 ```{r, refactor, result = 'hide'}
-initialise_pop <- function(N, t){
+initialise_pop <- function(N, t, strains = 3){
   I <- matrix(NA, ncol = N, nrow = t)
-  I[1, ] <- rep(c("a", "b", "c"), N / 3)
+  I[1, ] <- rep(letters[1:strains], ceiling(N / strains))[1:N]
   return(I)
 }
 
@@ -255,12 +256,52 @@ update_pop <- function(x, N, i){
 }
 ```
 
-We can then write tests for each function.
+
+
+## Test easy to understand parameters
+
+In order to carefully work out exactly what we expect each function to do, it is useful to use easy to understand parameters.
+For example, if we set up a very small population with only one strain, we know that both the first and second time step should only contain strain a.
+
+
+```{r, test_easy, results = 'hide'}
+pop <- initialise_pop(3, 2, strain = 1) 
+pop2 <- update_pop(pop, 3, 2)
+expect_true(all(pop2 == 'a'))
+```
+
+## Test all arguments
+
+Our function `initialise_pop` has three arguments so we should test that each of these does what we expect.
+To do this we will initialise one population, and then alter each argument in turn.
+In the last test we have tested the exact value we expect the first row to take.
+
+```{r, test_all_args, results = 'hide'}
+pop <- initialise_pop(3, 2, strain = 3) 
+expect_equal(dim(pop), c(2, 3))
+
+pop2 <- initialise_pop(3, 6, strain = 3) 
+expect_equal(dim(pop2), c(6, 3))
+
+pop3 <- initialise_pop(20, 2, strain = 3) 
+expect_equal(dim(pop3), c(2, 20))
+
+pop4 <- initialise_pop(3, 2, strain = 2) 
+expect_equal(pop4[1, ], c('a', 'b', 'a'))
+
+```
+
+
+
+## Carefully work through more complex parameters
+
+We can also write tests for each function with less simple parameter values.
 After initialising our population, we expect all the rows other than the first to contain NAs.
 We also expect each of the strains a, b and c to occur in the first row.
 Our function update performs one time step of the simulation, so we expect one additional row to be populated.
+Instead of testing the exact values of the results here, we are testing that they make sense with our more macro understanding of the model system.
 
-```{r, test1, results = 'hide'}
+```{r, test_complex, results = 'hide'}
 pop <- initialise_pop(12, 20) 
 expect_true(all(is.na(pop[-1, ])))
 expect_true(all(c('a', 'b', 'c') %in% pop[1, ]))
@@ -269,18 +310,6 @@ pop2 <- update_pop(pop, 12, 2)
 expect_true(all(!is.na(pop2[1:2, ])))
 ```
 
-
-## Test structure as well as values
-the matrix to be an $N \times t$ matrix with
-expect_equal(dim(pop), c(20, 12))
-
-
-
-## Test easy to understand parameters
-
-test update pop with only one strain.
-
-## Carefully work through more complex parameters
 
 
 ## Split stochastic and deterministic parts
@@ -323,7 +352,7 @@ Where possible we should test larger, more macro aspects of the model here.
 We now expect there to be no NAs left in our matrix.
 We also now expect every element in our matrix to be one of the three strain strings.
 
-```{r, test2, results = 'hide'}
+```{r, testnn, results = 'hide'}
 pop <- full_sim(12, 20)
 expect_true(!any(is.na(pop)))
 expect_true(all(pop %in% c('a', 'b', 'c')))
