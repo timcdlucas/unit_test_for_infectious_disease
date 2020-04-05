@@ -75,6 +75,7 @@ unit testing is formally defined tests in a framework that encourages them to be
 # Introduction
 
 Infectious disease modellers write lots of code.
+Code is getting more complex as IBMs become more popular [@willem2017lessons, @ferguson2006strategies].
 That code is important because it directs policy.
 examples include covid and another example where models have directly influenced policy.
 
