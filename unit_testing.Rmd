@@ -161,6 +161,20 @@ for(t in seq(2, t)){
 
 We might then make some plots to explore whether our code is doing something sensible.
 For example we might plot the time course of one or more individuals and see that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
+However, if we look at the proportion of each strain through time (not plotted) we will quickly see that the proportions do not change.
+Therefore there must be a bug in our code.
+
+This simple example demonstrates a number of points.
+Firstly, something that everyone who has ever written code knows, bugs can be subtle.
+Even though the code above is only a few lines, it is not easy to notice that it is wrong.
+Secondly, it is much easier to debug code, once you know there is a bug.
+Once you know there is a bug in the above code, some proportion of readers might be able to identify the bug.
+Thirdly, this example is not far from the testing that many scientists do; write the code, plot some outputs and see if they make sense.
+However, approaching this in an ad hoc way makes it less likely that we will catch bugs.
+In this example, we used the wrong plot to diagnose whether our code was correct and therefore missed the bug.
+Finally, while plots are an excellent way to check the behaviour of code, and plotting simulation runs is a vital step in code checking, it is not the easiest method for automatically checking code because a human has to scan each plot each time the tests are run.
+
+
 
 ```{r, firstplots, echo = FALSE, fig.cap = 'The infection status of one individual though time.'}
 d1 <- data.frame(time = seq(t), strain = I[, 1])
@@ -187,6 +201,9 @@ ggplot(d1, aes(time, strain_num, colour = individual, group = individual)) +
 ```{r, bug_show_plot, include = FALSE}
 apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
 ```
+
+The fix for this particular bug is that the \texttt{sample} function defaults to sampling without replacement.
+Setting \texttt{replace = TRUE} fixes the code and when we plot the proportion of each strain (Figure \@ref{fig:correctplots}) we now see the correct behaviour.
 
 ```{r, correct_code, results = 'hide'}
 N <- 12
