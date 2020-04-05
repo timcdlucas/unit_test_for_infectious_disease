@@ -400,8 +400,31 @@ However, we still have one function, `sample_events`, that is irreducably stocha
 Similarly to finding parameters that are simple to test for other functions, we can often find parameter values for which our stochastic functions are not longer stochastic.
 For example, a bernoulli sample with probability 0 always gives a 0 and with a probability of 1 always gives a 1.
 In the example here, in the case where we only have one strain, the model is no longer stochastic.
+So if we initialise a population with one strain, the second time step should equal the first time step.
+
+```{r, test_stoch_determin, results = 'hide'}
+pop <- initialise_pop(3, 2, strain = 1) 
+pop <- update_pop(pop, 3, 2)
+expect_equal(pop[1, ], pop[2, ])
+```
 
 ### Test all possible answers {-#allpossible}
+
+Again foussing on very simple parameters, there are some cases where the code is stochastic, but has a very small number of possible outputs. 
+In this case we can run the function many times and check that it always gives one of the possible outputs.
+In the case of a population of two people, with two strains, the only possible outcomes in the second iteration are (a, a), (a, b), (b, a) and (b, b).
+
+
+```{r, test_stoch_fewvalues, results = 'hide'}
+pop <- initialise_pop(2, 2, strain = 2) 
+# Run first update 300 times.
+# Collapse each population into a single string to make comparisons easier.
+many_pops <- replicate(300, paste0(update_pop(pop, 2, 2)[2, ], collapse = ''))
+
+expect_true(all(many_pops %in% c('aa', 'ab', 'ba', 'bb')))
+
+```
+
 
 ### Use very large samples for stochastic part {-#largesmaples}
 
