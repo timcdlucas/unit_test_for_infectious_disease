@@ -204,8 +204,10 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% m
 
 The fix for this particular bug is that the \texttt{sample} function defaults to sampling without replacement.
 Setting \texttt{replace = TRUE} fixes the code and when we plot the proportion of each strain (Figure \@ref{fig:correctplots}) we now see the correct behaviour.
+Given this example, we will now work through specific advice for unit testing for infectious disease models.
+We will write tests and rewrite the code as we go until we have a well tested, more reliabley implemented model at the end.
 
-```{r, correct_code, results = 'hide'}
+```{r, correct_code, results = 'hide', echo = FALSE}
 N <- 12
 t <- 20
 I <- matrix(NA, ncol = N, nrow = t)
@@ -227,12 +229,10 @@ for(t in seq(2, t)){
 
 # Tips and best practice
 
-## Write functions
+## Write small functions
 
 In order to guarantee that a unit test is checking the same code as used in the model, the code needs to be defined once, in a function.
 This same function is then used in the larger model code and used by the unit test itself.
-
-## Write small functions
 
 In order to effectively write unit tests it helps to make your functions small, such that they do one, clearly defined operation.
 This makes it easier to reason through a few examples to be confident you know exactly what the output should be.
