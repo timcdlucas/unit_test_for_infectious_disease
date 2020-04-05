@@ -217,8 +217,8 @@ t <- 20
 I <- matrix(NA, ncol = N, nrow = t)
 I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
-for(t in seq(2, t)){
-  I[t, ] <- sample(I[t - 1, ], N, replace = TRUE)
+for(i in seq(2, t)){
+  I[i, ] <- sample(I[i - 1, ], N, replace = TRUE)
 }
 ```
 
@@ -249,52 +249,39 @@ initialise_pop <- function(N, t){
   return(I)
 }
 
-update_pop <- function(x, N, t){
-  x[t, ] <- sample(x[t - 1, ], N, replace = TRUE)
+update_pop <- function(x, N, i){
+  x[i, ] <- sample(x[i - 1, ], N, replace = TRUE)
   return(x)
 }
 ```
 
 We can then write tests for each function.
-After initialising our population, we expect the matrix to be an $N \times t$ matrix with only the first row populated.
+After initialising our population, we expect all the rows other than the first to contain NAs.
 We also expect each of the strains a, b and c to occur in the first row.
-Our function update pop performs one time step of the simulation, so we expect one additional row to be populated.
+Our function update performs one time step of the simulation, so we expect one additional row to be populated.
 
 ```{r, test1, results = 'hide'}
 pop <- initialise_pop(12, 20) 
-expect_equal(dim(pop), c(20, 12))
 expect_true(all(is.na(pop[-1, ])))
+expect_true(all(c('a', 'b', 'c') %in% pop[1, ]))
 
-populated_rows1 <- sum(apply(pop, 1, function(x) !all(is.na(x))))
 pop2 <- update_pop(pop, 12, 2)
-populated_rows2 <- sum(apply(pop2, 1, function(x) !all(is.na(x))))
-expect_equal(populated_rows2 - populated_rows1, 1)
+expect_true(all(!is.na(pop2[1:2, ])))
 ```
 
 
-
-
-## Combine smaller functions and test the upper-level functions
+## Test structure as well as values
+the matrix to be an $N \times t$ matrix with
+expect_equal(dim(pop), c(20, 12))
 
 
 
 ## Test easy to understand parameters
 
-
+test update pop with only one strain.
 
 ## Carefully work through more complex parameters
 
-## Test corner cases
-
-## Test structure as well as values
-
-
-## Test incorrect inputs
-
-This is especially important for user facing functions.
-The author of the code is also a user!
-If a function will be used for new datasets, test that is handles NAs, NaNs, etc.
-Consider defensive programming.
 
 ## Split stochastic and deterministic parts
 
@@ -309,6 +296,49 @@ Remember to set the seed.
 
 
 
+## Test corner cases
+
+
+
+
+## Combine smaller functions and test the upper-level functions
+
+There are many aspects of code that are best tested using small, specific functions.
+However, we also need to test that we are tying these functions together properly.
+Therefore, we should write larger functions that can also be tested.
+
+```{r, refactor2, result = 'hide'}
+
+full_sim <- function(N, t){
+  pop <- initialise_pop(N, t) 
+  for(i in seq(2, t)){
+    pop <- update_pop(pop, N, i)
+  }
+  return(pop)
+}
+
+```
+
+Where possible we should test larger, more macro aspects of the model here.
+We now expect there to be no NAs left in our matrix.
+We also now expect every element in our matrix to be one of the three strain strings.
+
+```{r, test2, results = 'hide'}
+pop <- full_sim(12, 20)
+expect_true(!any(is.na(pop)))
+expect_true(all(pop %in% c('a', 'b', 'c')))
+```
+
+
+
+
+
+## Test incorrect inputs
+
+This is especially important for user facing functions.
+The author of the code is also a user!
+If a function will be used for new datasets, test that is handles NAs, NaNs, etc.
+Consider defensive programming.
 
 # Unit testing frameworks {#frameworks}
 
