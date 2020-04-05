@@ -58,7 +58,7 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 ```{r, setup, echo = FALSE}
 library(ggplot2)
 library(testthat)
-knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 5, 
+knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
                       out.extra = '', out.width = "0.6\\textwidth",
                       fig.align='center')
 ```
@@ -188,6 +188,7 @@ d1 <- data.frame(time = seq(t), strain = I[, 1])
 d1$strain_num <- as.numeric(factor(d1$strain))
 ggplot(d1, aes(time, strain_num)) + 
   geom_path() +
+  geom_point() +
   scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) +
   labs(y = 'Strain', x = 'Time')
 ```
@@ -230,7 +231,7 @@ for(i in seq(2, t)){
 ```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each strain drifting. Each strain is a different line.'}
 (apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) / N) %>% 
   t %>% 
-  matplot(type = 'l', xlab = 'Time', ylab = 'Proportion')
+  matplot(type = 'l', xlab = 'Time', ylab = 'Proportion', lwd = 2)
 ```
 
 
