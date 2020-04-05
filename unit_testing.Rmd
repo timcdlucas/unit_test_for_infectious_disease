@@ -201,8 +201,10 @@ for(t in seq(2, t)){
 
 
 
-```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each strain drifting.'}
-apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
+```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each strain drifting. Each strain is a different line.'}
+(apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) / N) %>% 
+  t %>% 
+  matplot(type = 'l', xlab = 'Time', ylab = 'Proportion')
 ```
 
 
