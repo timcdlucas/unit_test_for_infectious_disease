@@ -373,18 +373,18 @@ sample_events <- function(N){
   sample(N, N, replace = TRUE)
 }
 
-new_infection_status <- funtion(old_i, events){
-  old_i[sample_events]
+new_infection_status <- function(old_i, events){
+  old_i[events]
 }
 
-add_infectious_status <- funtion(x, new_i, i){
+add_infection_status <- function(x, new_i, i){
   x[i, ] <- new_i
 }
 
 update_pop <- function(x, N, i){
   events <- sample_events(N)
-  new_i <- new_infectious_status(x[i - 1, ])
-  x <- add_infectious_status(x, new_i, i)
+  new_i <- new_infection_status(x[i - 1, ])
+  x[i, ] <- add_infection_status(x, new_i, i)
   return(x)
 }
 
