@@ -56,6 +56,7 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 
 ```{r, setup, echo = FALSE}
 library(ggplot2)
+library(testthat)
 knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 5, out.extra = '')
 ```
 
@@ -105,8 +106,11 @@ So far a function that computes the square root of a number, we would write a te
 We would write tests that cover various possible inputs: what do we want our function to do if it is given a negative number, or a string instead of a numeric object?
 
 In R [@R], the testthat package [@testthat], provides a simple interface for testing.
-While there are a number of test functions, the main function is expect_true and takes one argument, an expression that should evaluate to true.
-So for our square root example above we would write expect_true(sqrt(4) == 2).
+While there are a number of test functions, the two main functions is `expect_true` and `expect_equal`. 
+`expect_true` takes one argument, an expression that should evaluate to true.
+So for our square root example above we would write `expect_true(sqrt(4) == 2)`.
+`expect_equal` takes two arguments, an expression and the expected output.
+For the square root example we would write `expect_equal(sqrt(4), 2)`.
 
 There are a number of ways that unit testing can be incorporated into programming workflow.
 The first and clearest is that as you write code, you should write tests that test the code does what you think it does.
@@ -132,7 +136,7 @@ Here we define a simple epidemiological model and then present R code for it.
 We will then use this as a working example to demonstrate how to effectively write unit tests for infectious disease modelling code.
 
 Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step.
-Each individual is defined by the strain they are currently infected with $I_{it} \in \{'a', 'b', 'c'\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
+Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
 Then each time step, the infection status of each individual is updated
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 
@@ -202,8 +206,8 @@ ggplot(d1, aes(time, strain_num, colour = individual, group = individual)) +
 apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
 ```
 
-The fix for this particular bug is that the \texttt{sample} function defaults to sampling without replacement.
-Setting \texttt{replace = TRUE} fixes the code and when we plot the proportion of each strain (Figure \@ref{fig:correctplots}) we now see the correct behaviour.
+The fix for this particular bug is that the `sample` function defaults to sampling without replacement.
+Setting `replace = TRUE` fixes the code and when we plot the proportion of each strain (Figure \@ref{fig:correctplots}) we now see the correct behaviour.
 Given this example, we will now work through specific advice for unit testing for infectious disease models.
 We will write tests and rewrite the code as we go until we have a well tested, more reliabley implemented model at the end.
 
@@ -231,11 +235,32 @@ for(t in seq(2, t)){
 
 ## Write small functions
 
-In order to guarantee that a unit test is checking the same code as used in the model, the code needs to be defined once, in a function.
+In order to guarantee that a unit test is checking the same code as used for actual analysis, the code needs to be defined once, in a function.
 This same function is then used in the larger model code and used by the unit test itself.
-
-In order to effectively write unit tests it helps to make your functions small, such that they do one, clearly defined operation.
+It helps to make your functions small, such that they do one, clearly defined operation.
 This makes it easier to reason through a few examples to be confident you know exactly what the output should be.
+In our example we could define one function to initialise the population and another to run the simulation.
+We can then write tests for each function.
+After initialising our population, we expect the matrix to be an $N \times t$ matrix with only the first row populated.
+We also expect each of the strains a, b and c to occur in the first row.
+Our function update pop performs one time step of the simulation, so we expect one additional row to be populated.
+
+```{r, refactor}
+initialise_pop <- function(N, t){
+  I <- matrix(NA, ncol = N, nrow = t)
+  I[1, ] <- rep(c("a", "b", "c"), N / 3)
+  return(I)
+}
+
+update_pop <- function(x, N, t){
+    x[t, ] <- sample(x[t - 1, ], N, replace = TRUE)
+}
+
+expect_equal(dim(initialise_pop(12, 20)), c(20, 12))
+```
+
+
+
 
 ## Combine smaller functions and test the upper-level functions
 
