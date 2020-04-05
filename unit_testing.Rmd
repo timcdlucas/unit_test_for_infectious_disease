@@ -266,20 +266,26 @@ update_pop <- function(x, N, i){
 ### Test easy to understand parameters {-#easyparams}
 
 In order to carefully work out exactly what we expect each function to do, it is useful to use easy to understand parameters.
-For example, if we set up a very small population with only one strain, we know that both the first and second time step should only contain strain a.
+For example, if we set up a very small populations with only a few strains we can easily work out exactly what we expect the initialised population to look like.
 
 
 ```{r, test_easy, results = 'hide'}
-pop <- initialise_pop(3, 2, strain = 1) 
-pop2 <- update_pop(pop, 3, 2)
-expect_true(all(pop2 == 'a'))
+pop1 <- initialise_pop(3, 2, strain = 2) 
+expect_equal(pop1[1, ], c('a', 'b', 'a'))
+
+pop2 <- initialise_pop(3, 2, strain = 3) 
+expect_equal(pop2[1, ], c('a', 'b', 'c'))
+
+pop3 <- initialise_pop(4, 2, strain = 2) 
+expect_equal(pop3[1, ], c('a', 'b', 'a', 'b'))
 ```
 
 ### Test all arguments {-#testargs}
 
 Our function `initialise_pop` has three arguments so we should test that each of these does what we expect.
 To do this we will initialise one population, and then alter each argument in turn.
-In the last test we have tested the exact value we expect the first row to take.
+The first two arguments directly change the expected dimension of the output matrix, so we test that.
+For the last argument we have tested that the number of strains is equal to the number of strains requested.
 
 ```{r, test_all_args, results = 'hide'}
 pop <- initialise_pop(3, 2, strain = 3) 
@@ -291,8 +297,8 @@ expect_equal(dim(pop2), c(6, 3))
 pop3 <- initialise_pop(20, 2, strain = 3) 
 expect_equal(dim(pop3), c(2, 20))
 
-pop4 <- initialise_pop(3, 2, strain = 2) 
-expect_equal(pop4[1, ], c('a', 'b', 'a'))
+pop4 <- initialise_pop(10, 2, strain = 5) 
+expect_equal(length(unique(pop4[1, ])), 5)
 
 ```
 
@@ -314,28 +320,6 @@ expect_true(all(c('a', 'b', 'c') %in% pop[1, ]))
 pop2 <- update_pop(pop, 12, 2)
 expect_true(all(!is.na(pop2[1:2, ])))
 ```
-
-
-## Testing stochastic code
-### Split stochastic and deterministic parts {-#splitstochastic}
-
-One of the most particular challenges for testing 
-
-
-### Test deterministic parameters for stochastic code {-#deterministicparams}
-
-### Use very large samples for stochastic part {-#largesmaples}
-
-This includes testing large numbers so that you can get a very likely range.
-But also includes testing many runs to check for rare events.
-Remember to set the seed.
-
-
-
-## Further testing
-### Test corner cases {-#corners}
-
-
 
 
 ### Combine smaller functions and test the upper-level functions {-#combine}
@@ -365,6 +349,70 @@ pop <- full_sim(12, 20)
 expect_true(!any(is.na(pop)))
 expect_true(all(pop %in% c('a', 'b', 'c')))
 ```
+
+
+
+## Testing stochastic code
+
+One of the most particular challenges for testing code for infectious disease modelling is the large amount of stochastic events.
+Stochastic events are difficult to test effectively because, by definition, we do not know exactly what the result will be.
+There are however a number of approaches that can help.
+
+### Split stochastic and deterministic parts {-#splitstochastic}
+
+The first thing to aim for is to isolate the stochastic parts of the code.
+For example, the function `update_pop` above does a number of things, some of which are stochastic and some of which are deterministi.
+Firslty, the function stochastically samples who gets infected by whom.
+Then it takes those infection events and finds the new infectious status for each individual.
+Finally, it adds the new infectious statuses to the full population matrix. 
+So we could split these tasks up as follows.
+
+```{r, refactorstoch}
+
+sample_events <- function(N){
+  sample(N, N, replace = TRUE)
+}
+
+new_infection_status <- funtion(old_i, events){
+  old_i[sample_events]
+}
+
+add_infectious_status <- funtion(x, new_i, i){
+  x[i, ] <- new_i
+}
+
+update_pop <- function(x, N, i){
+  events <- sample_events(N)
+  new_i <- new_infectious_status(x[i - 1, ])
+  x <- add_infectious_status(x, new_i, i)
+  return(x)
+}
+
+```
+
+Now two thirds of the code is deterministic and can be tested using the ideas discussed previously.
+Similarly, the function `update_pop` that combines these functions can be tested at a more macro level, confident that two thirds of the code inside it is already tested very carefully.
+However, we still have one function, `sample_events`, that is irreducably stochastic.
+
+
+### Test deterministic parameters for stochastic code {-#deterministicparams}
+
+Similarly to finding parameters that are simple to test for other functions, we can often find parameter values for which our stochastic functions are not longer stochastic.
+For example, a bernoulli sample with probability 0 always gives a 0 and with a probability of 1 always gives a 1.
+In the example here, in the case where we only have one strain, the model is no longer stochastic.
+
+### Test all possible answers {-#allpossible}
+
+### Use very large samples for stochastic part {-#largesmaples}
+
+This includes testing large numbers so that you can get a very likely range.
+But also includes testing many runs to check for rare events.
+Remember to set the seed.
+
+
+
+## Further testing
+### Test corner cases {-#corners}
 
 
 
