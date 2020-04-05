@@ -2,6 +2,7 @@
 output:
   bookdown::pdf_document2:
     number_sections: true
+    toc: false
     keep_tex: true
 title: "Test, test me do: unit testing for infectious disease modelling"
 author: Tim CD Lucas, Tim Pollington, Deirdre Hollingsworth, et al.
@@ -57,7 +58,9 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 ```{r, setup, echo = FALSE}
 library(ggplot2)
 library(testthat)
-knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 5, out.extra = '')
+knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 5, 
+                      out.extra = '', out.width = "0.6\\textwidth",
+                      fig.align='center')
 ```
 
 # Abstract
