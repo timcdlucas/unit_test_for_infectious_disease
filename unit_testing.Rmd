@@ -99,8 +99,8 @@ So far a function that computes the square root of a number, we would write a te
 We would write tests that cover various possible inputs: what do we want our function to do if it is given a negative number, or a string instead of a numeric object?
 
 In R [@R], the testthat package [@testthat], provides a simple interface for testing.
-While there are a number of test functions, the main function is expect_equal and takes two arguments, the expression to run and the expected output.
-So for our square root example above we would write expect_equal(sqrt(4), 2).
+While there are a number of test functions, the main function is expect_true and takes one argument, an expression that should evaluate to true.
+So for our square root example above we would write expect_true(sqrt(4) == 2).
 
 There are a number of ways that unit testing can be incorporated into programming workflow.
 The first and clearest is that as you write code, you should write tests that test the code does what you think it does.
@@ -132,44 +132,47 @@ $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 
 Here then is our first attempt at implementing this model.
 
+```{r, setup, results = 'hide', echa = FALSE}
+set.seed(3132)
+```
+
+
 ```{r, first_code, results = 'hide'}
-N <- 99
-T <- 200
-I <- matrix(NA, ncol = N, nrow = T)
+N <- 12
+t <- 20
+I <- matrix(NA, ncol = N, nrow = t)
 I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
-for(t in seq(2, T)){
+for(t in seq(2, t)){
   I[t, ] <- sample(I[t - 1, ], N)
 }
 ```
 
 
-```{r, first_code2, results = 'hide'}
-N <- 6
-T <- 20
-I <- matrix(NA, ncol = N, nrow = T)
-I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
-for(t in seq(2, T)){
-  I[t, ] <- sample(I[t - 1, ], N)
-}
+```{r, firstplots}
+I[, 1] %>% factor %>% as.numeric() %>% plot(type = 'l')
+apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
+
 ```
 
 
 
 ```{r, correct_code, results = 'hide'}
-N <- 99
-T <- 200
-I <- matrix(NA, ncol = N, nrow = T)
+N <- 12
+t <- 20
+I <- matrix(NA, ncol = N, nrow = t)
 I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
-for(t in seq(2, T)){
+for(t in seq(2, t)){
   I[t, ] <- sample(I[t - 1, ], N, replace = TRUE)
 }
 ```
 
-I[, 1] %>% factor %>% as.numeric() %>% plot
-apply(I, 1, table)
+
+```{r, correct_plots}
+apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
+```
 
 # Tips and best practice
 
@@ -185,7 +188,11 @@ This makes it easier to reason through a few examples to be confident you know e
 
 ## Combine smaller functions and test the upper-level functions
 
+
+
 ## Test easy to understand parameters
+
+
 
 ## Carefully work through more complex parameters
 
