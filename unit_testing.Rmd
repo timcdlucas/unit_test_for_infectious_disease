@@ -398,7 +398,7 @@ However, we still have one function, `sample_events`, that is irreducably stocha
 ### Test deterministic parameters for stochastic code {-#deterministicparams}
 
 Similarly to finding parameters that are simple to test for other functions, we can often find parameter values for which our stochastic functions are not longer stochastic.
-For example, a bernoulli sample with probability 0 always gives a 0 and with a probability of 1 always gives a 1.
+For example, a Bernoulli sample with probability 0 always gives a 0 and with a probability of 1 always gives a 1.
 In the example here, in the case where we only have one strain, the model is no longer stochastic.
 So if we initialise a population with one strain, the second time step should equal the first time step.
 
@@ -412,7 +412,7 @@ expect_equal(pop[1, ], pop[2, ])
 
 Again foussing on very simple parameters, there are some cases where the code is stochastic, but has a very small number of possible outputs. 
 In this case we can run the function many times and check that it always gives one of the possible outputs.
-In the case of a population of two people, there are possible outcomes when drawing who is infected by whom.
+In the case of a population of two people, there are four possible outcomes when drawing who is infected by whom.
 Individual 1 can be infected by individual 1 or individual 2 and individual 2 an be infected by individual 1 or individual 2.
 
 
@@ -462,18 +462,62 @@ expect_true(all(sapply(many_sims, function(x) length(unique(apply(x, 1, table)))
 ```
 
 ## Further testing
-### Test corner cases {-#corners}
+### Test edge cases and special cases {-#corners}
 
 
+When writing tests it is easy to focus on the standard behaviours.
+However, bugs often occur when parameters are at the edges of their values or for certain special values.
+For example, in R, selecting one column from a matrix returns a vector while selecting two or more columns returns a matrix.
+Code that relies on the returned object being a matrix will often fail in the edge case of selecting one column.
+
+Similarly, in many programming applications, there are many input values for which there is a clear pattern between input and output but a few input values that do not fit the clear pattern, even when these are not at the extremes of the possible parameter range.
+For example, consider a function `div(x, y)` that divides `x` by `y`. 
+If we test that `2 * div(10, 2) == 10` this suggests that the function works for nearly all values of division.
+However, this test will fail for $y = 0$.
+We call cases like these special cases.
+
+In our example model, we might consider testing edge cases such as one individual, one iteration and one strain.
+In fact, running `full_sim` with only one iteration errors without a useful error message.
+In practice we would probably fix this with a check at the top of the function that returns a useful error message if the user tries to run the function with `t = 1`.
+
+```{r, edge, eval = FALSE}
+pop <- full_sim(12, 1)
+```
+
+Similarly, early we tested whether the `strain` argument of `initialise_pop` worked by checking whether the returned population had the correct number of strains.
+However, if we set the `strain` argument to be greater than the number of individuals in the population, the function we have currently written does not error but does not give the answer we expected.
+Here again there is probably no solution other than a check at the beginning of the function that returns an error if `strain` is larger than `N`.
+
+```{r, edge2, eval = FALSE}
+pop <- initialise_pop(10, 2, strain = 11) 
+expect_equal(length(unique(pop[1, ])), 11)
+```
 
 
 
 ### Test incorrect inputs {-#testincorrect}
 
-This is especially important for user facing functions.
-The author of the code is also a user!
-If a function will be used for new datasets, test that is handles NAs, NaNs, etc.
-Consider defensive programming.
+The arguments examined in the edge and special case section could be considered incorrect.
+But there are many other ways that a user may input incorrect arguments.
+Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
+This is especially true for functions that a user might use directly.
+Some of these cases will quickly fail, but sometimes a function can either silently give wrong results or run a long time before erroring.
+Both of these cases are dangerous or annoying and an be difficult to debug after the fact.
+A common case to check, that is can be common in infectious disease modelling, is testing whether code handles data with NAs in correctly. 
+Code will often be written with a clean, complete dataset. 
+When it comes for the code to be reused, the new data is often incomplete and this an cause difficult to diagnose bugs.
+Often the simplest solutions to these sorts of issues is to include code at the beginning of the function that checks the arguments are as expected.
+We can write tests that expect an error to make sure we have handled these cases correctly.
+
+Here we demonstrate one example with the code above.
+We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking the function requires a vector of all time points to run).
+In this case the code does error, though perhaps we could make the function return an error message that tells the user how to fix the problem (i.e. tell the user that t should be of length 1).
+
+```{r, wrong1}
+expect_error(pop <- full_sim(4, 1:100))
+```
+
+
 
 # Unit testing frameworks {#frameworks}
 
