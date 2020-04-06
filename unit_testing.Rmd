@@ -133,11 +133,11 @@ Frameworks for formalising these frameworks are discussed in Sections [6](framew
 Here we define a simple epidemiological model and then present R code for it.
 We will then use this as a working example to demonstrate how to effectively write unit tests for infectious disease modelling code.
 
-Consider a multistrain system, where a population of $N$ individuals who get reinfected once per time step.
-Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
-Then each time step, the infection status of each individual is updated
+Consider a multistrain system, with a population of $N$ individuals who eacg get reinfected exactly once per time step.
+Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by a length $N$ vector of states $\mathbf{I}_t$.
+Each time step, the infection status of each individual is updated as
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
-That is, each iteration, each individual is infected by a random individual in the population (includind themself).
+That is, each iteration, the new infection status of each individual is a uniform random sample from the set of infection statuses in the previous iterations (including individual $I_i$).
 Here then is our first attempt at implementing this model.
 
 ```{r, simsetup, results = 'hide', echa = FALSE}
@@ -154,8 +154,8 @@ I <- matrix(NA, ncol = N, nrow = t)
 # Initialise the population
 I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
-# For each time step, each person is reinfected
-#   by someone randomly sampled from the population.
+# For each time step, all N individuals are reinfected
+#   by someone randomly sampled from the population at t-1.
 for(t in seq(2, t)){
   I[t, ] <- sample(I[t - 1, ], N)
 }
@@ -163,17 +163,17 @@ for(t in seq(2, t)){
 
 We might then make some plots to explore whether our code is doing something sensible.
 For example we might plot the time course of one or more individuals and see that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
-However, if we look at the proportion of each strain through time (not plotted) we will quickly see that the proportions do not change.
+However, if we look at the proportion of each strain through time (not shown here) we will quickly see that the proportions are identical through time.
 Therefore there must be a bug in our code.
 
 This simple example demonstrates a number of points.
-Firstly, something that everyone who has ever written code knows, bugs can be subtle.
+Firstly, as everyone who has ever written code knows, bugs can be subtle.
 Even though the code above is only a few lines, it is not easy to notice that it is wrong.
 Secondly, it is much easier to debug code, once you know there is a bug.
-Once you know there is a bug in the above code, some proportion of readers might be able to identify the bug.
-Thirdly, this example is not far from the testing that many scientists do; write the code, plot some outputs and see if they make sense.
+Having now read that there is a bug in the above code, a good proportion of readers might be able to identify the bug.
+Thirdly, testing the code with a few plots is not very dissimilar from the testing that many scientists do; write the code, plot some outputs and see if they make sense.
 However, approaching this in an ad hoc way makes it less likely that we will catch bugs.
-In this example, we used the wrong plot to diagnose whether our code was correct and therefore missed the bug.
+In this example, we initially used the wrong plot to diagnose whether our code was correct and therefore missed the bug.
 Finally, while plots are an excellent way to check the behaviour of code, and plotting simulation runs is a vital step in code checking, it is not the easiest method for automatically checking code because a human has to scan each plot each time the tests are run.
 
 
@@ -205,8 +205,8 @@ ggplot(d1, aes(time, strain_num, colour = individual, group = individual)) +
 apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
 ```
 
-The fix for this particular bug is that the `sample` function defaults to sampling without replacement.
-Setting `replace = TRUE` fixes the code and when we plot the proportion of each strain (Figure \@ref{fig:correctplots}) we now see the correct behaviour.
+The cause of this particular bug is that the `sample` function defaults to sampling without replacement.
+Setting `replace = TRUE` fixes the code and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we now see the correct behaviour.
 Given this example, we will now work through specific advice for unit testing for infectious disease models.
 We will write tests and rewrite the code as we go until we have a well tested, more reliabley implemented model at the end.
 
