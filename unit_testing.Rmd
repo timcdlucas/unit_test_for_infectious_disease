@@ -455,7 +455,9 @@ For a reasonably large simulation we would expect this to happen very rarely, so
 
 ```{r, returningstrain}
 set.seed(20200407)
-many_sims <- replicate(300, full_sim(20, 30))
+many_sims <- replicate(100, full_sim(40, 30), simplify = FALSE)
+
+expect_true(all(sapply(many_sims, function(x) length(unique(apply(x, 1, table))) > 1)))
 
 ```
 
