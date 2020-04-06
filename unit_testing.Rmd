@@ -142,7 +142,7 @@ Consider a multistrain system, where a population of $N$ individuals who get rei
 Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by the length $N$ vector of states $\mathbf{I}_t$.
 Then each time step, the infection status of each individual is updated
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
-
+That is, each iteration, each individual is infected by a random individual in the population (includind themself).
 Here then is our first attempt at implementing this model.
 
 ```{r, simsetup, results = 'hide', echa = FALSE}
@@ -412,25 +412,40 @@ expect_equal(pop[1, ], pop[2, ])
 
 Again foussing on very simple parameters, there are some cases where the code is stochastic, but has a very small number of possible outputs. 
 In this case we can run the function many times and check that it always gives one of the possible outputs.
-In the case of a population of two people, with two strains, the only possible outcomes in the second iteration are (a, a), (a, b), (b, a) and (b, b).
+In the case of a population of two people, there are possible outcomes when drawing who is infected by whom.
+Individual 1 can be infected by individual 1 or individual 2 and individual 2 an be infected by individual 1 or individual 2.
 
 
 ```{r, test_stoch_fewvalues, results = 'hide'}
-pop <- initialise_pop(2, 2, strain = 2) 
-# Run first update 300 times.
-# Collapse each population into a single string to make comparisons easier.
-many_pops <- replicate(300, paste0(update_pop(pop, 2, 2)[2, ], collapse = ''))
-
-expect_true(all(many_pops %in% c('aa', 'ab', 'ba', 'bb')))
-
+# Collapse each draw into a single string to make comparisons easier.
+many_pops <- replicate(300, paste0(sample_events(2), collapse = ''))
+expect_true(all(many_pops %in% c('11', '12', '21', '22')))
 ```
 
 
 ### Use very large samples for stochastic part {-#largesmaples}
 
-This includes testing large numbers so that you can get a very likely range.
-But also includes testing many runs to check for rare events.
-Remember to set the seed.
+While the previous example looked at very small numbers, we can also consider how testing is made easier by using very large numbers.
+This typically includes either using large sample sizes or large numbers of runs of a stochastic part.
+For example, the clearest test to distinguish between our first-attempt, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one individuals in a time step.
+In any given run however, this is never guarenteed, but the larger the population size the more likely it is to occur.
+So we can use a large enough sample size that this is almost certain to occur (but make sure we set the seed so that the test is reproducible and does not stochastically fail every now and then).
+We can work out the probability of this test failing for a population with $P$ individuals (it is the well known birthday paradox).
+There are $P$ choose 2 possible pairs of individuals (also written as $P \choose 2$.
+The probability of a pair of people not being infected by the same person is $1 - 1/P$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/P$).
+For the test to fail, every pair would have to not be infected by the same person giving $(1 - 1/P) ^ {P \choose 2}$.
+For a population with 100 individuals, the probability of the test failing (if programmed correctly) is $10^{-21}$ and is vanishingly small for 1000 individuals.
+
+
+```{r, test_stoch_largenum}
+set.seed(202004)
+P <- 1e3
+events <- sample_events(1e6)
+expect_true(max(table(events)) > 1)
+
+prob_of_failing <- (1 - (1 / P)) ^ choose(P, 2)
+```
+
 
 
 
