@@ -383,7 +383,7 @@ add_infection_status <- function(x, new_i, i){
 
 update_pop <- function(x, N, i){
   events <- sample_events(N)
-  new_i <- new_infection_status(x[i - 1, ])
+  new_i <- new_infection_status(x[i - 1, ], events)
   x[i, ] <- add_infection_status(x, new_i, i)
   return(x)
 }
@@ -450,10 +450,12 @@ If we have an event that we know should not happen, we can use a large number of
 However, it can be difficult to determine how many times is reasonable to run a simulation especially as we want unit tests to run quickly.
 This strategy works best when we have a specific bug that occurred relatively frequently (perhaps in one in ten simulations).
 We can then say that if it does not occur in 500 simulations we are pretty sure we fixed the bug.
+In our original buggy code we found that the proportions remained identical for entire simulations.
+For a reasonably large simulation we would expect this to happen very rarely, so we can run the full simulation a number of times to check that this specific bug does not occur.
 
 ```{r, returningstrain}
 set.seed(20200407)
-# Cant think of a good example
+many_sims <- replicate(300, full_sim(20, 30))
 
 ```
 
@@ -499,6 +501,10 @@ Similarly, services like codecov measure how much of your code is tested.
 
 
 # Conclusions
+
+# Code availability
+
+Please see the fully reproducible and version controlled code at www.github.com/timcdlucas/unit_test_for_infectious_disease for a complete record of the many bugs created and fixed during the writing of this manuscript.
 
 
 # References
