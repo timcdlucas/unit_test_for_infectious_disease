@@ -438,7 +438,7 @@ For a population with 100 individuals, the probability of the test failing (if p
 
 
 ```{r, test_stoch_largenum}
-set.seed(202004)
+set.seed(20200406)
 P <- 1e3
 events <- sample_events(1e6)
 expect_true(max(table(events)) > 1)
@@ -446,8 +446,16 @@ expect_true(max(table(events)) > 1)
 prob_of_failing <- (1 - (1 / P)) ^ choose(P, 2)
 ```
 
+If we have an event that we know should not happen, we can use a large number of simulations to provide stronger evidence that is does not stochastically occur.
+However, it can be difficult to determine how many times is reasonable to run a simulation especially as we want unit tests to run quickly.
+This strategy works best when we have a specific bug that occurred relatively frequently (perhaps in one in ten simulations).
+We can then say that if it does not occur in 500 simulations we are pretty sure we fixed the bug.
 
+```{r, returningstrain}
+set.seed(20200407)
+# Cant think of a good example
 
+```
 
 ## Further testing
 ### Test corner cases {-#corners}
