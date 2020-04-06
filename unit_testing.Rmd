@@ -65,21 +65,16 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
 
 # Abstract
 
-We use code.
 
-Noone is bug free.
+Models are a core part of infectious disease epidemiology and are increasingly computations rather than pen-and-paper mathematical.
+Noone writes guarenteed bug-free code.
+However, models of infectious diseases are used to guide policy that determine the health, morbidity or mortality of billions of people.
+It is therefore critical that the code we write is as correct as we can possibly make it.
+Furthermore, given that bugs are more readily found when they give unexpected results, buggy code is biased code.
+Within software engineering, the core method for reducing the number of bugs in code is unit testing.
+Unit testing is a formally defined framework that compares the outputs from code to what the programmer was expecting the code to produce.
+In this article we introduce unit testing, demonstrate how it can handle the particular difficulties of infectious disease models and encourage all infectious disease biologists to start unit testing their code.
 
-it is important that out code is correct because people live or die
-
-buggy code is biased code
-
-people currently use as hoc testing.
-
-We did a review and few people were writing tests.
-
-really we should be doing unit testing
-
-unit testing is formally defined tests in a framework that encourages them to be regularly run.
 
 # Introduction
 
