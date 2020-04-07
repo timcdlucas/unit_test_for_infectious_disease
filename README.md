@@ -1,3 +1,6 @@
+We are now considering two papers. They currently both live in this repo
+
+
 A primer on unit testing for infectious disease models
 =======================================================
 
@@ -21,3 +24,13 @@ We can base quite a lot of this on the workshop and any lessons we learn while g
 
 [The workshop](https://docs.google.com/presentation/d/1_cCBOQBi6lGh6Dey41c72AvrN7yVGa6oUJyOIFZivF0/edit?usp=sharing
 )
+
+
+Effective software development during a pandemic
+=======================================================
+
+Lead by Tim P.
+A review of how good the software standards were during the covid epidemic (expecting this work to be done when the epidemic has died down!)
+Cover broader software principles than just unit testing.
+Include reviews of the published analyses etc.
+
