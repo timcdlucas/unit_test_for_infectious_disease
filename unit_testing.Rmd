@@ -4,7 +4,7 @@ output:
     number_sections: true
     toc: false
     keep_tex: true
-title: "Test, test me do: unit testing for infectious disease modelling"
+title: "Unit testing for infectious disease modelling"
 author: Tim CD Lucas, Tim Pollington, Deirdre Hollingsworth, et al.
 geometry: margin=1in
 bibliography: unit_testing.bib
@@ -55,7 +55,7 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 -->
 
 
-```{r, setup, echo = FALSE}
+```{r, setup, echo = FALSE, results = 'hide'}
 library(ggplot2)
 library(testthat)
 knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
@@ -89,7 +89,7 @@ Furthermore, buggy code is biased code, with an example.
 However, most researchers currently do tests as hoc and only once.
 
 unit testing is a framework for doing this properly (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
-useful frameworks are readily available in R and Julia and python.
+useful frameworks are readily available in R [@R] and Julia [@bezanson2017julia] and python [@python].
 infectious disease modelling presents some specific challenges such as stochastic code.
 in this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
 we give specific recommendations for the problems specific to infectious disease modelling.
@@ -516,18 +516,29 @@ expect_error(pop <- full_sim(4, 1:100))
 
 # Unit testing frameworks {#frameworks}
 
-Does this need to go at the beginning as we are already introducing testthat? I would rather not put it at the beginning...
+While unit tests can be written with functions that throw errors, most programming languages have ready  built testing functions that can give useful information when a test fails.
+In R, as described above, there is the testthat package.
 
-testthat we already introduced
+When structuring R code as a package, code should be kept in the directory `tests/testthat`.
+Further requirements to the structure can be found in @wickham2015r Chapter 7.
+All the tests in a package can then be run with the function `test` from the testthat package but also by running `check` from the devtools package [@devtools] which also check a number aspects of the package.
+Running tests within a package like this has the added benefit that the tests are run in a new, clean environment.
+One easy-to-make mistake when testing is for a test to rely on an object that is not defined in the test script.
+Running the tests in a clean environment quickly highlights these errors so they can be fixed.
 
-Test in Julia
+In Julia there is the Test package [@juliatest]. 
+The basic structure for tests with this package are demonstrated below.
+We give the specific test a name and give a single expression that evaluates to true or false.
+Unit tests within a Julia package live in the file `test/runtests.jl` and the tests can be run with the function `Pkg.test`.
 
-If we build our code as packages this is set up as well
+```{julia, test, eval = FALSE}
+@testset "my_test_name" begin
+    @test sqrt(4) == 2
+end
+```
 
-testthat in an r package
-devtools::check runs checks that the r package is built correctly and runs unit tests.
+Finally, in python we have the unittest framework [@pythonunittest]
 
-Test in a Julia package
 
 
 # Continuous integration {#ci}
