@@ -573,7 +573,7 @@ However, in the simplest cases, the set up is very easy.
 For example if you have R code, organised into a package and hosted openly on GitHub, then setting up travis CI is very easy.
 Within your version controlled folder you add a file called `.travis.yml` that simply contains a description of which language the code uses.
 
-```{yml, travis, eval = FALSE}
+```{awk, travis, eval = FALSE}
 language:r
 ```
 
@@ -585,6 +585,11 @@ More details can be found in @wickham2015r Chapter 14.3.
 
 
 # Conclusions
+
+It is vital that infectious disease models are coded such that bugs are minimised.
+Unit testing is the fundemental process by which we can redue the number of bugs in our code.
+Setting up unit testing is simple but writing good tests is a skill that takes practice and thought.
+There are many frameworks that make testing more automatic and more informative and these should be used where possible.
 
 # Code availability
 
