@@ -92,19 +92,19 @@ https://twitter.com/neil_ferguson/status/1241835454707699713
 --->
 
 Given the importance of modelling results, it is vital that they are both correct and trusted.
+The trust issue was highlighted during the COVID-19 pandemic when Neil Ferguson, one of the leading modellers informing UK government policy, tweeted
+"To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics" [@ferg_tweet].
+The tweet garnered considerable backlash with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
+The workflow followed by many epidemiologists is to write some code, run some full models and examine plots of the output.
+This *ad hoc* testing is not very sensitive and can miss many bugs.
+Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug free while models showing unexpected behaviour are more thoroughly scrutinised.
 
-
-Given that modelling is important, it is important for the code to be correct.
-Neil Ferguson got flack for code that wasn't written with software best practices.
-Furthermore, buggy code is biased code, with an example.
-However, most researchers currently do tests as hoc and only once.
-
-unit testing is a framework for doing this properly (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
-useful frameworks are readily available in R [@R] and Julia [@bezanson2017julia] and python [@python].
-infectious disease modelling presents some specific challenges such as stochastic code.
-in this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
-we give specific recommendations for the problems specific to infectious disease modelling.
-we also give an overview of the testing frameworks and continuous integration options available.
+Unit testing is a framework for testing code that is more principled (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
+Useful frameworks for unit testing are readily available in R [@R], Julia [@bezanson2017julia] and python [@python].
+While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic code, which are difficult to test and not covered in more general introductions to unit testing.
+In this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
+We give special focus to recommendations for the problems specific to infectious disease modelling.
+We also give an overview of the testing frameworks available.
 
 
 # Unit testing basics
