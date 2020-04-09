@@ -526,6 +526,8 @@ Running tests within a package like this has the added benefit that the tests ar
 One easy-to-make mistake when testing is for a test to rely on an object that is not defined in the test script.
 Running the tests in a clean environment quickly highlights these errors so they can be fixed.
 
+Other programming languages have similar testing frameworks.
+The specifics of the frameworks in the various programming languages differ but the main concept of defining an expression to run and an expected output stays the same.
 In Julia there is the Test package [@juliatest]. 
 The basic structure for tests with this package are demonstrated below.
 We give the specific test a name and give a single expression that evaluates to true or false.
@@ -537,7 +539,23 @@ Unit tests within a Julia package live in the file `test/runtests.jl` and the te
 end
 ```
 
-Finally, in python we have the unittest framework [@pythonunittest]
+Finally, in python we have the unittest framework [@pythonunittest].
+In this framework, tests must be written into a class that inherits from the `TestCase` class.
+The tests must be written as methods with `self` as the first argument.
+An example test script is shown below.
+Tests should be kept in  a directory called `Lib/test`, and the filename of every file with tests should begin with `test_`.
+
+```{python, testpy, eval = FALSE}
+import unittest
+import math
+
+class TestMaths(unittest.TestCase):
+  
+  def test_sqrt(self):
+    self.assertEqual(math.sqrt(4), 2)
+
+unittest.main()
+```
 
 
 
