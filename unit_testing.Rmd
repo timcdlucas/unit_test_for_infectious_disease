@@ -561,12 +561,26 @@ unittest.main()
 
 # Continuous integration {#ci}
 
-If the code is hosted as a remote repo, we can deploy continuous integration so that tests are run every time we push changes.
+If your code is under version control [@osborne2014ten; @wilson2014best] and hosted online on a website such as GitHub, GitLab or BitBucket you can automate the running of unit tests.
+This process is called continuous integration.
+In this setup, whenever you push changes in your code from your local computer to the online repository, anytests that you have defined get run automatically.
+You can have these systems set up such that you recieve an email if your tests fail for example.
+There are various continuous integration services such as travis-ci.org and GitLab pipelines.
+These services are often free on a limited basis or free if your code is open source.
 
-For open source packages, services like Travis ci are free.
-simply add a traits yml file, sign up, point travis to your repo.
-Similarly, services like codecov measure how much of your code is tested.
+A full description of how to set up these services is beyond the scope of this paper.
+However, in the simplest cases, the set up is very easy.
+For example if you have R code, organised into a package and hosted openly on GitHub, then setting up travis CI is very easy.
+Within your version controlled folder you add a file called `.travis.yml` that simply contains a description of which language the code uses.
 
+```{yml, travis, eval = FALSE}
+language:r
+```
+
+This file can also be setup with the devtools function `use_travis`.
+You then need to sign up to travis-ci.org and point it to the correct GitHub repository.
+To trigger the first automatic test you need to make a minor change to your code, commit it and push to GitHub.
+More details can be found in @wickham2015r Chapter 14.3.
 
 
 
