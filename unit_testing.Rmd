@@ -78,10 +78,21 @@ In this article we introduce unit testing, demonstrate how it can handle the par
 
 # Introduction
 
-Infectious disease modellers write lots of code.
-Code is getting more complex as IBMs become more popular [@willem2017lessons; @ferguson2006strategies].
-That code is important because it directs policy.
-examples include covid and another example where models have directly influenced policy.
+Modelling is a hugely important tool in epidemiology as a way to forecast disease burdens, test the effectiveness of interventions and to understand fundemental biological processes.
+These models are commonly used to guide policy for the control of endemic disease and also during fast moving epidemics and pandemics.
+Examples include the models being used to directly adviae govenments on responses to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy].
+The results of these models therefore directly cause or prevent many deaths and influence the morbidity of millions of people globally.
+The models being used are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data driven contact processes  [@willem2017lessons; @ferguson2006strategies].
+This increase in model complexity is accompanied by an increased reliance on code to implement our models.
+The code bases for these models are often complex and large.
+
+<!--
+I’m conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19.  To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics...
+https://twitter.com/neil_ferguson/status/1241835454707699713
+--->
+
+Given the importance of modelling results, it is vital that they are both correct and trusted.
+
 
 Given that modelling is important, it is important for the code to be correct.
 Neil Ferguson got flack for code that wasn't written with software best practices.
