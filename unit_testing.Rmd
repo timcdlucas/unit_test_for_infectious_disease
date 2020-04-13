@@ -248,7 +248,7 @@ for(i in seq(2, t)){
 ### Write small functions {-#smallfuns}
 
 In order to guarantee that a unit test is checking the same code as used for actual analysis, the code needs to be defined once, in a function.
-This same function is then used in the larger model code and used by the unit test itself.
+This same function is then used in both the larger model code and in the unit test itself.
 It helps to make your functions small, such that they do one, clearly defined operation.
 This makes it easier to reason through a few examples to be confident you know exactly what the output should be.
 In our example we could define one function to initialise the population and another to run the simulation.
@@ -316,7 +316,7 @@ expect_equal(length(unique(pop4[1, ])), 5)
 We can also write tests for each function with less simple parameter values.
 After initialising our population, we expect all the rows other than the first to contain NAs.
 We also expect each of the strains a, b and c to occur in the first row.
-Our function update performs one time step of the simulation, so we expect one additional row to be populated.
+Our function `update_pop` performs one time step of the simulation, so we expect one additional row to be populated.
 Instead of testing the exact values of the results here, we are testing that they make sense with our more macro understanding of the model system.
 
 ```{r, test_complex, results = 'hide'}
@@ -363,13 +363,15 @@ expect_true(all(pop %in% c('a', 'b', 'c')))
 
 One of the most particular challenges for testing code for infectious disease modelling is the large amount of stochastic events.
 Stochastic events are difficult to test effectively because, by definition, we do not know exactly what the result will be.
+We can test very broad scale properties such as in the test above where the only thing we are testing is that all the values are one of the possible strains.
+However, there are many ways some code could pass that test and still be wrong (for example the original, buggy code would pass that test).
 There are however a number of approaches that can help.
 
 ### Split stochastic and deterministic parts {-#splitstochastic}
 
 The first thing to aim for is to isolate the stochastic parts of the code.
-For example, the function `update_pop` above does a number of things, some of which are stochastic and some of which are deterministi.
-Firslty, the function stochastically samples who gets infected by whom.
+For example, the function `update_pop` above does a number of things, some of which are stochastic and some of which are deterministic.
+Firstly, the function stochastically samples who gets infected by whom.
 Then it takes those infection events and finds the new infectious status for each individual.
 Finally, it adds the new infectious statuses to the full population matrix. 
 So we could split these tasks up as follows.
@@ -404,7 +406,7 @@ However, we still have one function, `sample_events`, that is irreducably stocha
 
 ### Test deterministic parameters for stochastic code {-#deterministicparams}
 
-Similarly to finding parameters that are simple to test for other functions, we can often find parameter values for which our stochastic functions are not longer stochastic.
+In the same way that we used simple parameters to test other functions, we can often find parameter values for which our stochastic functions are no longer stochastic.
 For example, a Bernoulli sample with probability 0 always gives a 0 and with a probability of 1 always gives a 1.
 In the example here, in the case where we only have one strain, the model is no longer stochastic.
 So if we initialise a population with one strain, the second time step should equal the first time step.
@@ -417,7 +419,7 @@ expect_equal(pop[1, ], pop[2, ])
 
 ### Test all possible answers {-#allpossible}
 
-Again foussing on very simple parameters, there are some cases where the code is stochastic, but has a very small number of possible outputs. 
+Again focussing on very simple parameters, there are some cases where the code is stochastic, but has a very small number of possible outputs. 
 In this case we can run the function many times and check that it always gives one of the possible outputs.
 In the case of a population of two people, there are four possible outcomes when drawing who is infected by whom.
 Individual 1 can be infected by individual 1 or individual 2 and individual 2 an be infected by individual 1 or individual 2.
@@ -433,7 +435,7 @@ expect_true(all(many_pops %in% c('11', '12', '21', '22')))
 ### Use very large samples for stochastic part {-#largesmaples}
 
 While the previous example looked at very small numbers, we can also consider how testing is made easier by using very large numbers.
-This typically includes either using large sample sizes or large numbers of runs of a stochastic part.
+This typically includes either using large sample sizes or large numbers of runs of the stochastic code.
 For example, the clearest test to distinguish between our first-attempt, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one individuals in a time step.
 In any given run however, this is never guarenteed, but the larger the population size the more likely it is to occur.
 So we can use a large enough sample size that this is almost certain to occur (but make sure we set the seed so that the test is reproducible and does not stochastically fail every now and then).
@@ -447,8 +449,8 @@ For a population with 100 individuals, the probability of the test failing (if p
 ```{r, test_stoch_largenum}
 set.seed(20200406)
 P <- 1e3
-events <- sample_events(1e6)
-expect_true(max(table(events)) > 1)
+events <- sample_events(P)
+expect_true(any(duplicated(events)))
 
 prob_of_failing <- (1 - (1 / P)) ^ choose(P, 2)
 ```
