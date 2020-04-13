@@ -66,9 +66,8 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
 # Abstract
 
 
-Models are a core part of infectious disease epidemiology and are increasingly computations rather than pen-and-paper mathematical.
-Noone writes guarenteed bug-free code.
-However, models of infectious diseases are used to guide policy that determine the health, morbidity or mortality of billions of people.
+Models are a core part of infectious disease epidemiology and are increasingly computational rather than pen-and-paper mathematical.
+Models of infectious diseases are used to guide policy that determine the health, morbidity or mortality of billions of people.
 It is therefore critical that the code we write is as correct as we can possibly make it.
 Furthermore, given that bugs are more readily found when they give unexpected results, buggy code is biased code.
 Within software engineering, the core method for reducing the number of bugs in code is unit testing.
@@ -80,7 +79,7 @@ In this article we introduce unit testing, demonstrate how it can handle the par
 
 Modelling is a hugely important tool in epidemiology as a way to forecast disease burdens, test the effectiveness of interventions and to understand fundemental biological processes.
 These models are commonly used to guide policy for the control of endemic disease and also during fast moving epidemics and pandemics.
-Examples include the models being used to directly adviae govenments on responses to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy].
+Examples include the models being used to directly advise govenments on responses to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy].
 The results of these models therefore directly cause or prevent many deaths and influence the morbidity of millions of people globally.
 The models being used are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data driven contact processes  [@willem2017lessons; @ferguson2006strategies].
 This increase in model complexity is accompanied by an increased reliance on code to implement our models.
@@ -95,6 +94,7 @@ Given the importance of modelling results, it is vital that they are both correc
 The trust issue was highlighted during the COVID-19 pandemic when Neil Ferguson, one of the leading modellers informing UK government policy, tweeted
 "To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics" [@ferg_tweet].
 The tweet garnered considerable backlash with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
+Our aim here however is certainly not to single out a single scientist as this level of code checking is common in epidemiology.
 The workflow followed by many epidemiologists is to write some code, run some full models and examine plots of the output.
 This *ad hoc* testing is not very sensitive and can miss many bugs.
 Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug free while models showing unexpected behaviour are more thoroughly scrutinised.
@@ -111,23 +111,24 @@ We also give an overview of the testing frameworks available.
 
 
 Unit testing consists of pairs of function calls and known/expected outputs.
-So far a function that computes the square root of a number, we would write a test that runs our function on the number 4 and compares it to the known, correct answer (2).
+Far a function that computes the square root of a number, we would write a test that runs the function on the number 4 and compares it to the known, correct answer i.e. 2.
 We would write tests that cover various possible inputs: what do we want our function to do if it is given a negative number, or a string instead of a numeric object?
 
 In R [@R], the testthat package [@testthat], provides a simple interface for testing.
-While there are a number of test functions, the two main functions is `expect_true` and `expect_equal`. 
-`expect_true` takes one argument, an expression that should evaluate to true.
-So for our square root example above we would write `expect_true(sqrt(4) == 2)`.
+While there are a number of test functions, the two main functions are `expect_true` and `expect_equal`. 
+`expect_true` takes one argument: an expression that should evaluate to `TRUE`
+For our square root example above we would write `expect_true(sqrt(4) == 2)`.
 `expect_equal` takes two arguments, an expression and the expected output.
 For the square root example we would write `expect_equal(sqrt(4), 2)`.
 
 There are a number of ways that unit testing can be incorporated into programming workflow.
-The first and clearest is that as you write code, you should write tests that test the code does what you think it does.
+The first and most obvious is that as you write code, you should write tests that confirm that the code does what you think it does.
 The second, is that these same tests should then be regularly run as you continue to develop code.
 If a change elsewhere in the code causes the older tests to break, something has gone wrong and needs to be fixed.
+Thirdly, whenever a bug is found in the code, a test should be written that captures the bug. 
+Then if the bug re-emerges during further development it will be caught.
 Finally, you can write tests before you write code.
-This can be a helpful way to force yourself to plan what some new code or functionality is expected to do.
-Write tests that define the wanted functionality, and keep on programming until all the tests pass.
+This can be a helpful way to force yourself to plan what some new code or functionality is expected to do: write tests that define the wanted functionality, and keep on programming until all the tests pass.
 This is known as test-driven development.
 Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
 
@@ -144,7 +145,7 @@ Frameworks for formalising these frameworks are discussed in Sections [6](framew
 Here we define a simple epidemiological model and then present R code for it.
 We will then use this as a working example to demonstrate how to effectively write unit tests for infectious disease modelling code.
 
-Consider a multistrain system, with a population of $N$ individuals who eacg get reinfected exactly once per time step.
+Consider a multistrain system, with a population of $N$ individuals who each get reinfected exactly once per time step.
 Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by a length $N$ vector of states $\mathbf{I}_t$.
 Each time step, the infection status of each individual is updated as
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
@@ -180,10 +181,10 @@ Therefore there must be a bug in our code.
 This simple example demonstrates a number of points.
 Firstly, as everyone who has ever written code knows, bugs can be subtle.
 Even though the code above is only a few lines, it is not easy to notice that it is wrong.
-Secondly, it is much easier to debug code, once you know there is a bug.
+Secondly, it is much easier to debug code once you know there is a bug.
 Having now read that there is a bug in the above code, a good proportion of readers might be able to identify the bug.
 Thirdly, testing the code with a few plots is not very dissimilar from the testing that many scientists do; write the code, plot some outputs and see if they make sense.
-However, approaching this in an ad hoc way makes it less likely that we will catch bugs.
+However, approaching this in an *ad hoc* way makes it less likely that we will catch bugs.
 In this example, we initially used the wrong plot to diagnose whether our code was correct and therefore missed the bug.
 Finally, while plots are an excellent way to check the behaviour of code, and plotting simulation runs is a vital step in code checking, it is not the easiest method for automatically checking code because a human has to scan each plot each time the tests are run.
 
@@ -217,7 +218,7 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% m
 ```
 
 The cause of this particular bug is that the `sample` function defaults to sampling without replacement.
-Setting `replace = TRUE` fixes the code and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we now see the correct behaviour.
+Setting `replace = TRUE` fixes the code and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we now see the correct behaviour (one strain drifting to fixation.
 Given this example, we will now work through specific advice for unit testing for infectious disease models.
 We will write tests and rewrite the code as we go until we have a well tested, more reliabley implemented model at the end.
 
