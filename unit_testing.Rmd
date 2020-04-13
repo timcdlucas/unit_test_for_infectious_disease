@@ -480,8 +480,8 @@ For example, in R, selecting one column from a matrix returns a vector while sel
 Code that relies on the returned object being a matrix will often fail in the edge case of selecting one column.
 
 Similarly, in many programming applications, there are many input values for which there is a clear pattern between input and output but a few input values that do not fit the clear pattern, even when these are not at the extremes of the possible parameter range.
-For example, consider a function `div(x, y)` that divides `x` by `y`. 
-If we test that `2 * div(10, 2) == 10` this suggests that the function works for nearly all values of division.
+For example, consider a function `divide(x, y)` that divides `x` by `y`. 
+If we test that `2 * divide(10, 2) == 10` this suggests that the function works for nearly all values of division.
 However, this test will fail for $y = 0$.
 We call cases like these special cases.
 
@@ -493,7 +493,7 @@ In practice we would probably fix this with a check at the top of the function t
 pop <- full_sim(12, 1)
 ```
 
-Similarly, early we tested whether the `strain` argument of `initialise_pop` worked by checking whether the returned population had the correct number of strains.
+Similarly, earlier we tested whether the `strain` argument of `initialise_pop` worked by checking whether the returned population had the correct number of strains.
 However, if we set the `strain` argument to be greater than the number of individuals in the population, the function we have currently written does not error but does not give the answer we expected.
 Here again there is probably no solution other than a check at the beginning of the function that returns an error if `strain` is larger than `N`.
 
@@ -511,16 +511,16 @@ But there are many other ways that a user may input incorrect arguments.
 Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
 This is especially true for functions that a user might use directly.
 Some of these cases will quickly fail, but sometimes a function can either silently give wrong results or run a long time before erroring.
-Both of these cases are dangerous or annoying and an be difficult to debug after the fact.
-A common case to check, that is can be common in infectious disease modelling, is testing whether code handles data with NAs in correctly. 
+Both of these cases are dangerous or annoying and can be difficult to debug after the fact.
+A common case to check, that is common in infectious disease modelling, is testing whether code handles data with NAs in correctly. 
 Code will often be written with a clean, complete dataset. 
-When it comes for the code to be reused, the new data is often incomplete and this an cause difficult to diagnose bugs.
+When it comes for the code to be reused, the new data is often incomplete and this can cause difficult to diagnose bugs.
 Often the simplest solutions to these sorts of issues is to include code at the beginning of the function that checks the arguments are as expected.
-We can write tests that expect an error to make sure we have handled these cases correctly.
+We can write tests that expect an error using the function `expect_error` to make sure we have handled these cases correctly.
 
 Here we demonstrate one example with the code above.
 We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking the function requires a vector of all time points to run).
-In this case the code does error, though perhaps we could make the function return an error message that tells the user how to fix the problem (i.e. tell the user that t should be of length 1).
+In this case the code does error, though perhaps we could make the function return an error message that tells the user how to fix the problem (i.e. tell the user that `t` should be of length 1).
 
 ```{r, wrong1}
 expect_error(pop <- full_sim(4, 1:100))
@@ -533,9 +533,9 @@ expect_error(pop <- full_sim(4, 1:100))
 While unit tests can be written with functions that throw errors, most programming languages have ready  built testing functions that can give useful information when a test fails.
 In R, as described above, there is the testthat package.
 
-When structuring R code as a package, code should be kept in the directory `tests/testthat`.
+When structuring R code as a package, tests should be kept in the directory `tests/testthat`.
 Further requirements to the structure can be found in @wickham2015r Chapter 7.
-All the tests in a package can then be run with the function `test` from the testthat package but also by running `check` from the devtools package [@devtools] which also check a number aspects of the package.
+All the tests in a package can then be run with the function `test` from the testthat package but also by running `check` from the devtools package [@devtools] which also checks other aspects of the package.
 Running tests within a package like this has the added benefit that the tests are run in a new, clean environment.
 One easy-to-make mistake when testing is for a test to rely on an object that is not defined in the test script.
 Running the tests in a clean environment quickly highlights these errors so they can be fixed.
