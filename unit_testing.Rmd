@@ -576,7 +576,7 @@ If your code is under version control [@osborne2014ten; @wilson2014best] and hos
 This process is called continuous integration.
 In this setup, whenever you push changes in your code from your local computer to the online repository, anytests that you have defined get run automatically.
 You can have these systems set up such that you recieve an email if your tests fail for example.
-There are various continuous integration services such as travis-ci.org and GitLab pipelines.
+There are various continuous integration services such as travis-ci.org, GitHub actions and GitLab pipelines.
 These services are often free on a limited basis or free if your code is open source.
 
 A full description of how to set up these services is beyond the scope of this paper.
@@ -604,7 +604,9 @@ There are many frameworks that make testing more automatic and more informative 
 
 # Code availability
 
-Please see the fully reproducible and version controlled code at www.github.com/timcdlucas/unit_test_for_infectious_disease for a complete record of the many bugs created and fixed during the writing of this manuscript.
+Please see the fully reproducible and version controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease} for a complete record of the many bugs created and fixed during the writing of this manuscript.
 
 
 # References
+
+
