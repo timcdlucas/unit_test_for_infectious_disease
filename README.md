@@ -4,7 +4,6 @@ We are now considering two papers. They currently both live in this repo
 A primer on unit testing for infectious disease models
 =======================================================
 
-
 A concise overview of unit testing.
 
 Focus on the specific difficulties in infectious disease models such as stochastic events.
@@ -24,6 +23,15 @@ We can base quite a lot of this on the workshop and any lessons we learn while g
 
 [The workshop](https://docs.google.com/presentation/d/1_cCBOQBi6lGh6Dey41c72AvrN7yVGa6oUJyOIFZivF0/edit?usp=sharing
 )
+
+
+If you want to make edits to this paper please edit `unit_testing.Rmd` and then use
+
+`rmarkdown::render('unit_testing.Rmd')`
+
+to build the pdf.
+
+
 
 
 Effective software development during a pandemic
