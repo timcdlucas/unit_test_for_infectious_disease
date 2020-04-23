@@ -65,25 +65,20 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
 
 # Abstract
 
+Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
+They help guide health policy that can affect millions of people. Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
+Therefore it is arguably an ethical responsibility that our code is as free of error as possible. Software engineering already provides a solution in _unit testing_, a defensive coding method to avoid bugs in code.
 
-Models are a core part of infectious disease epidemiology and are increasingly computational rather than pen-and-paper mathematical.
-Models of infectious diseases are used to guide policy that determine the health, morbidity or mortality of billions of people.
-It is therefore critical that the code we write is as correct as we can possibly make it.
-Furthermore, given that bugs are more readily found when they give unexpected results, buggy code is biased code.
-Within software engineering, the core method for reducing the number of bugs in code is unit testing.
-Unit testing is a formally defined framework that compares the outputs from code to what the programmer was expecting the code to produce.
-In this article we introduce unit testing, demonstrate how it can handle the particular difficulties of infectious disease models and encourage all infectious disease biologists to start unit testing their code.
-
+We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers from infectious diseases to ecology to try implementing unit testing in their next script.
 
 # Introduction
 
-Modelling is a hugely important tool in epidemiology as a way to forecast disease burdens, test the effectiveness of interventions and to understand fundemental biological processes.
-These models are commonly used to guide policy for the control of endemic disease and also during fast moving epidemics and pandemics.
-Examples include the models being used to directly advise govenments on responses to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy].
-The results of these models therefore directly cause or prevent many deaths and influence the morbidity of millions of people globally.
-The models being used are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data driven contact processes  [@willem2017lessons; @ferguson2006strategies].
-This increase in model complexity is accompanied by an increased reliance on code to implement our models.
-The code bases for these models are often complex and large.
+Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
+They may guide policy for the control of endemic disease or for fast-moving epidemics. 
+For instance models are currently being used to directly advise governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy]. 
+The decisions based on these models to different degress could significantly affect the health outcomes of millions of people globally.
+Today's models are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
+These increases in model complexity are accompanied with growing code bases. The mathematical methods themselves use numerical solution as opposed to analytical pen-and-paper methods. Soon enough it becomes more difficult to tell that a bug lies within based on the results that come out.
 
 <!--
 I’m conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19.  To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics...
@@ -91,15 +86,15 @@ https://twitter.com/neil_ferguson/status/1241835454707699713
 --->
 
 Given the importance of modelling results, it is vital that they are both correct and trusted.
-The trust issue was highlighted during the COVID-19 pandemic when Neil Ferguson, one of the leading modellers informing UK government policy, tweeted
-"To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics" [@ferg_tweet].
+The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
+> "To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics" [@ferg_tweet].
 The tweet garnered considerable backlash with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
 Our aim here however is certainly not to single out a single scientist as this level of code checking is common in epidemiology.
 The workflow followed by many epidemiologists is to write some code, run some full models and examine plots of the output.
 This *ad hoc* testing is not very sensitive and can miss many bugs.
 Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug free while models showing unexpected behaviour are more thoroughly scrutinised.
 
-Unit testing is a framework for testing code that is more principled (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
+Unit testing is a formally defined framework that compares the outputs from code to what the programmer was expecting the code to produce. Unit testing is a framework for testing code that is more principled (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
 Useful frameworks for unit testing are readily available in R [@R], Julia [@bezanson2017julia] and python [@python].
 While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic code, which are difficult to test and not covered in more general introductions to unit testing.
 In this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
