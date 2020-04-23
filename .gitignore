@@ -3,3 +3,4 @@
 *.html
 *.tex
 *.log
+.Rproj.user

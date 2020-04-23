@@ -5,7 +5,7 @@ output:
     toc: false
     keep_tex: true
 title: "Unit testing for infectious disease modelling"
-author: Tim CD Lucas, Tim Pollington, Deirdre Hollingsworth, et al.
+author: Tim CD Lucas, Timothy M Pollington, T Déirdre Hollingsworth, et al.
 geometry: margin=1in
 bibliography: unit_testing.bib
 ---
