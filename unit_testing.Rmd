@@ -87,47 +87,43 @@ https://twitter.com/neil_ferguson/status/1241835454707699713
 
 Given the importance of modelling results, it is vital that they are both correct and trusted.
 The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
-> "To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics" [@ferg_tweet].
-The tweet garnered considerable backlash with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
-Our aim here however is certainly not to single out a single scientist as this level of code checking is common in epidemiology.
-The workflow followed by many epidemiologists is to write some code, run some full models and examine plots of the output.
-This *ad hoc* testing is not very sensitive and can miss many bugs.
-Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug free while models showing unexpected behaviour are more thoroughly scrutinised.
 
-Unit testing is a formally defined framework that compares the outputs from code to what the programmer was expecting the code to produce. Unit testing is a framework for testing code that is more principled (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
-Useful frameworks for unit testing are readily available in R [@R], Julia [@bezanson2017julia] and python [@python].
-While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic code, which are difficult to test and not covered in more general introductions to unit testing.
+> "...To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics..." [@ferg_tweet].
+
+The tweet garnered considerable backlash, with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
+Our aim here however is certainly not to single out a single scientist. Indeed this level of code checking is common in epidemiology, especially in fast-moving epidemics.
+The workflow followed by many is to write some code, run the full model and examine plots of the output.
+This *ad hoc* testing approach is not very sensitive and can miss many bugs.
+Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug-free while models showing unexpected behaviour are more thoroughly scrutinised.
+
+_Unit testing_ is a formally-defined, principled framework that compares numerous output scenarios from code to what the programmer was expecting the code to produce (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
+Ready-to-run frameworks for unit testing are available in R [@R], Julia [@bezanson2017julia] and python [@python].
+While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
 In this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
 We give special focus to recommendations for the problems specific to infectious disease modelling.
-We also give an overview of the testing frameworks available.
-
+We also give an overview of the available testing frameworks in various languages commonly used by infectious disease modellers.
 
 # Unit testing basics
 
+At the heart of every unit test is a function output, its known/expected output and comparing the two.
+For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in $\texttt{R}), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2. Often our function arguments will cover an infinite range of possibilities but we cannot exhaustively check them all. Instead we devise tests that cover particular scenarios or 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
-Unit testing consists of pairs of function calls and known/expected outputs.
-Far a function that computes the square root of a number, we would write a test that runs the function on the number 4 and compares it to the known, correct answer i.e. 2.
-We would write tests that cover various possible inputs: what do we want our function to do if it is given a negative number, or a string instead of a numeric object?
+In $\texttt{R}$ [@R], the \texttt{testthat} package [@testthat], provides a simple interface for testing.
+While there are a variety of functions to make different comparisons, the two main ones are `expect_true` and `expect_equal`. 
+`expect_true` takes one argument: an expression that should evaluate to `TRUE`.
+For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
+`expect_equal` takes two arguments, an expression and the expected output; 
+for the square root example we would write `expect_equal(sqrt(4), 2)`.
 
-In R [@R], the testthat package [@testthat], provides a simple interface for testing.
-While there are a number of test functions, the two main functions are `expect_true` and `expect_equal`. 
-`expect_true` takes one argument: an expression that should evaluate to `TRUE`
-For our square root example above we would write `expect_true(sqrt(4) == 2)`.
-`expect_equal` takes two arguments, an expression and the expected output.
-For the square root example we would write `expect_equal(sqrt(4), 2)`.
-
-There are a number of ways that unit testing can be incorporated into programming workflow.
+There are a number of ways that unit testing can be incorporated into the programming workflow.
 The first and most obvious is that as you write code, you should write tests that confirm that the code does what you think it does.
-The second, is that these same tests should then be regularly run as you continue to develop code.
-If a change elsewhere in the code causes the older tests to break, something has gone wrong and needs to be fixed.
+The second, is that these same tests should then be regularly run as you develop new code.
+If a change in new code causes the older tests to break, this points to the introduction of an error in the new code, or the older code could not generalise to the adapted environment.
 Thirdly, whenever a bug is found in the code, a test should be written that captures the bug. 
-Then if the bug re-emerges during further development it will be caught.
-Finally, you can write tests before you write code.
-This can be a helpful way to force yourself to plan what some new code or functionality is expected to do: write tests that define the wanted functionality, and keep on programming until all the tests pass.
-This is known as test-driven development.
+Then if the bug re-emerges it will be caught.
+Finally, you can write tests before you write code---also known as test-driven development.
+This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming so long as all tests keep passing.
 Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
-
-
 
 # Example
 
@@ -182,8 +178,6 @@ Thirdly, testing the code with a few plots is not very dissimilar from the testi
 However, approaching this in an *ad hoc* way makes it less likely that we will catch bugs.
 In this example, we initially used the wrong plot to diagnose whether our code was correct and therefore missed the bug.
 Finally, while plots are an excellent way to check the behaviour of code, and plotting simulation runs is a vital step in code checking, it is not the easiest method for automatically checking code because a human has to scan each plot each time the tests are run.
-
-
 
 ```{r, firstplots, echo = FALSE, fig.cap = 'The infection status of one individual though time.'}
 d1 <- data.frame(time = seq(t), strain = I[, 1])
