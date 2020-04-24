@@ -155,11 +155,11 @@ t <- 20 # study length
 I <- matrix(data = NA, nrow = t, ncol = N)
 
 # Initialise the population @ t = 1 with a fixed configuration
-I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
+I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
 # At each time step, everyone is re-infected by someone from the previous time step.
 for(t in seq(2, t)){
-  I[t, ] <- sample(x = I[t - 1, ], size = N)
+  I[t,] <- sample(x = I[t-1,], size = N)
 }
 ```
 
@@ -201,10 +201,10 @@ t <- 20
 
 I <- matrix(data = NA, nrow = t, ncol = N)
 
-I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
+I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
 for(t in seq(2, t)){
-  I[t, ] <- sample(x = I[t - 1, ], size = N, replace = TRUE)
+  I[t,] <- sample(x = I[t-1,], size = N, replace = TRUE)
 }
 ```
 
@@ -229,12 +229,12 @@ Here we have modified the code that initialises the population so that we can va
 ```{r, refactor, result = 'hide'}
 initialisePop <- function(t, N, strains = 3){
   I <- matrix(data = NA, nrow = t, ncol = N)
-  I[1, ] <- rep(x = letters[1:strains], length.out = N)
+  I[1,] <- rep(x = letters[1:strains], length.out = N)
   return(I)
 }
 
 updatePop <- function(x, i, N){
-  x[i, ] <- sample(x = x[i - 1, ], size = N, replace = TRUE)
+  x[i,] <- sample(x = x[i-1,], size = N, replace = TRUE)
   return(x)
 }
 ```
@@ -245,13 +245,13 @@ If we choose a very small population with a few strains to start with, we can th
 
 ```{r, test_easy, results = 'hide'}
 pop1 <- initialisePop(t = 2, N = 3, strain = 2) 
-expect_equal(pop1[1, ], c("a", "b", "a"))
+expect_equal(pop1[1,], c("a", "b", "a"))
 
 pop2 <- initialisePop(t = 2, N = 3, strain = 3) 
-expect_equal(pop2[1, ], c("a", "b", "c"))
+expect_equal(pop2[1,], c("a", "b", "c"))
 
 pop3 <- initialisePop(t = 2, N = 4, strain = 2) 
-expect_equal(pop3[1, ], c("a", "b", "a", "b"))
+expect_equal(pop3[1,], c("a", "b", "a", "b"))
 ```
 
 ### Test all arguments {-#testargs}
@@ -272,7 +272,7 @@ pop3 <- initialisePop(t = 2, N = 20, strain = 3)
 expect_equal(dim(pop3), c(2, 20))
 
 pop4 <- initialisePop(t = 2, N = 10, strain = 5) 
-expect_equal(length(unique(pop4[1, ])), 5)
+expect_equal(length(unique(pop4[1,])), 5)
 ```
 
 ### Carefully work through more complex cases {-#complexcases}
@@ -285,79 +285,71 @@ Instead of testing the exact values of the results here, we are testing that the
 
 ```{r, test_complex, results = 'hide'}
 pop1 <- initialisePop(t = 20, N = 12) 
-expect_true(all(is.na(pop1[-1, ]))) # expect all except the first row are NAs
-expect_true(all(c("a", "b", "c") %in% pop[1, ])) # expect all 3 strains @ t = 1
+expect_true(all(is.na(pop1[-1,]))) # expect all except the first row are NAs
+expect_true(all(c("a", "b", "c") %in% pop[1,])) # expect all 3 strains @ t = 1
 
 pop2 <- updatePop(pop, i = 2, N = 12)
-expect_true(all(!is.na(pop2[1:2, ]))) # after update expect 1st & 2nd row not to have NAs
+expect_true(all(!is.na(pop2[1:2,]))) # after update expect 1st & 2nd row not to have NAs
 ```
-
 
 ### Combine simple functions and test the higher-level functions {-#combine}
 
-There are many aspects of code that are best tested using compact functions.
-However, we also need to test that we are tying these functions together properly.
-Therefore, we should write larger functions that can also be tested.
+In the end the entire model runs when functions work together and here we need to test these connections. This can be achieved by nesting functions together, or defining functions at a higher level.
 
 ```{r, refactor2, result = 'hide'}
-
-full_sim <- function(N, t){
-  pop <- initialise_pop(N, t) 
+fullSim <- function(t, N){
+  pop <- initialisePop(t, N) 
   for(i in seq(2, t)){
-    pop <- update_pop(pop, N, i)
+    pop <- updatePop(pop, i, N)
   }
   return(pop)
 }
-
 ```
 
-Where possible we should test larger, more macro aspects of the model here.
-We now expect there to be no NAs left in our matrix.
-We also now expect every element in our matrix to be one of the three strain strings.
+At this higher level we should test macro aspects of the model.
+For instance, we now expect there to be no NAs left in matrix `I`.
+We also now expect every element of $I_{it}$ to be one of the three strain strings.
 
 ```{r, testnn, results = 'hide'}
-pop <- full_sim(12, 20)
-expect_true(!any(is.na(pop)))
-expect_true(all(pop %in% c("a", "b", "c")))
+pop <- fullSim(t = 12, N = 20)
+expect_true(!any(is.na(pop))) # expect no NAs
+expect_true(all(pop %in% c("a", "b", "c"))) # expect all 3 strains contained within
 ```
-
-
 
 ## Testing stochastic code
 
-One of the most particular challenges for testing code for infectious disease modelling is the large amount of stochastic events.
+A challenges for testing particular to infectious disease modelling is the use of stochastic simulationss.
 Stochastic events are difficult to test effectively because, by definition, we do not know exactly what the result will be.
-We can test very broad scale properties such as in the test above where the only thing we are testing is that all the values are one of the possible strains.
-However, there are many ways some code could pass that test and still be wrong (for example the original, buggy code would pass that test).
+We can test very broad-scale properties, like the test above, where we check the range of strain values.
+However, code could still pass that test and be wrong (for example the original example would pass that test).
 There are however a number of approaches that can help.
 
 ### Split stochastic and deterministic parts {-#splitstochastic}
 
-The first thing to aim for is to isolate the stochastic parts of the code.
-For example, the function `update_pop` above does a number of things, some of which are stochastic and some of which are deterministic.
-Firstly, the function stochastically samples who gets infected by whom.
+Isolate the stochastic parts of your code.
+For example, the function `updatePop()` performs stochastic and deterministic operations in one line.
+Firstly, `updatePop()` stochastically samples who gets infected by whom.
 Then it takes those infection events and finds the new infectious status for each individual.
-Finally, it adds the new infectious statuses to the full population matrix. 
+Finally, it adds the new infectious statuses to the full population matrix.
 So we could split these tasks up as follows.
 
 ```{r, refactorstoch}
-
-sample_events <- function(N){
-  sample(N, N, replace = TRUE)
+sampleEvents <- function(N){
+  sample(x = N, size = N, replace = TRUE)
 }
 
-new_infection_status <- function(old_i, events){
+newInfectionStatus <- function(old_i, events){
   old_i[events]
 }
 
-add_infection_status <- function(x, new_i, i){
-  x[i, ] <- new_i
+addInfectionStatus <- function(x, new_i, i){
+  x[i,] <- new_i
 }
 
-update_pop <- function(x, N, i){
-  events <- sample_events(N)
-  new_i <- new_infection_status(x[i - 1, ], events)
-  x[i, ] <- add_infection_status(x, new_i, i)
+updatePop <- function(x, N, i){
+  events <- sampleEvents(N)
+  new_i <- newInfectionStatus(x[i-1,], events)
+  x[i,] <- addInfectionStatus(x, new_i, i)
   return(x)
 }
 
@@ -378,7 +370,7 @@ So if we initialise a population with one strain, the second time step should eq
 ```{r, test_stoch_determin, results = 'hide'}
 pop <- initialise_pop(3, 2, strain = 1) 
 pop <- update_pop(pop, 3, 2)
-expect_equal(pop[1, ], pop[2, ])
+expect_equal(pop[1,], pop[2,])
 ```
 
 ### Test all possible answers {-#allpossible}
@@ -405,8 +397,8 @@ In any given run however, this is never guarenteed, but the larger the populatio
 So we can use a large enough sample size that this is almost certain to occur (but make sure we set the seed so that the test is reproducible and does not stochastically fail every now and then).
 We can work out the probability of this test failing for a population with $P$ individuals (it is the well known birthday paradox).
 There are $P$ choose 2 possible pairs of individuals (also written as $P \choose 2$.
-The probability of a pair of people not being infected by the same person is $1 - 1/P$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/P$).
-For the test to fail, every pair would have to not be infected by the same person giving $(1 - 1/P) ^ {P \choose 2}$.
+The probability of a pair of people not being infected by the same person is $1-\frac{1}{P}$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/P$).
+For the test to fail, every pair would have to not be infected by the same person giving $\big(1-\frac{1}{P}\big) ^ {P \choose 2}$.
 For a population with 100 individuals, the probability of the test failing (if programmed correctly) is $10^{-21}$ and is vanishingly small for 1000 individuals.
 
 
@@ -462,7 +454,7 @@ Here again there is probably no solution other than a check at the beginning of 
 
 ```{r, edge2, eval = FALSE}
 pop <- initialise_pop(10, 2, strain = 11) 
-expect_equal(length(unique(pop[1, ])), 11)
+expect_equal(length(unique(pop[1,])), 11)
 ```
 
 
