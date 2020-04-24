@@ -30,7 +30,7 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 
 
 # good practice
-#.   small functions
+#.   compact functions
 
 # what to test
 #.  edge cases. 0, others?
@@ -115,17 +115,18 @@ For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
 `expect_equal` takes two arguments, an expression and the expected output; 
 for the square root example we would write `expect_equal(sqrt(4), 2)`.
 
-There are a number of ways that unit testing can be incorporated into the programming workflow.
-The first and most obvious is that as you write code, you should write tests that confirm that the code does what you think it does.
-The second, is that these same tests should then be regularly run as you develop new code.
+There are a number of ways that unit testing can be incorporated into your programming workflow.
+
+1. As you write code, you should write tests that confirm the code does what you think it should.
+2. These same tests should then be regularly run as you develop new code.
 If a change in new code causes the older tests to break, this points to the introduction of an error in the new code, or the older code could not generalise to the adapted environment.
-Thirdly, whenever a bug is found in the code, a test should be written that captures the bug. 
+3. Whenever a bug is found in the code, a test should be written that captures the bug. 
 Then if the bug re-emerges it will be caught.
-Finally, you can write tests before you write code---also known as test-driven development.
+4. You can write tests before you write code---also known as test-driven development.
 This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming so long as all tests keep passing.
 Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
 
-# Example
+# Bug in a multi-strain reinfection model
 
 <!--
 # this example should
@@ -133,96 +134,79 @@ Frameworks for formalising these frameworks are discussed in Sections [6](framew
 #  Have elements that are fixable by all the ideas later
 -->
 
-Here we define a simple epidemiological model and then present R code for it.
-We will then use this as a working example to demonstrate how to effectively write unit tests for infectious disease modelling code.
+Here we define a simple epidemiological model and then demonstrate how to effectively write unit tests in $\texttt{R}$ code for it.
 
-Consider a multistrain system, with a population of $N$ individuals who each get reinfected exactly once per time step.
-Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by a length $N$ vector of states $\mathbf{I}_t$.
+Consider a multi-strain system, with a population of $N$ infected individuals who each get reinfected at every time step.
+Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by a length $N$ vector of states $\mathbf{I}_t$ = $(I_{it})_{i=[1,N]}$.
 Each time step, the infection status of each individual is updated as
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
-That is, each iteration, the new infection status of each individual is a uniform random sample from the set of infection statuses in the previous iterations (including individual $I_i$).
-Here then is our first attempt at implementing this model.
+That is, at each iteration $t$, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iterations (including individual $I_{i,t-1}$).
+Certainly this toy model is naive in that it is governed my mass-action principles, ignoring contact and spatial dynamics. Nevertheless it will serve its purpose. Here is our first attempt at implementing this model.
 
-```{r, simsetup, results = 'hide', echa = FALSE}
+```{r, simsetup, results = 'hide', echo = FALSE}
 set.seed(3132)
 ```
 
 
 ```{r, first_code, results = 'hide'}
-N <- 12
-t <- 20
+N <- 12 # infected individuals
+t <- 20 # study length
 # create the matrix to store the simulation data
-I <- matrix(NA, ncol = N, nrow = t)
+I <- matrix(data = NA, nrow = t, ncol = N)
 
-# Initialise the population
-I[1, ] <- rep(c("a", "b", "c"), N / 3)
+# Initialise the population @ t = 1 with a fixed configuration
+I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
 
-# For each time step, all N individuals are reinfected
-#   by someone randomly sampled from the population at t-1.
+# At each time step, everyone is re-infected by someone from the previous time step.
 for(t in seq(2, t)){
-  I[t, ] <- sample(I[t - 1, ], N)
+  I[t, ] <- sample(x = I[t - 1, ], size = N)
 }
 ```
 
-We might then make some plots to explore whether our code is doing something sensible.
-For example we might plot the time course of one or more individuals and see that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
-However, if we look at the proportion of each strain through time (not shown here) we will quickly see that the proportions are identical through time.
-Therefore there must be a bug in our code.
+Usually we would make some plots to explore if our code is outputting something sensible.
+For example plotting the time course of individuals' infection strain indicates that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
+However, if we look at the proportion of each strain through time (not shown here) we will quickly notice there must be a bug hiding.
 
 This simple example demonstrates a number of points.
-Firstly, as everyone who has ever written code knows, bugs can be subtle.
-Even though the code above is only a few lines, it is not easy to notice that it is wrong.
-Secondly, it is much easier to debug code once you know there is a bug.
-Having now read that there is a bug in the above code, a good proportion of readers might be able to identify the bug.
-Thirdly, testing the code with a few plots is not very dissimilar from the testing that many scientists do; write the code, plot some outputs and see if they make sense.
-However, approaching this in an *ad hoc* way makes it less likely that we will catch bugs.
-In this example, we initially used the wrong plot to diagnose whether our code was correct and therefore missed the bug.
-Finally, while plots are an excellent way to check the behaviour of code, and plotting simulation runs is a vital step in code checking, it is not the easiest method for automatically checking code because a human has to scan each plot each time the tests are run.
 
-```{r, firstplots, echo = FALSE, fig.cap = 'The infection status of one individual though time.'}
-d1 <- data.frame(time = seq(t), strain = I[, 1])
-d1$strain_num <- as.numeric(factor(d1$strain))
-ggplot(d1, aes(time, strain_num)) + 
+* bugs can be subtle
+* it is not easy-to-notice there is an error, even over just 7 lines of active code
+* it is much easier to debug code once you know there is a bug. Perhaps you can find it?!
+* testing with plots is the common approach of many scientists---write code, plot some outputs and check they are sensible. However if we had only relied on Figure \@ref(fig:firstplots) we would have missed the bug. While plotting simulation runs are an excellent way to check model behaviour, it is not the most effective method for checking code because a human has to perform this scan at every test run.
+
+In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
+
+```{r, firstplots, echo = FALSE, fig.cap = 'Infection profile for individual 1.'}
+library(ggplot2)
+d1 <- data.frame(time = seq(t), strain = (I[, 1]), stringsAsFactors = TRUE)
+ggplot(d1, aes(time, as.numeric(strain))) +
   geom_path() +
   geom_point() +
   scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) +
-  labs(y = 'Strain', x = 'Time')
+  labs(y = 'Strain', x = 'Time') +
+  theme(panel.grid.minor = element_blank())
 ```
-
-
-```{r, firstplots2, echo = FALSE, result = 'hide', include = FALSE}
-d1 <- data.frame(time = rep(seq(t), 3), 
-                 strain = as.vector(I[, 1:3]),
-                 individual = factor(rep(1:3, each = t)))
-d1$strain_num <- as.numeric(factor(d1$strain))
-ggplot(d1, aes(time, strain_num, colour = individual, group = individual)) + 
-  geom_path() +
-  scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) +
-  labs(y = 'Strain', x = 'Time', colour = 'Indiv.')
-```
-
 
 ```{r, bug_show_plot, include = FALSE}
 apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% t %>% matplot(type = 'l')
 ```
 
-The cause of this particular bug is that the `sample` function defaults to sampling without replacement.
-Setting `replace = TRUE` fixes the code and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we now see the correct behaviour (one strain drifting to fixation.
-Given this example, we will now work through specific advice for unit testing for infectious disease models.
-We will write tests and rewrite the code as we go until we have a well tested, more reliabley implemented model at the end.
+The cause of this particular bug is that the `sample()` function defaults to sampling without replacement `sample(..., replace = FALSE)`.
+Setting `replace = TRUE` fixes this and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we now see the correct behaviour (one strain drifting to fixation).
+We will now develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end.
 
 ```{r, correct_code, results = 'hide', echo = FALSE}
 N <- 12
 t <- 20
-I <- matrix(NA, ncol = N, nrow = t)
-I[1, ] <- rep(c("a", "b", "c"), N / 3)
 
-for(i in seq(2, t)){
-  I[i, ] <- sample(I[i - 1, ], N, replace = TRUE)
+I <- matrix(data = NA, nrow = t, ncol = N)
+
+I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
+
+for(t in seq(2, t)){
+  I[t, ] <- sample(x = I[t - 1, ], size = N, replace = TRUE)
 }
 ```
-
-
 
 ```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each strain drifting. Each strain is a different line.'}
 (apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) / N) %>% 
@@ -230,97 +214,88 @@ for(i in seq(2, t)){
   matplot(type = 'l', xlab = 'Time', ylab = 'Proportion', lwd = 2)
 ```
 
-
 # Tips and best practice
 
 ## Basic testing
-### Write small functions {-#smallfuns}
+To ensure the unit test is evaluating the same code as the actual analysis, the code needs to be defined once, in a single function.
+This function is then used in both as part of the model code base and in the unit test itself.
 
-In order to guarantee that a unit test is checking the same code as used for actual analysis, the code needs to be defined once, in a function.
-This same function is then used in both the larger model code and in the unit test itself.
-It helps to make your functions small, such that they do one, clearly defined operation.
-This makes it easier to reason through a few examples to be confident you know exactly what the output should be.
-In our example we could define one function to initialise the population and another to run the simulation.
-In doing so we can more carefully consider the structure of our code more generally.
-Here we have modified the code that initialises the population so that we can vary the number of strains and so that the number of individuals does not have to be a multiple of the number of strains.
+### Write compact functions {-#compactfuns}
+It helps to make your functions compact with a single clearly-defined operation.
+In our example we could define a function to initialise the population and another to run the simulation.
+Organising the code base into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
+Here we have modified the code that initialises the population so that we can vary the number of strains.
 
 ```{r, refactor, result = 'hide'}
-initialise_pop <- function(N, t, strains = 3){
-  I <- matrix(NA, ncol = N, nrow = t)
-  I[1, ] <- rep(letters[1:strains], ceiling(N / strains))[1:N]
+initialisePop <- function(t, N, strains = 3){
+  I <- matrix(data = NA, nrow = t, ncol = N)
+  I[1, ] <- rep(x = letters[1:strains], length.out = N)
   return(I)
 }
 
-update_pop <- function(x, N, i){
-  x[i, ] <- sample(x[i - 1, ], N, replace = TRUE)
+updatePop <- function(x, i, N){
+  x[i, ] <- sample(x = x[i - 1, ], size = N, replace = TRUE)
   return(x)
 }
 ```
 
+### Test simple cases first {-#easycases}
 
-
-### Test easy to understand parameters {-#easyparams}
-
-In order to carefully work out exactly what we expect each function to do, it is useful to use easy to understand parameters.
-For example, if we set up a very small populations with only a few strains we can easily work out exactly what we expect the initialised population to look like.
-
+If we choose a very small population with a few strains to start with, we can then easily work out exactly what we expect the initialised population to look like.
 
 ```{r, test_easy, results = 'hide'}
-pop1 <- initialise_pop(3, 2, strain = 2) 
-expect_equal(pop1[1, ], c('a', 'b', 'a'))
+pop1 <- initialisePop(t = 2, N = 3, strain = 2) 
+expect_equal(pop1[1, ], c("a", "b", "a"))
 
-pop2 <- initialise_pop(3, 2, strain = 3) 
-expect_equal(pop2[1, ], c('a', 'b', 'c'))
+pop2 <- initialisePop(t = 2, N = 3, strain = 3) 
+expect_equal(pop2[1, ], c("a", "b", "c"))
 
-pop3 <- initialise_pop(4, 2, strain = 2) 
-expect_equal(pop3[1, ], c('a', 'b', 'a', 'b'))
+pop3 <- initialisePop(t = 2, N = 4, strain = 2) 
+expect_equal(pop3[1, ], c("a", "b", "a", "b"))
 ```
 
 ### Test all arguments {-#testargs}
 
-Our function `initialise_pop` has three arguments so we should test that each of these does what we expect.
-To do this we will initialise one population, and then alter each argument in turn.
-The first two arguments directly change the expected dimension of the output matrix, so we test that.
-For the last argument we have tested that the number of strains is equal to the number of strains requested.
+Our function `initialisePop()` has three arguments so we should test that each of these does what we expect.
+First we initialise one population, and then alter each argument in turn.
+The first two arguments `(t, N, ...)` directly change the expected dimension of matrix `I`, so we test that.
+For the last argument we test that the number of strains is equal to the number of strains requested.
 
 ```{r, test_all_args, results = 'hide'}
-pop <- initialise_pop(3, 2, strain = 3) 
-expect_equal(dim(pop), c(2, 3))
+pop1 <- initialisePop(t = 2, N = 3, strain = 3) 
+expect_equal(dim(pop1), c(2, 3))
 
-pop2 <- initialise_pop(3, 6, strain = 3) 
+pop2 <- initialisePop(t = 6, N = 3, strain = 3) 
 expect_equal(dim(pop2), c(6, 3))
 
-pop3 <- initialise_pop(20, 2, strain = 3) 
+pop3 <- initialisePop(t = 2, N = 20, strain = 3) 
 expect_equal(dim(pop3), c(2, 20))
 
-pop4 <- initialise_pop(10, 2, strain = 5) 
+pop4 <- initialisePop(t = 2, N = 10, strain = 5) 
 expect_equal(length(unique(pop4[1, ])), 5)
-
 ```
 
+### Carefully work through more complex cases {-#complexcases}
 
-
-### Carefully work through more complex parameters {-#complexparams}
-
-We can also write tests for each function with less simple parameter values.
-After initialising our population, we expect all the rows other than the first to contain NAs.
-We also expect each of the strains a, b and c to occur in the first row.
-Our function `update_pop` performs one time step of the simulation, so we expect one additional row to be populated.
-Instead of testing the exact values of the results here, we are testing that they make sense with our more macro understanding of the model system.
+We can also cover cases with more commplex parameter values.
+After initialising our population, we expect all the rows other than the first to contain `NA`.
+We also expect each of the strains a, b and c to occur at least once on the first row if $N\geq 3$.
+Finally, our function `updatePop` performs one simulation time step, so we expect one additional row to be populated.
+Instead of testing the exact values of the results here, we are testing that they make sense within our macro understanding of the model system.
 
 ```{r, test_complex, results = 'hide'}
-pop <- initialise_pop(12, 20) 
-expect_true(all(is.na(pop[-1, ])))
-expect_true(all(c('a', 'b', 'c') %in% pop[1, ]))
+pop1 <- initialisePop(t = 20, N = 12) 
+expect_true(all(is.na(pop1[-1, ]))) # expect all except the first row are NAs
+expect_true(all(c("a", "b", "c") %in% pop[1, ])) # expect all 3 strains @ t = 1
 
-pop2 <- update_pop(pop, 12, 2)
-expect_true(all(!is.na(pop2[1:2, ])))
+pop2 <- updatePop(pop, i = 2, N = 12)
+expect_true(all(!is.na(pop2[1:2, ]))) # after update expect 1st & 2nd row not to have NAs
 ```
 
 
-### Combine smaller functions and test the upper-level functions {-#combine}
+### Combine simple functions and test the higher-level functions {-#combine}
 
-There are many aspects of code that are best tested using small, specific functions.
+There are many aspects of code that are best tested using compact functions.
 However, we also need to test that we are tying these functions together properly.
 Therefore, we should write larger functions that can also be tested.
 
@@ -343,7 +318,7 @@ We also now expect every element in our matrix to be one of the three strain str
 ```{r, testnn, results = 'hide'}
 pop <- full_sim(12, 20)
 expect_true(!any(is.na(pop)))
-expect_true(all(pop %in% c('a', 'b', 'c')))
+expect_true(all(pop %in% c("a", "b", "c")))
 ```
 
 
@@ -416,12 +391,12 @@ Individual 1 can be infected by individual 1 or individual 2 and individual 2 an
 
 ```{r, test_stoch_fewvalues, results = 'hide'}
 # Collapse each draw into a single string to make comparisons easier.
-many_pops <- replicate(300, paste0(sample_events(2), collapse = ''))
-expect_true(all(many_pops %in% c('11', '12', '21', '22')))
+many_pops <- replicate(300, paste0(sample_events(2), collapse = ""))
+expect_true(all(many_pops %in% c("11", "12", "21", "22")))
 ```
 
 
-### Use very large samples for stochastic part {-#largesmaples}
+### Use very large samples for the stochastic part {-#largesmaples}
 
 While the previous example looked at very small numbers, we can also consider how testing is made easier by using very large numbers.
 This typically includes either using large sample sizes or large numbers of runs of the stochastic code.
@@ -461,7 +436,6 @@ expect_true(all(sapply(many_sims, function(x) length(unique(apply(x, 1, table)))
 
 ## Further testing
 ### Test edge cases and special cases {-#corners}
-
 
 When writing tests it is easy to focus on the standard behaviours.
 However, bugs often occur when parameters are at the edges of their values or for certain special values.
@@ -600,5 +574,3 @@ Please see the fully reproducible and version controlled code at \url{www.github
 
 
 # References
-
-
