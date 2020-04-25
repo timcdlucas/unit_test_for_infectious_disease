@@ -1,9 +1,13 @@
 ---
 title: |
   | Unit testing for infectious disease modelling 
+  |
   | A beginner's guide to unit testing for infectious disease epidemiologists 
+  |
   | A guide for effective unit testing for robust, infectious disease code
+  |
   | Unit testing for disease modelling
+  |
   | First steps in unit testing for your disease model
   
 author:
@@ -26,9 +30,9 @@ abstract: |
   Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
   Models of infectious disease help guide health policy that can affect millions of people. 
   Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
-  Therefore it is an ethical responsibility that our code is as free of error as possible.
+  We are ethically obliged to ensure our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
-  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try implementing unit testing in their next script.
+  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. We promise you will not regret it!
 
   
 author_summary: |
@@ -82,7 +86,7 @@ The workflow followed by many is to write some code, run the full model and exam
 This *ad hoc* testing approach is not very sensitive and can miss many bugs.
 Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug-free while models showing unexpected behaviour are more thoroughly scrutinised.
 
-_Unit testing_ is a formally-defined, principled framework that compares numerous output scenarios from code to what the programmer was expecting the code to produce (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
+_Unit testing_ is a formally-defined, principled framework that compares numerous output scenarios from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
 Ready-to-run frameworks for unit testing are available in \emph{R} [@R], \emph{Julia} [@bezanson2017julia] and \emph{python} [@python].
 While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
 These testing concepts also apply to ecology and other sciences but here we focus on infectious diseases.
@@ -429,7 +433,7 @@ Code that relies on the returned object being a matrix would fail in this vector
 
 Equally special cases can be triggered with parameter sets that do not follow a clear pattern such as the extrema of parameter space. 
 This is where understanding of the functional form of the model can help. Consider a function `divide(x, y)` that divides `x` by `y`. 
-If we test the (mathematically bloated) calculation `2 * divide(x, 2) == x` we would believe it works for nearly all values of division, until we ever try $y = 0$.
+If we test the (mathematically bloated) calculation `2 * divide(x, 2) == x` we would believe it works for nearly all values of division, until we ever try `y = 0`.
 
 In our example model, we might consider testing edge cases such as one individual, one iteration and one strain.
 In fact, running `fullSim()` with only one iteration errors without a useful error message.
