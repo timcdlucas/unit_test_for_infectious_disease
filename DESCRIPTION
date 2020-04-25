@@ -13,4 +13,5 @@ Imports:
     rmarkdown,
     testthat
 Suggests:
-    bookdown
+    bookdown,
+    rticles
