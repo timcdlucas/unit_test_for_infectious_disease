@@ -13,7 +13,7 @@ author:
     affiliation: Big Data Institute
 address:
   - code: Big Data Institute
-    address: Department, Street, City, State, Zip
+    address: Big Data Institute, University of Oxford, UK
   - code: MathSys CDT
     address: MathSys CDT, University of Warwick, UK
 abstract: |
