@@ -233,7 +233,7 @@ for(t in seq(2, t)){
 
 ## Basic testing
 To ensure the unit test is evaluating the same code as the actual analysis, the code needs to be defined once, in a single function.
-This function is then used in both as part of the model code base and in the unit test itself.
+This function is then used both as part of the model code base and in the unit test itself.
 
 ### Write compact functions {-#compactfuns}
 It helps to make your functions compact with a single clearly-defined operation.
@@ -273,7 +273,7 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 
 Our function `initialisePop()` has three arguments so we should test that each of these does what we expect.
 First we initialise one population, and then alter each argument in turn.
-The first two arguments `(t, N, ...)` directly change the expected dimension of matrix `I`, so we test that.
+The first two arguments, `t` and `N`, directly change the expected dimension of matrix `I`, so we test that.
 For the last argument we test that the number of strains is equal to the number of strains requested.
 
 ```{r, test_all_args, results = 'hide'}
@@ -300,16 +300,20 @@ Instead of testing the exact values of the results here, we are testing that the
 
 ```{r, test_complex, results = 'hide'}
 pop1 <- initialisePop(t = 20, N = 12) 
-expect_true(all(is.na(pop1[-1,]))) # expect all except the first row are NAs
-expect_true(all(c("a", "b", "c") %in% pop1[1,])) # expect all 3 strains @ t = 1
+# expect all except the first row are NAs
+expect_true(all(is.na(pop1[-1,]))) 
+# expect all 3 strains at t = 1
+expect_true(all(c("a", "b", "c") %in% pop1[1,])) 
 
 pop2 <- updatePop(pop1, t = 2, N = 12)
-expect_true(all(!is.na(pop2[1:2,]))) # after update expect 1st & 2nd row not to have NAs
+# after update expect 1st & 2nd row not to have NAs
+expect_true(all(!is.na(pop2[1:2,]))) 
 ```
 
 ### Combine simple functions and test the higher-level functions {-#combine}
 
-In the end the entire model runs when functions work together and here we need to test these connections. This can be achieved by nesting functions together, or defining functions at a higher level.
+In the end the entire model runs when functions work together and here we need to test these connections. 
+This can be achieved by nesting functions together, or defining functions at a higher level.
 
 ```{r, refactor2, result = 'hide'}
 fullSim <- function(t, N){
@@ -323,12 +327,13 @@ fullSim <- function(t, N){
 
 At this higher level we should test macro aspects of the model.
 For instance, we now expect there to be no NAs left in matrix `I`.
-We also now expect every element of $I_{it}$ to be one of the three strain strings.
+We also now expect every element of `I` to be one of the three strain strings.
 
 ```{r, testnn, results = 'hide'}
 pop <- fullSim(t = 12, N = 20)
 expect_true(!any(is.na(pop))) # expect no NAs
-expect_true(all(pop %in% c("a", "b", "c"))) # expect all 3 strains contained within
+# expect all 3 strains contained within
+expect_true(all(pop %in% c("a", "b", "c"))) 
 ```
 
 ## Testing stochastic code
