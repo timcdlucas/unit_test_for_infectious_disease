@@ -1,10 +1,12 @@
 language: r
 
-
-
-script:
-- Rscript -e "install.packages('rmarkdown')"
-- Rscript -e "install.packages('ggplot2')"
-- Rscript -e "install.packages('testthat')"
-- Rscript -e "rmarkdown::render('unit_testing.Rmd')"
+# http://www.goring.org/resources/Adding_CI_To_RMarkdown.html
+# https://github.com/PalEON-Project/stepps-baconizing
+sudo: false
+script: make unittest
+cache: packages
+r_packages:
+  - rmarkdown
+  - ggplot2
+  - testthat
 
