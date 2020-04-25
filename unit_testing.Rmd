@@ -133,7 +133,7 @@ If a change in new code causes the older tests to break, this points to the intr
 3. Whenever a bug is found in the code, a test should be written that captures the bug. 
 Then if the bug re-emerges it will be caught.
 4. You can write tests before you write code---also known as test-driven development.
-This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming so long as all tests keep passing.
+This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming until all tests keep passing.
 Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
 
 # Bug in a multi-strain reinfection model
