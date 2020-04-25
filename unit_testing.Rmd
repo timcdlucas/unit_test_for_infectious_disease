@@ -113,10 +113,12 @@ We also give an overview of the available testing frameworks in various language
 
 # Unit testing basics
 
-At the heart of every unit test is a function output, its known/expected output and comparing the two.
-For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \texttt{R}), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2. Often our function arguments will cover an infinite range of possibilities but we cannot exhaustively check them all. Instead we devise tests that cover particular scenarios or 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
+At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
+For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \texttt{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2.
+Often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
+Instead we devise tests that cover particular scenarios such as standard usage as well as 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
-In $\texttt{R}$ [@R], the \texttt{testthat} package [@testthat], provides a simple interface for testing.
+In $\texttt{R}$, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While there are a variety of functions to make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
 `expect_true()` takes one argument: an expression that should evaluate to `TRUE`.
 For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
@@ -127,7 +129,7 @@ There are a number of ways that unit testing can be incorporated into your progr
 
 1. As you write code, you should write tests that confirm the code does what you think it should.
 2. These same tests should then be regularly run as you develop new code.
-If a change in new code causes the older tests to break, this points to the introduction of an error in the new code, or the older code could not generalise to the adapted environment.
+If a change in new code causes the older tests to break, this points to the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
 3. Whenever a bug is found in the code, a test should be written that captures the bug. 
 Then if the bug re-emerges it will be caught.
 4. You can write tests before you write code---also known as test-driven development.
