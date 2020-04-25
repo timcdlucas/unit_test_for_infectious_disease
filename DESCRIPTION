@@ -1,0 +1,14 @@
+Title: Unit testing for infectious disease
+Version: 1.0
+Author: Tim Lucas, 
+Authors@R: c(person(given = "Tim", family = "Lucas",
+    role = c("aut", "cre"), email = "timcdlucas@gmail.com"),
+    person(given = c("Timothy"), family = "Pollington",
+    role = c("aut", "cre"))
+Maintainer: Tim Lucas <timcdlucas@gmail.com>
+Description: Unit testing for infectious disease modelling.
+License: MIT + file LICENSE
+Imports:
+    ggplot2,
+    rmarkdown,
+    testthat
