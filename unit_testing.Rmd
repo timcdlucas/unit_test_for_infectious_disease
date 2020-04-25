@@ -28,7 +28,9 @@ abstract: |
 author_summary: |
 
 bibliography: unit_testing.bib
-output: rticles::plos_article
+output:
+  bookdown::pdf_book:
+    base_format: rticles::plos_article
 csl: plos.csl
 ---
 
@@ -151,7 +153,9 @@ Each individual is defined by the strain they are currently infected with $I_{it
 Each time step, the infection status of each individual is updated as
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 That is, at each iteration $t$, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iterations (including individual $I_{i,t-1}$).
-Certainly this toy model is naive in that it is governed my mass-action principles, ignoring contact and spatial dynamics. Nevertheless it will serve its purpose. Here is our first attempt at implementing this model.
+Certainly this toy model is naïve in that it is governed my mass-action principles, ignoring contact and spatial dynamics. 
+Nevertheless it will serve its purpose. 
+Here is our first attempt at implementing this model.
 
 ```{r, simsetup, results = 'hide', echo = FALSE}
 set.seed(01011885)
@@ -164,10 +168,11 @@ t <- 20 # study length
 # create the matrix to store the simulation data
 I <- matrix(data = NA, nrow = t, ncol = N)
 
-# Initialise the population @ t = 1 with a fixed configuration
+# Initialise the population at t = 1 with a fixed configuration
 I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
-# At each time step, everyone is re-infected by someone from the previous time step.
+# At each time step, everyone is re-infected 
+#   by someone from the previous time step.
 for(t in seq(2, t)){
   I[t,] <- sample(x = I[t-1,], size = N)
 }
@@ -182,7 +187,7 @@ This simple example demonstrates a number of points.
 * bugs can be subtle
 * it is not easy-to-notice there is an error, even over just 7 lines of active code
 * it is much easier to debug code once you know there is a bug. Perhaps you can find it?!
-  * testing with plots is the common approach of many scientists---write code, plot some outputs and check they are sensible. However if we had only relied on Figure \@ref(fig:firstplots) we would have missed the bug. While plotting simulation runs are an excellent way to check model behaviour, it is not the most effective method for checking code because a human has to perform this scan at every test run.
+* testing with plots is the common approach of many scientists---write code, plot some outputs and check they are sensible. However if we had only relied on Figure \@ref(fig:firstplots) we would have missed the bug. While plotting simulation runs are an excellent way to check model behaviour, it is not the most effective method for checking code because a human has to perform this scan at every test run.
 
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
 
