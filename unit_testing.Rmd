@@ -118,6 +118,8 @@ Furthermore, this workflow is biased as models that show "expected behaviour" ar
 _Unit testing_ is a formally-defined, principled framework that compares numerous output scenarios from code to what the programmer was expecting the code to produce (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
 Ready-to-run frameworks for unit testing are available in R [@R], Julia [@bezanson2017julia] and python [@python].
 While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
+These testing concepts also apply to ecology and other sciences but here we focus on infectious diseases.
+
 In this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
 We give special focus to recommendations for the problems specific to infectious disease modelling.
 We also give an overview of the available testing frameworks in various languages commonly used by infectious disease modellers.
