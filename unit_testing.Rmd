@@ -22,7 +22,10 @@ rmarkdown::render('unit_testing.Rmd')
 Title: A beginners guide to unit testing for infectious disease epidemiologists
 Title: A guide for effective unit testing for robust, infectious disease code.
 -->
+<!-- Broadening audience: not just infectious disease modellers of human diseases but also population ecologists. Ecology also helps hint at animal infectious disease modellers. A wider audience helps to appeal to PLoS Comp Bio. So where you have said InfDisModelling throughout the piece I am raising if ecological viewpoint could be included too. -->
 
+<!-- 1) "Unit testing for disease and ecological modelling"? -->
+<!-- 2) "First steps in unit testing for your disease or ecological model code"? -->
 
 <!--
 # use covid Ferguson as motivating example.
@@ -419,56 +422,66 @@ expect_true(all(sapply(manySims, function(x) length(unique(apply(x, 1, table))) 
 ### Test edge cases and special cases {-#corners}
 
 When writing tests it is easy to focus on standard behaviour.
-However, bugs often occur when parameters are at the edges of their ranges or special values.
-For example, in R, selecting one column from a matrix e.g. `[,2]` returns a vector while selecting two or more columns e.g. `[,2:3]` returns a matrix.
-Code that relies on the returned object being a matrix would fail in the vector edge case.
+However, bugs often occur at _edge cases_---when parameters are at the edges of their ranges or special values.
 
-Similarly, in many programming applications, there are many input values for which there is a clear pattern between input and output but a few input values that do not fit the clear pattern, even when these are not at the extremes of the possible parameter range.
-For example, consider a function `divide(x, y)` that divides `x` by `y`. 
-If we test that `2 * divide(10, 2) == 10` this suggests that the function works for nearly all values of division.
-However, this test will fail for $y = 0$.
-We call cases like these special cases.
+For example, in R, selecting one column from a matrix e.g. `[,2]` returns a vector while selecting two or more columns e.g. `[,2:3]` returns a matrix.
+Code that relies on the returned object being a matrix would fail in this vector edge case.
+
+Equally special cases can be triggered with parameter sets that do not follow a clear pattern such as the extrema of parameter space. 
+This is where understanding of the functional form of the model can help. Consider a function `divide(x, y)` that divides `x` by `y`. 
+If we test the (mathematically bloated) calculation `2 * divide(x, 2) == x` we would believe it works for nearly all values of division, until we ever try $y = 0$.
 
 In our example model, we might consider testing edge cases such as one individual, one iteration and one strain.
 In fact, running `fullSim()` with only one iteration errors without a useful error message.
+
+```{r, edge, eval=FALSE}
+pop <- fullSim(t = 1, N = 12)
+```
+
 In practice we would probably fix this with a check at the top of the function that returns a useful error message if the user tries to run the function with `t = 1`.
 
-```{r, edge, eval = FALSE}
-pop <- fullSim(t = 1, N = 12)
+```{r, erroronspecialcase, eval = FALSE}
+fullSim2 <- function(t, N){
+  stopifnot(t > 1)
+  pop <- initialisePop(t, N) 
+  for(i in seq(2, t)){
+    pop <- updatePop(pop, i, N)
+  }
+  return(pop)
+}
+pop <- fullSim2(t = 1, N = 12)
 ```
 
 Similarly, earlier we tested whether the `strain` argument of `initialisePop()` worked by checking if the returned population had the correct number of strains.
 However, if we set the `strain` argument to be greater than the number of individuals in the population, the function we have currently written does not error but does not give the answer we expected either.
-Here again there is probably no solution other than a check at the beginning of the function that returns an error if `strain > N`.
 
 ```{r, edge2, eval = FALSE}
 pop <- initialisePop(10, 2, strain = 11) 
 expect_equal(length(unique(pop[1,])), 11)
 ```
 
+Here again there is probably no solution other than a `stopifnot(strain > N)` check at the beginning of the function.
+
 ### Test incorrect inputs {-#testincorrect}
 
-The arguments examined in the edge and special case section could be considered incorrect.
-But there are many other ways that a user may input incorrect arguments.
+The user may discover that the function arguments examined in the edge and special case section are incorrect. 
+However another user may input incorrect arguments, such as when new uncleaned data meets the functions previously tested on complete datasets. 
 Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
-This is especially true for functions that a user might use directly.
-Some of these cases will quickly fail, but sometimes a function can either silently give wrong results or run a long time before erroring.
-Both of these cases are dangerous or annoying and can be difficult to debug after the fact.
-A common case to check, that is common in infectious disease modelling, is testing whether code handles data with NAs in correctly. 
-Code will often be written with a clean, complete dataset. 
-When it comes for the code to be reused, the new data is often incomplete and this can cause difficult to diagnose bugs.
-Often the simplest solutions to these sorts of issues is to include code at the beginning of the function that checks the arguments are as expected.
-We can write tests that expect an error using the function `expect_error()` to make sure we have handled these cases correctly.
+This is especially true for 'external' functions available to that a user on the front-end of a package.
+Some cases may quickly fail, but sometimes a function may run silently giving false results or run a long time before failure.
+Both of these cases are dangerous or annoying and can be difficult to debug afterwards.
+
+A common case to check with epidemiological datasets is whether code correctly handles missing data (normally represented as `NA` or `""`). 
+Often the simplest solution is to include argument checks at the beginning of functions.
+To test that these checks work we can use `expect_error()`.
 
 Here we demonstrate one example with the code above.
-We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking the function requires a vector of all time points to run).
-In this case the code does error, though perhaps we could make the function return an error message that tells the user how to fix the problem (i.e. tell the user that `t` should be of length 1).
+We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needs a vector of all time points to run).
+In this case the code does error, though perhaps we could make the error message more informative, i.e. tell the user that `t` should be of length 1.
 
 ```{r, wrong1}
-expect_error(pop <- fullSim(4, 1:100))
+expect_error(pop <- fullSim2(4, 1:100))
 ```
-
-
 
 # Unit testing frameworks {#frameworks}
 
@@ -477,17 +490,16 @@ For R, there is the $\texttt{testthat}$ package.
 
 When structuring R code as a package, tests should be kept in the directory `tests/testthat`.
 Further requirements to the structure can be found in @wickham2015r Chapter 7.
-All the tests in a package can then be run with the function `test()` from the $\texttt{testthat}$ package but also by running `check()` from the devtools package [@devtools] which also checks other aspects of the package.
-Running tests within a package like this has the added benefit that the tests are run in a new, clean environment.
-One easy-to-make mistake when testing is for a test to rely on an object that is not defined in the test script.
-Running the tests in a clean environment quickly highlights these errors so they can be fixed.
+All the tests in a package can then be run with the function `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to building a package.
+If the code is intended as part of a package then the use of these tools is essential to test that code runs within the context of a built environment.
+These tools also allow the test to run in a clean environment that can highlight if a test was previously relying on objects defined outside of the test script.
 
-Other programming languages have similar testing frameworks.
-The specifics of the frameworks in the various programming languages differ but the main concept of defining an expression to run and an expected output stays the same.
-In Julia there is the Test package [@juliatest]. 
+Other programming languages have similar testing frameworks too.
+Their specifics differ but the main concept of comparing a function evaluation to the expected output remains the same.
+In Julia there is the $\texttt{Test}$ package [@juliatest]. 
 The basic structure for tests with this package are demonstrated below.
-We give the specific test a name and give a single expression that evaluates to true or false.
-Unit tests within a Julia package live in the file `test/runtests.jl` and the tests can be run with `Pkg.test()`.
+We give the specific test a name and give a single expression that evaluates to `TRUE` or `FALSE`.
+For a Julia package unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
 
 ```{julia, test, eval = FALSE}
 @testset "my_test_name" begin
@@ -495,8 +507,7 @@ Unit tests within a Julia package live in the file `test/runtests.jl` and the te
 end
 ```
 
-Finally, in python we have the unittest framework [@pythonunittest].
-In this framework, tests must be written into a class that inherits from the `TestCase` class.
+Finally, in python we have the $\texttt{unittest}$ framework [@pythonunittest]; tests must be written into a class that inherits from the `TestCase` class.
 The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
 Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with `test_`.
@@ -513,40 +524,39 @@ class TestMaths(unittest.TestCase):
 unittest.main()
 ```
 
-
-
 # Continuous integration {#ci}
 
-If your code is under version control [@osborne2014ten; @wilson2014best] and hosted online on a website such as GitHub, GitLab or BitBucket you can automate the running of unit tests.
-This process is called continuous integration.
-In this setup, whenever you push changes in your code from your local computer to the online repository, anytests that you have defined get run automatically.
-You can have these systems set up such that you recieve an email if your tests fail for example.
+If your code is under version control [@osborne2014ten; @wilson2014best] and hosted on GitHub, GitLab or BitBucket, you can automate the running of unit tests.
+This process is called _continuous integration_.
+In this setup, whenever you push code changes from your local computer to the online repository, any tests that you have defined get run automatically.
+Furthermore these tests can be automated irrespective of changes to the code or test. Since dependencies with other packages that may change and contribute to a bug can be automatically found.
+These systems then send you an email notification in these circumstances.
 There are various continuous integration services such as travis-ci.org, GitHub actions and GitLab pipelines.
-These services are often free on a limited basis or free if your code is open source.
+These services are often free on a limited basis, or free if your code is open source.
 
 A full description of how to set up these services is beyond the scope of this paper.
-However, in the simplest cases, the set up is very easy.
-For example if you have R code, organised into a package and hosted openly on GitHub, then setting up travis CI is very easy.
-Within your version controlled folder you add a file called `.travis.yml` that simply contains a description of which language the code uses.
+However, in the simplest cases, the setup is straightforward.
+For R code organised into a package and hosted openly on GitHub, then setting up travis CI is very easy.
+Within your version-controlled folder you add a `.travis.yml` file that contains a description of which language the code uses.
 
 ```{awk, travis, eval = FALSE}
 language:r
 ```
 
-This file can also be setup with the $\texttt{usethis}$ function `use_travis()`.
+This file can also be created using `use_travis()` from the $\texttt{usethis}$ package.
 You then need to sign up to travis-ci.org and point it to the correct GitHub repository.
 To trigger the first automatic test you need to make a minor change to your code, commit it and push to GitHub.
 More details can be found in @wickham2015r Chapter 14.3.
 
 # Conclusions
 
-It is vital that infectious disease models are coded such that bugs are minimised.
-Unit testing is the fundemental process by which we can reduce the number of bugs in our code.
-Setting up unit testing is simple but writing good tests is a skill that takes practice and thought.
-There are many frameworks that make testing more automatic and more informative and these should be used where possible.
+It is vital that infectious disease models are coded to minimise bugs.
+Unit testing is the principled way we can do this.
+Setting it up is simple but writing good tests is a skill that takes practice and thought.
+There are many frameworks that make aspects of testing automatic and more informative and these should be used where possible.
 
 # Code availability
 
-Please see the fully reproducible and version controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease} for a complete record of the many bugs created and fixed during the writing of this manuscript.
+Please see the fully reproducible and version-controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease} for a complete record of the many bugs created and fixed during the writing of this manuscript.
 
 # References
