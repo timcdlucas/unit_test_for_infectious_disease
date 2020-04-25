@@ -20,7 +20,7 @@ abstract: |
   Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
   Models of infectious disease help guide health policy that can affect millions of people. 
   Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
-  Therefore it is arguably an ethical responsibility that our code is as free of error as possible.
+  Therefore it is an ethical responsibility that our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
   We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers from infectious diseases to ecology to try implementing unit testing in their next script.
 
