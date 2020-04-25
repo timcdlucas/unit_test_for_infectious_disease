@@ -17,15 +17,15 @@ address:
   - code: MathSys CDT
     address: MathSys CDT, University of Warwick, UK
 abstract: |
-Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
-They help guide health policy that can affect millions of people. 
-Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
-Therefore it is arguably an ethical responsibility that our code is as free of error as possible. Software engineering already provides a solution in _unit testing_, a defensive coding method to avoid bugs in code.
-We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers from infectious diseases to ecology to try implementing unit testing in their next script.
+  Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
+  They help guide health policy that can affect millions of people. 
+  Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
+  Therefore it is arguably an ethical responsibility that our code is as free of error as possible. Software engineering already provides a solution in _unit testing_, a defensive coding method to avoid bugs in code.
+  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers from infectious diseases to ecology to try implementing unit testing in their next script.
   
 author_summary: |
 
-bibliography: mybibfile.bib
+bibliography: unit_testing.bib
 output: rticles::plos_article
 csl: plos.csl
 ---
@@ -117,7 +117,7 @@ We also give an overview of the available testing frameworks in various language
 # Unit testing basics
 
 At the heart of every unit test is a function output, its known/expected output and comparing the two.
-For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in $\texttt{R}), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2. Often our function arguments will cover an infinite range of possibilities but we cannot exhaustively check them all. Instead we devise tests that cover particular scenarios or 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
+For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \texttt{R}), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2. Often our function arguments will cover an infinite range of possibilities but we cannot exhaustively check them all. Instead we devise tests that cover particular scenarios or 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
 In $\texttt{R}$ [@R], the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While there are a variety of functions to make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
@@ -403,8 +403,8 @@ In any given run however, this is never guaranteed, but the larger the populatio
 So we can use a large enough sample size that this is almost certain to occur. While setting the initialisation seed for the random number generator so that the test is reproducible, otherwise it will be seen to fail but only every now and then.
 We can calculate the probability of this test failing for a population with $n$ individuals---it is the well-known birthday paradox.
 There are '$n$ choose 2' $n \choose{2}$ possible pairs of individuals.
-The probability of a pair not being infected by the same person is $1-\frac{1}{n}$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/n$).
-For the test to fail, every pair would have to not be infected by the same person giving $\big(1-\frac{1}{n}\big) ^ {n \choose 2}$.
+The probability of a pair not being infected by the same person is $1-1/n$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/n$).
+For the test to fail, every pair would have to not be infected by the same person giving $\left(1-1/n\right) ^ {n \choose 2}$.
 For a population with 100 individuals, the probability of the test failing (if programmed correctly) is $10^{-21}$ and vanishingly small for 1000 individuals.
 
 ```{r, test_stoch_largenum}
@@ -479,7 +479,7 @@ Here we demonstrate one example with the code above.
 We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking the function requires a vector of all time points to run).
 In this case the code does error, though perhaps we could make the function return an error message that tells the user how to fix the problem (i.e. tell the user that `t` should be of length 1).
 
-```{r, wrong1}
+```{r, wrong1, eval = FALSE}
 expect_error(pop <- fullSim(4, 1:100))
 ```
 
