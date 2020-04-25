@@ -12,3 +12,5 @@ Imports:
     ggplot2,
     rmarkdown,
     testthat
+Suggests:
+    bookdown
