@@ -1,20 +1,46 @@
 ---
-output:
-  bookdown::pdf_document2:
-    number_sections: true
-    toc: false
-    keep_tex: true
-title: "Unit testing for infectious disease modelling"
-author: Tim CD Lucas, Timothy M Pollington, T Déirdre Hollingsworth, et al.
-geometry: margin=1in
+title: Unit testing for infectious disease modelling
+author:
+  - name: Tim CD Lucas
+    email: timcdlucas@gmail.com
+    affiliation: Big Data Institute
+    corresponding: timcdlucas@gmail.com
+  - name: Timothy M Pollington
+    email: timothy.pollington@gmail.com
+    affiliation: [Big Data Institute, MathSys CDT]
+  - name: T Déirdre Hollingsworth
+    email: timcdlucas@gmail.com
+    affiliation: Big Data Institute
+address:
+  - code: Big Data Institute
+    address: Big Data Institute, University of Oxford, UK
+  - code: MathSys CDT
+    address: MathSys CDT, University of Warwick, UK
+abstract: |
+  Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
+  Models of infectious disease help guide health policy that can affect millions of people. 
+  Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
+  Therefore it is an ethical responsibility that our code is as free of error as possible.
+  Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
+  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try implementing unit testing in their next script.
+
+  
+author_summary: |
+
 bibliography: unit_testing.bib
+output:
+  bookdown::pdf_book:
+    base_format: rticles::plos_article
+csl: plos.csl
 ---
 
 
 <!--
+You might need to install the package rticles for the formatting to work.
 To build run
 rmarkdown::render('unit_testing.Rmd')
 -->
+<<<<<<< HEAD
 
 
 
@@ -26,6 +52,10 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 
 <!-- 1) "Unit testing for disease and ecological modelling"? -->
 <!-- 2) "First steps in unit testing for your disease or ecological model code"? -->
+=======
+  
+  
+>>>>>>> 5130cd088411f80773a2735e39460bfd2b9cd673
 
 <!--
 # use covid Ferguson as motivating example.
@@ -36,7 +66,7 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 
 # what to test
 #.  edge cases. 0, others?
-  #.  types
+#.  types
 #.  dims
 #.  bounds
 
@@ -62,22 +92,17 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
                       fig.align='center')
 ```
 
-# Abstract
-
-Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
-They help guide health policy that can affect millions of people. Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
-Therefore it is arguably an ethical responsibility that our code is as free of error as possible. Software engineering already provides a solution in _unit testing_, a defensive coding method to avoid bugs in code.
-
-We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers from infectious diseases to ecology to try implementing unit testing in their next script.
-
 # Introduction
 
 Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
-They may guide policy for the control of endemic disease or for fast-moving epidemics. 
-For instance models are currently being used to directly advise governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy]. 
+These models may guide policy for the control of endemic disease or for fast-moving epidemics. 
+For instance models are currently being used to directly advise governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility].
+Similarly, policy on other diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
 The decisions based on these models to different degress could significantly affect the health outcomes of millions of people globally.
 Today's models are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
-These increases in model complexity are accompanied with growing code bases. The mathematical methods themselves use numerical solution as opposed to analytical pen-and-paper methods. Soon enough it becomes more difficult to tell that a bug lies within based on the results that come out.
+These increases in model complexity are accompanied with growing code bases. 
+The mathematical methods themselves use numerical solutions as opposed to analytical pen-and-paper methods. 
+Soon enough it becomes more difficult to tell where a bug lies based on the model outputs
 
 <!--
 I’m conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19.  To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics...
@@ -104,10 +129,12 @@ We also give an overview of the available testing frameworks in various language
 
 # Unit testing basics
 
-At the heart of every unit test is a function output, its known/expected output and comparing the two.
-For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in $\texttt{R}), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2. Often our function arguments will cover an infinite range of possibilities but we cannot exhaustively check them all. Instead we devise tests that cover particular scenarios or 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
+At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
+For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \texttt{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2.
+Often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
+Instead we devise tests that cover particular scenarios such as standard usage as well as 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
-In $\texttt{R}$ [@R], the \texttt{testthat} package [@testthat], provides a simple interface for testing.
+In $\texttt{R}$, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While there are a variety of functions to make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
 `expect_true()` takes one argument: an expression that should evaluate to `TRUE`.
 For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
@@ -118,11 +145,11 @@ There are a number of ways that unit testing can be incorporated into your progr
 
 1. As you write code, you should write tests that confirm the code does what you think it should.
 2. These same tests should then be regularly run as you develop new code.
-If a change in new code causes the older tests to break, this points to the introduction of an error in the new code, or the older code could not generalise to the adapted environment.
+If a change in new code causes the older tests to break, this points to the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
 3. Whenever a bug is found in the code, a test should be written that captures the bug. 
 Then if the bug re-emerges it will be caught.
 4. You can write tests before you write code---also known as test-driven development.
-This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming so long as all tests keep passing.
+This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming until all tests keep passing.
 Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
 
 # Bug in a multi-strain reinfection model
@@ -140,7 +167,9 @@ Each individual is defined by the strain they are currently infected with $I_{it
 Each time step, the infection status of each individual is updated as
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 That is, at each iteration $t$, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iterations (including individual $I_{i,t-1}$).
-Certainly this toy model is naive in that it is governed my mass-action principles, ignoring contact and spatial dynamics. Nevertheless it will serve its purpose. Here is our first attempt at implementing this model.
+Certainly this toy model is naïve in that it is governed my mass-action principles, ignoring contact and spatial dynamics. 
+Nevertheless it will serve its purpose. 
+Here is our first attempt at implementing this model.
 
 ```{r, simsetup, results = 'hide', echo = FALSE}
 set.seed(01011885)
@@ -153,10 +182,11 @@ t <- 20 # study length
 # create the matrix to store the simulation data
 I <- matrix(data = NA, nrow = t, ncol = N)
 
-# Initialise the population @ t = 1 with a fixed configuration
+# Initialise the population at t = 1 with a fixed configuration
 I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
-# At each time step, everyone is re-infected by someone from the previous time step.
+# At each time step, everyone is re-infected 
+#   by someone from the previous time step.
 for(t in seq(2, t)){
   I[t,] <- sample(x = I[t-1,], size = N)
 }
@@ -164,7 +194,7 @@ for(t in seq(2, t)){
 
 Usually we would make some plots to explore if our code is outputting something sensible.
 For example plotting the time course of individuals' infection strain indicates that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
-However, if we look at the proportion of each strain through time (not shown here) we will quickly notice there must be a bug hiding.
+However, if we look at the proportion of each strain through time (not shown here) we will quickly notice that the strain proportions are identical through time and so there must be a bug hiding.
 
 This simple example demonstrates a number of points.
 
@@ -217,7 +247,7 @@ for(t in seq(2, t)){
 
 ## Basic testing
 To ensure the unit test is evaluating the same code as the actual analysis, the code needs to be defined once, in a single function.
-This function is then used in both as part of the model code base and in the unit test itself.
+This function is then used both as part of the model code base and in the unit test itself.
 
 ### Write compact functions {-#compactfuns}
 It helps to make your functions compact with a single clearly-defined operation.
@@ -257,7 +287,7 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 
 Our function `initialisePop()` has three arguments so we should test that each of these does what we expect.
 First we initialise one population, and then alter each argument in turn.
-The first two arguments `(t, N, ...)` directly change the expected dimension of matrix `I`, so we test that.
+The first two arguments, `t` and `N`, directly change the expected dimension of matrix `I`, so we test that.
 For the last argument we test that the number of strains is equal to the number of strains requested.
 
 ```{r, test_all_args, results = 'hide'}
@@ -284,16 +314,20 @@ Instead of testing the exact values of the results here, we are testing that the
 
 ```{r, test_complex, results = 'hide'}
 pop1 <- initialisePop(t = 20, N = 12) 
-expect_true(all(is.na(pop1[-1,]))) # expect all except the first row are NAs
-expect_true(all(c("a", "b", "c") %in% pop1[1,])) # expect all 3 strains @ t = 1
+# expect all except the first row are NAs
+expect_true(all(is.na(pop1[-1,]))) 
+# expect all 3 strains at t = 1
+expect_true(all(c("a", "b", "c") %in% pop1[1,])) 
 
 pop2 <- updatePop(pop1, t = 2, N = 12)
-expect_true(all(!is.na(pop2[1:2,]))) # after update expect 1st & 2nd row not to have NAs
+# after update expect 1st & 2nd row not to have NAs
+expect_true(all(!is.na(pop2[1:2,]))) 
 ```
 
 ### Combine simple functions and test the higher-level functions {-#combine}
 
-In the end the entire model runs when functions work together and here we need to test these connections. This can be achieved by nesting functions together, or defining functions at a higher level.
+In the end the entire model runs when functions work together and here we need to test these connections. 
+This can be achieved by nesting functions together, or defining functions at a higher level.
 
 ```{r, refactor2, result = 'hide'}
 fullSim <- function(t, N){
@@ -307,17 +341,18 @@ fullSim <- function(t, N){
 
 At this higher level we should test macro aspects of the model.
 For instance, we now expect there to be no NAs left in matrix `I`.
-We also now expect every element of $I_{it}$ to be one of the three strain strings.
+We also now expect every element of `I` to be one of the three strain strings.
 
 ```{r, testnn, results = 'hide'}
 pop <- fullSim(t = 12, N = 20)
 expect_true(!any(is.na(pop))) # expect no NAs
-expect_true(all(pop %in% c("a", "b", "c"))) # expect all 3 strains contained within
+# expect all 3 strains contained within
+expect_true(all(pop %in% c("a", "b", "c"))) 
 ```
 
 ## Testing stochastic code
 
-A challenges for testing particular to infectious disease modelling is the use of stochastic simulationss.
+A challenge for testing, particular to infectious disease modelling, is the use of stochastic simulations.
 Stochastic events are difficult to test effectively because, by definition, we do not know exactly what the result will be.
 We can test very broad-scale properties, like the test above, where we check the range of strain values.
 However, code could still pass that test and be wrong (for example the original example would pass that test).
@@ -371,7 +406,7 @@ expect_equal(pop[1,], pop[2,])
 
 ### Test all possible answers (if few) {-#allpossible}
 
-Again focussing on very simple parameters, there are some cases where the code is stochastic, but with a small finite set of outputs. 
+Again focussing on very simple parameters, there are some cases where the code is stochastic, but with a small, finite set of outputs. 
 In this case we can run the function exhaustively and check it returns all of the possible outputs.
 For a population of two people, there are four possible outcomes when drawing who is infected by whom.
 Individual 1 can be infected by themselves (individual 1) or individual 2, and individual 2 an be infected by themselves (individual 2) or individual 1.
@@ -386,13 +421,13 @@ expect_true(all(manyPops %in% c("11", "12", "21", "22")))
 
 While the previous example worked well for a small set of possible outputs, counterintuitively testing can be made easier by using very large numbers.
 This typically involves large sample sizes or large numbers of runs of the stochastic code.
-For example, the clearest test to distinguish between our first-attempt, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one individuals in a time step.
+For example, the clearest test to distinguish between our original, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one individuals in a time step.
 In any given run however, this is never guaranteed, but the larger the population size the more likely it is to occur.
 So we can use a large enough sample size that this is almost certain to occur. While setting the initialisation seed for the random number generator so that the test is reproducible, otherwise it will be seen to fail but only every now and then.
 We can calculate the probability of this test failing for a population with $n$ individuals---it is the well-known birthday paradox.
 There are '$n$ choose 2' $n \choose{2}$ possible pairs of individuals.
-The probability of a pair not being infected by the same person is $1-\frac{1}{n}$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/n$).
-For the test to fail, every pair would have to not be infected by the same person giving $\big(1-\frac{1}{n}\big) ^ {n \choose 2}$.
+The probability of a pair of people not being infected by the same person is $1-\frac{1}{P}$ (given that the first person is infected by person $a$, the probability that the second person is infected by $a$ is just $1/P$).
+For the test to fail, every pair would have to not be infected by the same person giving $\big(1-\frac{1}{P}\big) ^ {P \choose 2}$.
 For a population with 100 individuals, the probability of the test failing (if programmed correctly) is $10^{-21}$ and vanishingly small for 1000 individuals.
 
 ```{r, test_stoch_largenum}
@@ -406,7 +441,7 @@ expect_true(any(duplicated(infector_strain)))
 
 If we have an event that we know should not happen, we can use a large number of simulations to provide stronger evidence that is does not stochastically occur.
 However, it can be difficult to determine how many times is reasonable to run a simulation especially as we want unit tests to run quickly.
-This strategy works best when we have a specific bug that occurred relatively frequently (perhaps 1:10 simulations).
+This strategy works best when we have a specific bug that occurred relatively frequently (perhaps once every ten simulations or so).
 We can then say that if the bug does not occur in 500 simulations we are pretty sure we fixed it.
 In our original buggy code we found that the proportions remained identical for entire simulations.
 For a reasonably large simulation we would expect this to happen very rarely, so we can run the full simulation a number of times to check that this specific bug does not occur.
@@ -456,7 +491,7 @@ Similarly, earlier we tested whether the `strain` argument of `initialisePop()` 
 However, if we set the `strain` argument to be greater than the number of individuals in the population, the function we have currently written does not error but does not give the answer we expected either.
 
 ```{r, edge2, eval = FALSE}
-pop <- initialisePop(10, 2, strain = 11) 
+pop <- initialisePop(t = 10, N = 2, strains = 11) 
 expect_equal(length(unique(pop[1,])), 11)
 ```
 
@@ -480,7 +515,11 @@ We test how the code handles a user inputting a vector of numbers to the `t` arg
 In this case the code does error, though perhaps we could make the error message more informative, i.e. tell the user that `t` should be of length 1.
 
 ```{r, wrong1}
+<<<<<<< HEAD
 expect_error(pop <- fullSim2(4, 1:100))
+=======
+expect_error(pop <- fullSim(t = 1:100, N = 4))
+>>>>>>> 5130cd088411f80773a2735e39460bfd2b9cd673
 ```
 
 # Unit testing frameworks {#frameworks}
@@ -503,7 +542,7 @@ For a Julia package unit tests reside in `test/runtests.jl` and tests are run wi
 
 ```{julia, test, eval = FALSE}
 @testset "my_test_name" begin
-    @test sqrt(4) == 2
+@test sqrt(4) == 2
 end
 ```
 
@@ -518,8 +557,8 @@ import math
 
 class TestMaths(unittest.TestCase):
   
-  def test_sqrt(self):
-    self.assertEqual(math.sqrt(4), 2)
+    def test_sqrt(self):
+        self.assertEqual(math.sqrt(4), 2)
 
 unittest.main()
 ```
@@ -559,4 +598,6 @@ There are many frameworks that make aspects of testing automatic and more inform
 
 Please see the fully reproducible and version-controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease} for a complete record of the many bugs created and fixed during the writing of this manuscript.
 
-# References
+  
+  
+# References {#references .unnumbered}
