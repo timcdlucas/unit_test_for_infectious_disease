@@ -533,7 +533,7 @@ The basic structure for tests with this package are demonstrated below.
 We give the specific test a name and give a single expression that evaluates to `TRUE` or `FALSE`.
 For a Julia package unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
 
-```{julia, test, eval = FALSE}
+```{r, test, eval = FALSE}
 @testset "my_test_name" begin
   @test sqrt(4) == 2
 end
@@ -544,7 +544,7 @@ The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
 Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with `test_`.
 
-```{python, testpy, eval = FALSE}
+```{r, testpy, eval = FALSE}
 import unittest
 import math
 
