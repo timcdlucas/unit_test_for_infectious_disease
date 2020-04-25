@@ -79,7 +79,7 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
 # Introduction
 
 Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
-They may guide policy for the control of endemic disease or for fast-moving epidemics. 
+These models may guide policy for the control of endemic disease or for fast-moving epidemics. 
 For instance models are currently being used to directly advise governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy]. 
 The decisions based on these models to different degress could significantly affect the health outcomes of millions of people globally.
 Today's models are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
