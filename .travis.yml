@@ -2,10 +2,9 @@ language: r
 
 
 
-r_packages:
-- rmarkdown
-- ggplot2
-- testthat
-
 script:
+- Rscript -e "install.packages('rmarkdown')"
+- Rscript -e "install.packages('ggplot2')"
+- Rscript -e "install.packages('testthat')"
 - Rscript -e "rmarkdown::render('unit_testing.Rmd')"
+
