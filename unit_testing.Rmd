@@ -62,7 +62,7 @@ For instance models are currently being used to directly advise governments on t
 Similarly, policy on other diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
 The decisions based on these models to different degress could significantly affect the health outcomes of millions of people globally.
 Today's models are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
-These increases in model complexity are accompanied with growing code bases. 
+These increases in model complexity are accompanied with growing codebases. 
 The mathematical methods themselves use numerical solutions as opposed to analytical pen-and-paper methods. 
 Soon enough it becomes more difficult to tell where a bug lies based on the model outputs
 
@@ -94,12 +94,12 @@ We also give an overview of the available testing frameworks in various language
 # Unit testing basics
 
 At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
-For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \emph{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2.
+For the square root function $\sqrt{x}$ (`sqrt(x)` in \emph{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2.
 Often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
-Instead we devise tests that cover particular scenarios such as standard usage as well as 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
+Instead we devise tests that cover particular scenarios such as standard usage as well as 'corner cases': what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
 In \emph{R}, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
-While there are a variety of functions to make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
+While there are a variety of test functions to make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
 `expect_true()` takes one argument: an expression that should evaluate to `TRUE`.
 For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
 `expect_equal()` takes two arguments, an expression and the expected output; 
@@ -113,7 +113,7 @@ If a change in new code causes the older tests to break, this points to the intr
 3. Whenever a bug is found in the code, a test should be written that captures the bug. 
 Then if the bug re-emerges it will be caught.
 4. You can write tests before you write code---also known as test-driven development.
-This can be a helpful way to plan functionality: write tests that define the desired functionality, and continue programming until all tests keep passing.
+This can be a helpful way to plan development: write tests that define the desired functionality, and continue programming until all tests keep passing.
 Frameworks for formalising these frameworks are discussed in Sections [6](frameworks) and [7](ci).
 
 # Bug in a multi-strain reinfection model
@@ -185,7 +185,7 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>%
       t %>% matplot(type = 'l')
 ```
 
-The cause of this particular bug is that the `sample()` function defaults to sampling without replacement `sample(..., replace = FALSE)`.
+The cause of this particular bug is that `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`.
 Setting `replace = TRUE` fixes this and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we now see the correct behaviour (one strain drifting to fixation).
 We will now develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end.
 
@@ -211,13 +211,13 @@ for(t in seq(2, t)){
 # Tips and best practice
 
 ## Basic testing
-To ensure the unit test is evaluating the same code as the actual analysis, the code needs to be defined once, in a single function.
-This function is then used both as part of the model code base and in the unit test itself.
+To ensure the unit test is evaluating the same code as the actual analysis, the code needs to be defined once, within a single function.
+This function is then used for the unit test in isolation or as part of the larger model codebase.
 
 ### Write compact functions {-#compactfuns}
 It helps to make your functions compact with a single clearly-defined operation.
 In our example we could define a function to initialise the population and another to run the simulation.
-Organising the code base into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
+Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
 Here we have modified the code that initialises the population so that we can vary the number of strains.
 
 ```{r, refactor, result = 'hide'}
@@ -250,7 +250,7 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 
 ### Test all arguments {-#testargs}
 
-Our function `initialisePop()` has three arguments so we should test that each of these does what we expect.
+`initialisePop()` has three arguments so we should test that each of these does what we expect.
 First we initialise one population, and then alter each argument in turn.
 The first two arguments, `t` and `N`, directly change the expected dimension of matrix `I`, so we test that.
 For the last argument we test that the number of strains is equal to the number of strains requested.
@@ -274,7 +274,7 @@ expect_equal(length(unique(pop4[1,])), 5)
 We can also cover cases with more commplex parameter values.
 After initialising our population, we expect all the rows other than the first to contain `NA`.
 We also expect each of the strains a, b and c to occur at least once on the first row if $N\geq 3$.
-Finally, our function `updatePop()` performs one simulation time step, so we expect one additional row to be populated.
+Finally, `updatePop()` performs one simulation time step, so we expect one additional row to be populated.
 Instead of testing the exact values of the results here, we are testing that they make sense within our macro understanding of the model system.
 
 ```{r, test_complex, results = 'hide'}
@@ -289,10 +289,10 @@ pop2 <- updatePop(pop1, t = 2, N = 12)
 expect_true(all(!is.na(pop2[1:2,]))) 
 ```
 
-### Combine simple functions and test the higher-level functions {-#combine}
+### Combine simple functions and test them at a higher-level{-#combine}
 
-In the end the entire model runs when functions work together and here we need to test these connections. 
-This can be achieved by nesting functions together, or defining functions at a higher level.
+In the end the entire model runs only when its functions work together seamlessly so we next test these aggregations. 
+This can be achieved by nesting functions together, or defining them at a higher level.
 
 ```{r, refactor2, result = 'hide'}
 fullSim <- function(t, N){
@@ -326,7 +326,7 @@ There are however a number of approaches that can help.
 ### Split stochastic and deterministic parts {-#splitstochastic}
 
 Isolate the stochastic parts of your code.
-For example, the function `updatePop()` performs stochastic and deterministic operations in one line.
+For example, `updatePop()` performs stochastic and deterministic operations in one line.
 Firstly, `updatePop()` stochastically samples who gets infected by whom.
 Then it takes those infection events and finds the new infectious status for each individual.
 Finally, it adds the new infectious statuses to the full population matrix.
@@ -358,7 +358,7 @@ However, we still have `chooseInfector()`, that is irreducibly stochastic.
 
 ### Pick a smart parameter for a deterministic result{-#deterministicparams}
 
-In the same way that we used simple parameters to test other functions, we can often find parameter values for which our stochastic functions are no longer stochastic.
+In the same way that we used simple parameters previously, we can often find parameter values for which our stochastic functions become deterministic.
 For example, samples from $X\sim\text{Bernoulli}(p)$ always gives zeroes for $p=0$ or ones for $p=1$.
 In the example here, in the case where we only have one strain, the model is no longer stochastic.
 So if we initialise a population with one strain, the second time step should equal the first.
@@ -464,11 +464,11 @@ Here again there is probably no solution other than a `stopifnot(strain > N)` ch
 
 ### Test incorrect inputs {-#testincorrect}
 
-The user may discover that the function arguments examined in the edge and special case section are incorrect. 
-However another user may input incorrect arguments, such as when new uncleaned data meets the functions previously tested on complete datasets. 
+The user may discover that function arguments examined in the edge and special case section are incorrect. 
+However another user may input incorrect arguments, such as when new uncleaned data meets functions previously tested on complete datasets. 
 Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
-This is especially true for 'external' functions available to that a user on the front-end of a package.
-Some cases may quickly fail, but sometimes a function may run silently giving false results or run a long time before failure.
+This is especially true for 'external' functions, available to a user on the package front-end.
+Some cases may quickly fail, but sometimes code may run silently giving false results or run a long time before failure.
 Both of these cases are dangerous or annoying and can be difficult to debug afterwards.
 
 A common case to check with epidemiological datasets is whether code correctly handles missing data (normally represented as `NA` or `""`). 
@@ -490,7 +490,7 @@ For \emph{R}, there is the $\texttt{testthat}$ package.
 
 When structuring {R} code as a package, tests should be kept in the directory `tests/testthat`.
 Further requirements to the structure can be found in @wickham2015r Chapter 7.
-All the tests in a package can then be run with the function `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to building a package.
+All the tests in a package can then be run with `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to building a package.
 If the code is intended as part of a package then the use of these tools is essential to test that code runs within the context of a built environment.
 These tools also allow the test to run in a clean environment that can highlight if a test was previously relying on objects defined outside of the test script.
 
