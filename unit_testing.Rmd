@@ -40,7 +40,6 @@ You might need to install the package rticles for the formatting to work.
 To build run
 rmarkdown::render('unit_testing.Rmd')
 -->
-<<<<<<< HEAD
 
 
 
@@ -52,10 +51,6 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 
 <!-- 1) "Unit testing for disease and ecological modelling"? -->
 <!-- 2) "First steps in unit testing for your disease or ecological model code"? -->
-=======
-  
-  
->>>>>>> 5130cd088411f80773a2735e39460bfd2b9cd673
 
 <!--
 # use covid Ferguson as motivating example.
@@ -515,11 +510,7 @@ We test how the code handles a user inputting a vector of numbers to the `t` arg
 In this case the code does error, though perhaps we could make the error message more informative, i.e. tell the user that `t` should be of length 1.
 
 ```{r, wrong1}
-<<<<<<< HEAD
-expect_error(pop <- fullSim2(4, 1:100))
-=======
 expect_error(pop <- fullSim(t = 1:100, N = 4))
->>>>>>> 5130cd088411f80773a2735e39460bfd2b9cd673
 ```
 
 # Unit testing frameworks {#frameworks}
@@ -542,7 +533,7 @@ For a Julia package unit tests reside in `test/runtests.jl` and tests are run wi
 
 ```{julia, test, eval = FALSE}
 @testset "my_test_name" begin
-@test sqrt(4) == 2
+  @test sqrt(4) == 2
 end
 ```
 
