@@ -1,5 +1,11 @@
 ---
-title: Unit testing for infectious disease modelling
+title: |
+  | Unit testing for infectious disease modelling 
+  | A beginner's guide to unit testing for infectious disease epidemiologists 
+  | A guide for effective unit testing for robust, infectious disease code
+  | Unit testing for disease modelling
+  | First steps in unit testing for your disease model
+  
 author:
   - name: Tim CD Lucas
     email: timcdlucas@gmail.com
@@ -34,49 +40,10 @@ output:
 csl: plos.csl
 ---
 
-
 <!--
 You might need to install the package rticles for the formatting to work.
 To build run
 rmarkdown::render('unit_testing.Rmd')
--->
-
-
-
-<!--
-Title: A beginners guide to unit testing for infectious disease epidemiologists
-Title: A guide for effective unit testing for robust, infectious disease code.
--->
-<!-- Broadening audience: not just infectious disease modellers of human diseases but also population ecologists. Ecology also helps hint at animal infectious disease modellers. A wider audience helps to appeal to PLoS Comp Bio. So where you have said InfDisModelling throughout the piece I am raising if ecological viewpoint could be included too. -->
-
-<!-- 1) "Unit testing for disease and ecological modelling"? -->
-<!-- 2) "First steps in unit testing for your disease or ecological model code"? -->
-
-<!--
-# use covid Ferguson as motivating example.
-# https://twitter.com/neil_ferguson/status/1241835454707699713?s=19
-
-# good practice
-#.   compact functions
-
-# what to test
-#.  edge cases. 0, others?
-#.  types
-#.  dims
-#.  bounds
-
-# how to test random
-#.   non random pars. p= 0
-#.   separate the random bit
-#.   large numbers and bounds
-#.   Test for rare events again with large number
-
-# frameworks
-#.  testthat and packages
-#.  test in Julia
-#.  add python
-
-# continuous integration
 -->
 
 ```{r, setup, echo = FALSE, results = 'hide'}
@@ -116,7 +83,7 @@ This *ad hoc* testing approach is not very sensitive and can miss many bugs.
 Furthermore, this workflow is biased as models that show "expected behaviour" are taken to be bug-free while models showing unexpected behaviour are more thoroughly scrutinised.
 
 _Unit testing_ is a formally-defined, principled framework that compares numerous output scenarios from code to what the programmer was expecting the code to produce (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
-Ready-to-run frameworks for unit testing are available in R [@R], Julia [@bezanson2017julia] and python [@python].
+Ready-to-run frameworks for unit testing are available in \emph{R} [@R], \emph{Julia} [@bezanson2017julia] and \emph{python} [@python].
 While unit testing is standard practice in the software industry, infectious disease modelling presents some specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
 These testing concepts also apply to ecology and other sciences but here we focus on infectious diseases.
 
@@ -127,11 +94,11 @@ We also give an overview of the available testing frameworks in various language
 # Unit testing basics
 
 At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
-For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \texttt{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2.
+For a function that computes the square root $\sqrt{x}$ (`sqrt(x)` in \emph{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the known, correct answer i.e. 2.
 Often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover particular scenarios such as standard usage as well as 'corner cases': what do we want our function to do if it is given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
-In $\texttt{R}$, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
+In \emph{R}, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While there are a variety of functions to make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
 `expect_true()` takes one argument: an expression that should evaluate to `TRUE`.
 For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
@@ -157,7 +124,7 @@ Frameworks for formalising these frameworks are discussed in Sections [6](framew
 #  Have elements that are fixable by all the ideas later
 -->
 
-Here we define a simple epidemiological model and then demonstrate how to effectively write unit tests in $\texttt{R}$ code for it.
+Here we define a simple epidemiological model and then demonstrate how to effectively write unit tests in \emph{R} code for it.
 
 Consider a multi-strain system, with a population of $N$ infected individuals who each get reinfected at every time step.
 Each individual is defined by the strain they are currently infected with $I_{it} \in \{a, b, c\}$ and so the the population is defined by a length $N$ vector of states $\mathbf{I}_t$ = $(I_{it})_{i=[1,N]}$.
@@ -456,7 +423,7 @@ expect_true(all(sapply(manySims, function(x) length(unique(apply(x, 1, table))) 
 When writing tests it is easy to focus on standard behaviour.
 However, bugs often occur at _edge cases_---when parameters are at the edges of their ranges or special values.
 
-For example, in R, selecting one column from a matrix e.g. `[,2]` returns a vector while selecting two or more columns e.g. `[,2:3]` returns a matrix.
+For example, in \emph{R}, selecting one column from a matrix e.g. `[,2]` returns a vector while selecting two or more columns e.g. `[,2:3]` returns a matrix.
 Code that relies on the returned object being a matrix would fail in this vector edge case.
 
 Equally special cases can be triggered with parameter sets that do not follow a clear pattern such as the extrema of parameter space. 
@@ -466,7 +433,7 @@ If we test the (mathematically bloated) calculation `2 * divide(x, 2) == x` we w
 In our example model, we might consider testing edge cases such as one individual, one iteration and one strain.
 In fact, running `fullSim()` with only one iteration errors without a useful error message.
 
-```{r, edge, eval=FALSE}
+```{r, edge, eval = FALSE}
 pop <- fullSim(t = 1, N = 12)
 ```
 
@@ -518,9 +485,9 @@ expect_error(pop <- fullSim(t = 1:100, N = 4))
 # Unit testing frameworks {#frameworks}
 
 While unit tests can be written with functions that throw errors, most programming languages have established testing packages.
-For R, there is the $\texttt{testthat}$ package.
+For \emph{R}, there is the $\texttt{testthat}$ package.
 
-When structuring R code as a package, tests should be kept in the directory `tests/testthat`.
+When structuring {R} code as a package, tests should be kept in the directory `tests/testthat`.
 Further requirements to the structure can be found in @wickham2015r Chapter 7.
 All the tests in a package can then be run with the function `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to building a package.
 If the code is intended as part of a package then the use of these tools is essential to test that code runs within the context of a built environment.
@@ -528,10 +495,10 @@ These tools also allow the test to run in a clean environment that can highlight
 
 Other programming languages have similar testing frameworks too.
 Their specifics differ but the main concept of comparing a function evaluation to the expected output remains the same.
-In Julia there is the $\texttt{Test}$ package [@juliatest]. 
+In \emph{Julia} there is the $\texttt{Test}$ package [@juliatest]. 
 The basic structure for tests with this package are demonstrated below.
 We give the specific test a name and give a single expression that evaluates to `TRUE` or `FALSE`.
-For a Julia package unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
+For a \emph{Julia} package unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
 
 ```{r, test, eval = FALSE}
 @testset "my_test_name" begin
@@ -539,7 +506,7 @@ For a Julia package unit tests reside in `test/runtests.jl` and tests are run wi
 end
 ```
 
-Finally, in python we have the $\texttt{unittest}$ framework [@pythonunittest]; tests must be written into a class that inherits from the `TestCase` class.
+Finally, in \emph{python} we have the $\texttt{unittest}$ framework [@pythonunittest]; tests must be written into a class that inherits from the `TestCase` class.
 The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
 Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with `test_`.
@@ -568,7 +535,7 @@ These services are often free on a limited basis, or free if your code is open s
 
 A full description of how to set up these services is beyond the scope of this paper.
 However, in the simplest cases, the setup is straightforward.
-For R code organised into a package and hosted openly on GitHub, then setting up travis CI is very easy.
+For \emph{R} code organised into a package and hosted openly on GitHub, then setting up travis CI is very easy.
 Within your version-controlled folder you add a `.travis.yml` file that contains a description of which language the code uses.
 
 ```{awk, travis, eval = FALSE}
