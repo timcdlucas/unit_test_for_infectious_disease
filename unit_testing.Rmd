@@ -180,7 +180,7 @@ for(t in seq(2, t)){
 
 Usually we would make some plots to explore if our code is outputting something sensible.
 For example plotting the time course of individuals' infection strain indicates that they are being repeatedly infected with different strains as expected (Figure \@ref(fig:firstplots)).
-However, if we look at the proportion of each strain through time (not shown here) we will quickly notice there must be a bug hiding.
+However, if we look at the proportion of each strain through time (not shown here) we will quickly notice that the strain proportions are identical through time and so there must be a bug hiding.
 
 This simple example demonstrates a number of points.
 
