@@ -80,10 +80,13 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
 
 Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
 These models may guide policy for the control of endemic disease or for fast-moving epidemics. 
-For instance models are currently being used to directly advise governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility] and [an_ntd_paper_that_definitely_influenced_policy]. 
+For instance models are currently being used to directly advise governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility].
+Similarly, policy on other diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
 The decisions based on these models to different degress could significantly affect the health outcomes of millions of people globally.
 Today's models are increasingly moving from mean-field ordinary differential equations to individual based models and models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
-These increases in model complexity are accompanied with growing code bases. The mathematical methods themselves use numerical solution as opposed to analytical pen-and-paper methods. Soon enough it becomes more difficult to tell that a bug lies within based on the results that come out.
+These increases in model complexity are accompanied with growing code bases. 
+The mathematical methods themselves use numerical solutions as opposed to analytical pen-and-paper methods. 
+Soon enough it becomes more difficult to tell where a bug lies based on the model outputs
 
 <!--
 I’m conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19.  To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics...
