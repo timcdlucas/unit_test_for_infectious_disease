@@ -1,0 +1,11 @@
+language: r
+
+
+
+r_packages:
+- rmarkdown
+- ggplot2
+- testthat
+
+script:
+- Rscript -e "rmarkdown::render('unit_testing.Rmd')"
