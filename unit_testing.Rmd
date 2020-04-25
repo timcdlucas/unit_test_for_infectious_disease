@@ -1,28 +1,43 @@
 ---
-output:
-  bookdown::pdf_document2:
-    number_sections: true
-    toc: false
-    keep_tex: true
-title: "Unit testing for infectious disease modelling"
-author: Tim CD Lucas, Timothy M Pollington, T Déirdre Hollingsworth, et al.
-geometry: margin=1in
-bibliography: unit_testing.bib
+title: Unit testing for infectious disease modelling
+author:
+  - name: Tim CD Lucas
+    email: timcdlucas@gmail.com
+    affiliation: Big Data Institute
+    corresponding: timcdlucas@gmail.com
+  - name: Timothy M Pollington
+    email: timothy.pollington@gmail.com
+    affiliation: MathSys CDT, Big Data Institute.
+  - name: T Déirdre Hollingsworth
+    email: timcdlucas@gmail.com
+    affiliation: Big Data Institute
+address:
+  - code: Big Data Institute
+    address: Department, Street, City, State, Zip
+  - code: MathSys CDT
+    address: MathSys CDT, University of Warwick, UK
+abstract: |
+Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
+They help guide health policy that can affect millions of people. 
+Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
+Therefore it is arguably an ethical responsibility that our code is as free of error as possible. Software engineering already provides a solution in _unit testing_, a defensive coding method to avoid bugs in code.
+We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers from infectious diseases to ecology to try implementing unit testing in their next script.
+  
+author_summary: |
+
+bibliography: mybibfile.bib
+output: rticles::plos_article
+csl: plos.csl
 ---
 
 
 <!--
+You might need to install the package rticles for the formatting to work.
 To build run
 rmarkdown::render('unit_testing.Rmd')
 -->
-
-
-
-<!--
-Title: A beginners guide to unit testing for infectious disease epidemiologists
-Title: A guide for effective unit testing for robust, infectious disease code.
--->
-
+  
+  
 
 <!--
 # use covid Ferguson as motivating example.
@@ -33,7 +48,7 @@ Title: A guide for effective unit testing for robust, infectious disease code.
 
 # what to test
 #.  edge cases. 0, others?
-  #.  types
+#.  types
 #.  dims
 #.  bounds
 
@@ -168,7 +183,7 @@ This simple example demonstrates a number of points.
 * bugs can be subtle
 * it is not easy-to-notice there is an error, even over just 7 lines of active code
 * it is much easier to debug code once you know there is a bug. Perhaps you can find it?!
-* testing with plots is the common approach of many scientists---write code, plot some outputs and check they are sensible. However if we had only relied on Figure \@ref(fig:firstplots) we would have missed the bug. While plotting simulation runs are an excellent way to check model behaviour, it is not the most effective method for checking code because a human has to perform this scan at every test run.
+  * testing with plots is the common approach of many scientists---write code, plot some outputs and check they are sensible. However if we had only relied on Figure \@ref(fig:firstplots) we would have missed the bug. While plotting simulation runs are an excellent way to check model behaviour, it is not the most effective method for checking code because a human has to perform this scan at every test run.
 
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
 
@@ -491,7 +506,7 @@ Unit tests within a Julia package live in the file `test/runtests.jl` and the te
 
 ```{julia, test, eval = FALSE}
 @testset "my_test_name" begin
-    @test sqrt(4) == 2
+@test sqrt(4) == 2
 end
 ```
 
@@ -508,7 +523,7 @@ import math
 class TestMaths(unittest.TestCase):
   
   def test_sqrt(self):
-    self.assertEqual(math.sqrt(4), 2)
+  self.assertEqual(math.sqrt(4), 2)
 
 unittest.main()
 ```
@@ -549,4 +564,6 @@ There are many frameworks that make testing more automatic and more informative 
 
 Please see the fully reproducible and version controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease} for a complete record of the many bugs created and fixed during the writing of this manuscript.
 
-# References
+  
+  
+# References {#references .unnumbered}
