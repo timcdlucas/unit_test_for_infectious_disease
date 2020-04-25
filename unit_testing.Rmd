@@ -7,7 +7,7 @@ author:
     corresponding: timcdlucas@gmail.com
   - name: Timothy M Pollington
     email: timothy.pollington@gmail.com
-    affiliation: MathSys CDT, Big Data Institute.
+    affiliation: [Big Data Institute, MathSys CDT]
   - name: T Déirdre Hollingsworth
     email: timcdlucas@gmail.com
     affiliation: Big Data Institute
