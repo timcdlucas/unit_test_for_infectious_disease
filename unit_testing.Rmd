@@ -46,7 +46,7 @@ output:
 csl: plos.csl
 ---
 
-```{r, enableChunkRef, echo=FALSE}
+```{r, setup, echo=FALSE, results = 'hide'}
 rm(list = ls())
 library(knitr)
 oldSource <- knit_hooks$get("source")
@@ -55,21 +55,16 @@ knit_hooks$set(source = function(x, options) {
   x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
   ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
 })
-```
-
-
-<!--
-You might need to install the package rticles for the formatting to work.
-To build run
-rmarkdown::render('unit_testing.Rmd')
--->
-
-```{r, setup, echo = FALSE, results = 'hide'}
 library(ggplot2)
 library(testthat)
 knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
                       out.extra = '', out.width = "0.6\\textwidth",
                       fig.align='center')
+set.seed(01011885)
+
+# You might need to install the package rticles for the formatting to work.
+# To build run
+# rmarkdown::render('unit_testing.Rmd')
 ```
 \newpage
 # Introduction
@@ -141,11 +136,7 @@ That is, at each iteration $t$, the new infection status of each individual $i$ 
 Certainly this toy model is naïve as it is governed by mass-action principles, ignoring contact and spatial dynamics. 
 Nevertheless it will serve its purpose. 
 Here is our first attempt at implementing this model.
-
-```{r, simsetup, results = 'hide', echo = FALSE}
-set.seed(01011885)
-```
-
+\newline
 ```{r first_code,  ref = "first_code", codecap = "Base code", results='hide'}
 N <- 12 # infected individuals
 t <- 20 # study length
@@ -194,7 +185,7 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>%
 _Solution_: `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone swaps their infection strain on a one-to-one basis rather than one-to-many as required by the model.
 Setting `replace = TRUE` fixes this and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we see the correct behaviour (one strain drifting to fixation).
 We will now develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end.
-
+\newline
 ```{r, correct_code, ref = "correct_code", codecap = "Corrected base code", results = 'hide', echo = FALSE}
 N <- 12
 t <- 20
@@ -215,7 +206,6 @@ for(t in seq(2, t)){
 ```
 
 # Tips and best practice
-Head back to \ref{TheFooChunk}
 
 ## Basic testing
 To ensure the unit test is evaluating the same code as the actual analysis, it needs to be defined once within a single function.
@@ -226,7 +216,7 @@ Make your functions compact with a single clearly-defined operation.
 We have defined a function `initialisePop()` to initialise the population and another `updatePop()` to run the simulation.
 Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
 We also modify `initialisePop(..., strains)` so that we can vary the number of strains.
-
+\newline
 ```{r, compactfunctions, ref = "compactfunctions", codecap = "Compact functions", result = 'hide'}
 initialisePop <- function(t, N, strains){
   I <- matrix(data = NA, nrow = t, ncol = N)
@@ -243,7 +233,7 @@ updatePop <- function(x, t, N){
 ### Test simple cases first {-#easycases}
 
 If we start with a small population with few strains, we can then easily work out what we expect the initialised population to look like.
-
+\newline
 ```{r, test_simple_first, ref = "test_simple_first", codecap = "Test simple cases first", results = 'hide'}
 pop1 <- initialisePop(t = 2, N = 3, strains = 2) 
 expect_equal(pop1[1,], c("a", "b", "a"))
@@ -261,7 +251,7 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 First we initialise the population, and then alter each argument in turn.
 Arguments `t` and `N` directly change the expected dimension of matrix `I` so we test them together.
 For the last argument we test that the number of strains is equal to the `strains` requested.
-
+\newline
 ```{r, test_all_args, ref = "test_all_args", codecap = "Test all function arguments", results = 'hide'}
 pop1 <- initialisePop(t = 2, N = 3, strains = 3) 
 expect_equal(dim(pop1), c(2, 3))
@@ -283,7 +273,7 @@ After initialising our population, we expect all the rows other than the first t
 We also expect each of the strains $a$, $b$ and $c$ to occur at least once on the first row if `strains` $\geq 3$ and `N` $\geq 3$.
 Finally, `updatePop()` performs one simulation time step, so we expect one additional row to be populated.
 Instead of testing the exact values of the results, we check they make sense within our macro understanding of the model system.
-
+\newline
 ```{r, test_complex, ref = "test_complex", codecap = "Test more complex cases", results = 'hide'}
 pop1 <- initialisePop(t = 20, N = 12, strains = 3) 
 # expect all except the first row are NAs
@@ -299,7 +289,7 @@ expect_true(all(!is.na(pop2[1:2,])))
 ### Combine simple functions and test them at a higher-level{-#combine}
 
 In the end an entire model only runs when its functions work together seamlessly. So we next test their connections; achieved through nesting functions together, or defining them at a higher level.
-
+\newline
 ```{r, combine_simple_func, ref = "combine_simple_func", codecap = "Combine simple functions", result = 'hide'}
 fullSim <- function(t, N, strains){
   pop <- initialisePop(t, N, strains) 
@@ -312,7 +302,7 @@ fullSim <- function(t, N, strains){
 
 At this higher level we should test macro aspects of the model.
 We now expect there to be no `NA`s left in matrix `I` and every element to be one of the three strain strings.
-
+\newline
 ```{r, testna, ref = "testna", codecap = "Test NAs", results = 'hide'}
 pop <- fullSim(t = 12, N = 20, strains = 3)
 expect_true(!any(is.na(pop))) # expect no NAs
@@ -336,7 +326,7 @@ Firstly, `updatePop()` stochastically samples who gets infected by whom at itera
 Then it takes those infection events and assigns the new infectious status for each individual.
 Finally, it adds the new infectious statuses to the full population matrix for that iteration.
 So we could split these tasks up as follows.
-
+\newline
 ```{r, split_deter_stoch, ref = "split_deter_stoch", codecap = "Split deterministic and stochastic code."}
 chooseInfector <- function(N){
   sample(x = N, size = N, replace = TRUE)
@@ -367,7 +357,7 @@ In the same way that we used simple parameters previously, we can often find par
 For example, samples from $X\sim\text{Bernoulli}(p)$ always give zeroes for $p=0$ or ones for $p=1$.
 In the case here where we only have one strain, the model is no longer stochastic.
 So initialisation with one strain means the second time step should equal the first.
-
+\newline
 ```{r, test_stoch_determin, ref = "test_stoch_determin", codecap = "Test splitting the deterministic and stochastic operations", results = 'hide'}
 pop <- initialisePop(t = 2, N = 3, strains = 1) 
 pop <- updatePop(pop, t = 2, N = 3)
@@ -380,7 +370,7 @@ Working again with a simple parameter set, there are some cases where the code i
 So we can run the function exhaustively and check it returns all of the possible outputs.
 For a population of two people, there are four possibilities when drawing who is infected by whom.
 Individual 1 can be infected by themselves ({1,}) or individual 2 ({2,}), and individual 2 infected by themselves ({,2}) or individual 1 ({,1}).
-
+\newline
 ```{r, test_stoch_fewvalues, ref = "test_stoch_fewvalues", codecap = "Test stochastic output when few differ", results = 'hide'}
 # Collapse each draw into a single string to make comparisons easier.
 manyPops <- replicate(300, paste0(chooseInfector(N = 2), collapse = ""))
@@ -401,7 +391,7 @@ There are '$n$ choose 2' $n \choose{2}$ possible pairs of individuals.
 The probability of a pair $<i,j>$ not being infected by the other is $1-\frac{1}{n}$ (given that the first person is infected by someone $i$, the probability that the second person $j$ is infected by the same $i$ is just $1/n$).
 For the test to fail, every pair would have to not be infected by the other, giving $\big(1-\frac{1}{n}\big) ^ {n \choose 2}$.
 For a population with 100 individuals, the probability of the test failing (if programmed correctly) is $10^{-21}$ and vanishingly small for 1000 individuals.
-
+\newline
 ```{r, test_stoch_largenum, ref = "test_stoch_largenum", codecap = "Stochastic test for large numbers", results='hide'}
 set.seed(10261985)
 n <- 1e3
@@ -417,7 +407,7 @@ This strategy works best when we have a specific bug that occurred relatively fr
 We say that if the bug does not occur even once in 500 simulations, then we are pretty sure we have fixed it.
 In our original buggy code we found that the proportions remained identical for entire simulations.
 For a reasonably large simulation we would expect this to happen seldom, so we can run the full simulation a number of times to check that this specific bug does not occur.
-
+\newline
 ```{r, returningstrain,ref = "returningstrain", codecap = "Returning strain code"}
 set.seed(11121955)
 manySims <- replicate(100, fullSim(t = 30, N = 40, strains = 3), 
@@ -442,14 +432,14 @@ This is where understanding of the functional form of the model can help. Consid
 If we test the (mathematically bloated) calculation `2 * divide(x, 2) == x` we would believe it works for nearly all values of division, unless we ever try `y = 0`.
 
 In our example model, we might consider testing edge cases such as one individual, one iteration and one strain.
-
+\newline
 ```{r, edge, ref = "edge", codecap = "Edge case", eval = FALSE}
 pop <- fullSim(t = 1, N = 12)
 ```
 
 In fact, running `fullSim()` with only one iteration errors without a useful error message.
 We have fixed this with an error check at the top of the function that returns a more useful error message if `t = 1` (or any integer less than two) is used.
-
+\newline
 ```{r, erroronspecialcase, ref = "erroronspecialcase", codecap = "Error on special case", eval = FALSE}
 fullSim2 <- function(t, N, strains){
   stopifnot(t > 1)
@@ -464,7 +454,7 @@ pop <- fullSim2(t = 1, N = 12, strains = 3)
 
 Similarly, we tested earlier if the `strains` argument of `initialisePop()` worked by verifying if the returned population had the correct number of strains.
 However, if we set the `strains` argument to be greater than the number of individuals in the population, the current function does not error nor give the answer we expected either.
-
+\newline
 ```{r, edge2, ref = "edge2", codecap = "Expect equal example", eval = FALSE}
 pop <- initialisePop(t = 10, N = 2, strains = 11) 
 expect_equal(length(unique(pop[1,])), 11)
@@ -485,7 +475,7 @@ Often the simplest solution is to include argument checks at the beginning of fu
 
 We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
 We have also updated `fullSim3()` to provide a check on the length of `t` with an informative message.
-
+\newline
 ```{r, wrong1, ref = "wrong1", codecap = "Wrong1 example"}
 expect_error(pop <- fullSim(t = 1:100, N = 4))
 
@@ -515,7 +505,7 @@ In \emph{Julia} there is the $\texttt{Test}$ package [@juliatest].
 The basic structure for tests with this package are demonstrated below.
 We give the specific test a name and give a single expression that evaluates to `TRUE` or `FALSE`.
 For a \emph{Julia} package unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
-
+\newline
 ```{r, juliatest, ref = "juliatest", codecap = "Julia test example", eval = FALSE}
 @testset "my_test_name" begin
   @test sqrt(4) == 2
@@ -526,7 +516,7 @@ Finally, in \emph{python} we have the $\texttt{unittest}$ framework [@pythonunit
 The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
 Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with `test_`.
-
+\newline
 ```{r, testpy, ref = "testpy", codecap = "Python test example", eval = FALSE}
 import unittest
 import math
