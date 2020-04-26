@@ -59,7 +59,7 @@ library(ggplot2)
 library(testthat)
 knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
                       out.extra = '', out.width = "0.6\\textwidth",
-                      fig.align='center')
+                      fig.align='center', fig.pos = "h")
 set.seed(01011885)
 
 # You might need to install the package rticles for the formatting to work.
