@@ -383,9 +383,9 @@ Though we need to be sure that the failure of the test is very rare.
 We set the seed of the random number generator so that the test is reproducible, otherwise it will be seen to fail but only every now and then.
 
 We can calculate the probability of this test failing for a population with $n$ individuals---it is the well-known 'birthday paradox'.
-There are '$n$ choose 2' $n \choose{2}$ possible pairs of individuals.
+There are '$n$ choose 2' $\binom{n}{2}$ possible pairs of individuals.
 The probability of a pair $<i,j>$ not being infected by the other is $1-\frac{1}{n}$ (given that the first person is infected by someone $i$, the probability that the second person $j$ is infected by the same $i$ is just $1/n$).
-For the test to fail, every pair would have to not be infected by the other, giving $\big(1-\frac{1}{n}\big) ^ {n \choose 2}$.
+For the test to fail, every pair would have to not be infected by the other, giving $\big(1-\frac{1}{n}\big) ^ {\binom{n}{2}}$.
 For a population with 100 individuals, the probability of the test failing (if programmed correctly) is $10^{-21}$ and vanishingly small for 1000 individuals.
 \newline
 ```{r, test_stoch_largenum, ref = "test_stoch_largenum", codecap = "Computing the probability of the stochastic test failing for 1000 individuals", results='hide'}
