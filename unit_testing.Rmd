@@ -99,7 +99,7 @@ Infectious disease modelling presents specific challenges, such as stochastic ou
 In this primer we introduce unit testing and demonstrate its use on an example infectious disease model.
 We also give an overview of the available testing frameworks in various languages commonly used by infectious disease modellers.
 
-# Unit testing basics
+# Unit testing foundations
 
 At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
 For the square root function $\sqrt{x}$ (`sqrt(x)` in \emph{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the correct answer i.e. 2.
@@ -205,13 +205,11 @@ for(t in seq(2, t)){
   matplot(type = 'l', xlab = 'Time', ylab = 'Proportion', lwd = 2)
 ```
 
-# Tips and best practice
-
-## Basic testing
+# Basic testing
 To ensure the unit test is evaluating the same code as the actual analysis, it needs to be defined once within a single function.
 This same function is then used for the unit test in isolation or as part of the larger model codebase.
 
-### Write compact functions {-#compactfuns}
+## Write compact functions {-#compactfuns}
 Make your functions compact with a single clearly-defined operation.
 We have defined a function `initialisePop()` to initialise the population and another `updatePop()` to run the simulation.
 Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
@@ -230,7 +228,7 @@ updatePop <- function(x, t, N){
 }
 ```
 
-### Test simple cases first {-#easycases}
+## Test simple cases first {-#easycases}
 
 If we start with a small population with few strains, we can then easily work out what we expect the initialised population to look like.
 \newline
@@ -245,7 +243,7 @@ pop3 <- initialisePop(t = 2, N = 4, strains = 2)
 expect_equal(pop3[1,], c("a", "b", "a", "b"))
 ```
 
-### Test all arguments {-#testargs}
+## Test all arguments {-#testargs}
 
 `initialisePop()` has three arguments that require testing.
 First we initialise the population, and then alter each argument in turn.
@@ -266,7 +264,7 @@ pop4 <- initialisePop(t = 2, N = 10, strains = 5)
 expect_equal(length(unique(pop4[1,])), 5)
 ```
 
-### Carefully work through more complex cases {-#complexcases}
+## Carefully work through more complex cases {-#complexcases}
 
 We can also cover cases with more complex parameter values.
 After initialising our population, we expect all the rows other than the first to contain `NA`.
@@ -286,7 +284,7 @@ pop2 <- updatePop(pop1, t = 2, N = 12)
 expect_true(all(!is.na(pop2[1:2,]))) 
 ```
 
-### Combine simple functions and test them at a higher-level{-#combine}
+## Combine simple functions and test them at a higher-level{-#combine}
 
 In the end an entire model only runs when its functions work together seamlessly. So we next test their connections; achieved through nesting functions together, or defining them at a higher level.
 \newline
@@ -310,7 +308,7 @@ expect_true(!any(is.na(pop))) # expect no NAs
 expect_true(all(pop %in% c("a", "b", "c"))) 
 ```
 
-## Testing stochastic code
+# Stochastic code
 
 Stochastic simulations are a common feature in infectious disease models.
 Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be.
@@ -318,7 +316,7 @@ We can test very broad-scale properties, like the test above, where we check the
 However, code could still pass that test and be wrong (for example the original example would still pass that test).
 There are however a number of approaches that can help.
 
-### Split stochastic and deterministic parts {-#splitstochastic}
+## Split stochastic and deterministic parts {-#splitstochastic}
 
 Isolate the stochastic parts of your code.
 For example, `updatePop()` performs stochastic and deterministic operations in one line.
@@ -351,7 +349,7 @@ updatePopCombined <- function(x, t, N){
 Two-thirds of `updatePopCombined()` is deterministic so can be tested using the ideas discussed previously.
 However, we still have `chooseInfector()`, that is irreducibly stochastic.
 
-### Pick a smart parameter for a deterministic result{-#deterministicparams}
+## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
 In the same way that we used simple parameters previously, we can often find parameter values for which our stochastic functions become deterministic.
 For example, samples from $X\sim\text{Bernoulli}(p)$ always give zeroes for $p=0$ or ones for $p=1$.
@@ -364,7 +362,7 @@ pop <- updatePop(pop, t = 2, N = 3)
 expect_equal(pop[1,], pop[2,])
 ```
 
-### Test all possible answers (if few) {-#allpossible}
+## Test all possible answers (if few) {-#allpossible}
 
 Working again with a simple parameter set, there are some cases where the code is stochastic, but with a small, finite set of outputs. 
 So we can run the function exhaustively and check it returns all of the possible outputs.
@@ -377,7 +375,7 @@ manyPops <- replicate(300, paste0(chooseInfector(N = 2), collapse = ""))
 expect_true(all(manyPops %in% c("11", "12", "21", "22")))
 ```
 
-### Use very large samples for the stochastic part {-#largesamples}
+## Use very large samples for the stochastic part {-#largesamples}
 
 While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
@@ -418,8 +416,8 @@ expect_true(all(sapply(manySims,
                          length(unique(apply(x, 1, table))) > 1)))
 ```
 
-## Further testing
-### Test edge cases and special cases {-#corners}
+# Further testing
+## Test edge cases and special cases {-#corners}
 
 When writing tests it is easy to focus on standard behaviour.
 However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
@@ -462,7 +460,7 @@ expect_equal(length(unique(pop[1,])), 11)
 
 Here again the best solution is a `stopifnot(strains > N)` error check at the beginning of the function.
 
-### Test incorrect inputs {-#testincorrect}
+## Test incorrect inputs {-#testincorrect}
 
 Bugs may be discovered by other users when new uncleaned data meets functions previously tested on complete datasets. 
 Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
