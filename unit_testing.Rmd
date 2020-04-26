@@ -72,7 +72,7 @@ set.seed(01011885)
 Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
 For instance models are currently providing advice to governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility].
 Similarly, policy on endemic infectious diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
-The decisions based on these models could significantly affect, to different degress, the health outcomes of millions of people globally.
+The decisions based on these models could significantly affect, to different degrees, the health outcomes of millions of people globally.
 
 Given the importance of modelling results, it is vital that they are both correct and trusted.
 The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
@@ -81,7 +81,7 @@ The issue of trust was highlighted recently when Neil Ferguson, one of the leadi
 
 The tweet garnered considerable backlash, with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
 Until the code is published we cannot comment on how it was tested. 
-Our aim here is certainly not to single out a single scientist. Indeed testing is scant in epidemiology, especially in fast-moving epidemics.
+Our aim here is certainly not to single out a single scientist. Indeed testing is scant in epidemiology, especially in fast-moving epidemics TODO[substantiate].
 
 Today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
@@ -100,7 +100,6 @@ In this primer we introduce unit testing and demonstrate its use on an example i
 We also give an overview of the available testing frameworks in various languages commonly used by infectious disease modellers.
 
 # Unit testing foundations
-
 At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
 For the square root function $\sqrt{x}$ (`sqrt(x)` in \emph{R} [@R]), we would write a test that runs the function call on the number 4 i.e. `sqrt(x = 4)` and compares it to the correct answer i.e. 2.
 Often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
@@ -122,7 +121,7 @@ If a change causes the older tests to break, this points to the introduction of 
 Then if the bug re-emerges it will be caught.
 4. You can write tests before you write code---also known as test-driven development.
 This can help development planning: write tests that define the desired functionality and continue programming, provided all tests keep passing.
-Frameworks for formalising this are discussed in Sections [6](frameworks) and [7](ci).
+Frameworks for formalising this are discussed in Sections \@ref(frameworks) and [7](ci).
 
 # Bug in a multi-strain re-infection model
 
