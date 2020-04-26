@@ -33,7 +33,7 @@ abstract: |
   We are ethically obliged to ensure our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
   
-  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. We promise you will not regret it!
+  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. 
 
 author_summary: |
 bibliography: unit_testing.bib
@@ -124,7 +124,7 @@ Then if the bug re-emerges it will be caught.
 This can help development planning: write tests that define the desired functionality and continue programming, provided all tests keep passing.
 Frameworks for formalising this are discussed in Sections [6](frameworks) and [7](ci).
 
-# Bug in a multi-strain reinfection model
+# Bug in a multi-strain re-infection model
 
 Here we define a simple epidemiological model and then demonstrate how to effectively write unit tests for it in \emph{R} code.
 
@@ -137,7 +137,7 @@ Certainly this toy model is naïve as it is governed by mass-action principles, 
 Nevertheless it will serve its purpose. 
 Here is our first attempt at implementing this model.
 \newline
-```{r first_code,  ref = "first_code", codecap = "Base example of the multi-strain reinfection model", results='hide'}
+```{r first_code,  ref = "first_code", codecap = "Base example of the multi-strain re-infection model", results='hide'}
 N <- 12 # infected individuals
 t <- 20 # study length
 # create the matrix to store the simulation data
@@ -154,7 +154,7 @@ for(t in seq(2, t)){
 ```
 
 Usually we would make some output plots to explore if our code is performing sensibly.
-Plotting the time course of individuals' infection strain indicates repeated infection with different strains as expected (Figure \@ref(fig:firstplots)).
+Plotting the time course of individuals' infection strain indicates repeated infection with different strains as expected (Fig. \@ref(fig:firstplots)).
 However, if we look at the proportion of each strain through time (not shown here) we quickly see that the strain proportions are identical through time and so there must be a bug hiding.
 
 This simple example demonstrates that:
@@ -162,7 +162,7 @@ This simple example demonstrates that:
 * bugs can be subtle
 * it is not easy to notice an error, even in just 7 lines of active code. Perhaps you can find it? The solution is in the next paragraph.
 * it is much easier to debug code when you now there is a bug. 
-* while plotting simulation runs are an excellent way to check model behaviour, if we had only relied on Figure \@ref(fig:firstplots) we would have missed the bug. It is a generally ineffective method because a human has to perform this scan every test run.
+* while plotting simulation runs are an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. It is a generally ineffective method because a human has to perform this scan every test run.
 
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
 
@@ -183,7 +183,7 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>%
 ```
 
 _Solution_: `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone swaps their infection strain on a one-to-one basis rather than one-to-many as required by the model.
-Setting `replace = TRUE` fixes this and when we plot the proportion of each strain (Figure \@ref(fig:correctplots)) we see the correct behaviour (one strain drifting to fixation).
+Setting `replace = TRUE` fixes this and when we plot the proportion of each strain (Fig. \@ref(fig:correctplots)) we see the correct behaviour (one strain drifting to fixation).
 We will now develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end.
 \newline
 ```{r, correct_code, ref = "correct_code", codecap = "Corrected base code", results = 'hide', echo = FALSE}
@@ -247,7 +247,7 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 
 `initialisePop()` has three arguments that require testing.
 First we initialise the population, and then alter each argument in turn.
-Arguments `t` and `N` directly change the expected dimension of matrix `I` so we test them together.
+Arguments `t` and `N` directly change the expected dimension of matrix `I` so we check them together.
 For the last argument we test that the number of strains is equal to the `strains` requested.
 \newline
 ```{r, test_all_args, ref = "test_all_args", codecap = "Test all function arguments in turn", results = 'hide'}
@@ -287,11 +287,11 @@ expect_true(all(!is.na(pop2[1:2,])))
 ## Combine simple functions and test them at a higher-level{-#combine}
 
 In the end an entire model only runs when its functions work together seamlessly. 
-So we next test their connections; achieved through nesting functions together, or defining them at a higher level.
-Developing at a higher level means we should test macro aspects of the model.
+So we next check their connections; achieved through nesting functions together, or defining them at a higher level.
+Developing at a higher level means we should check macro aspects of the model.
 We now expect there to be no `NA`s left in matrix `I` and every element to be one of the three strain strings.
 \newline
-```{r, combine_simple_func, ref = "combine_simple_func", codecap = "Combine simple functions through nesting to test higher-level functionality", result = 'hide'}
+```{r, combine_simple_func, ref = "combine_simple_func", codecap = "Combine simple functions through nesting to check higher-level functionality", result = 'hide'}
 fullSim <- function(t, N, strains){
   pop <- initialisePop(t, N, strains) 
   for(i in seq(2, t)){
@@ -310,8 +310,8 @@ expect_true(all(pop %in% c("a", "b", "c")))
 
 Stochastic simulations are a common feature in infectious disease models.
 Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be.
-We can test very broad-scale properties, like the test above, where we check the range of strain values.
-However, code could still pass that test and be wrong (for example the original example would still pass that test).
+We can check very broad-scale properties, like the test above, where we check the range of strain values.
+However, code could still pass and be wrong (for example the original example would still pass that test).
 There are however a number of approaches that can help.
 
 ## Split stochastic and deterministic parts {-#splitstochastic}
@@ -344,7 +344,7 @@ updatePopCombined <- function(x, t, N){
 }
 ```
 
-Two-thirds of `updatePopCombined()` is deterministic so can be tested using the ideas discussed previously.
+Two-thirds of `updatePopCombined()` is deterministic so can be checked using the ideas discussed previously.
 However, we still have `chooseInfector()`, that is irreducibly stochastic.
 
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
@@ -380,7 +380,7 @@ This typically involves large sample sizes or numbers of stochastic runs.
 For example, the clearest test to distinguish between our original, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one in a single time step.
 In any given run this is never guaranteed, but the larger the population size (and equivalently the sample size) the more likely it is to occur. 
 Though we need to be sure that the failure of the test is very rare. 
-We set the seed of the random number generator so that the test is reproducible, otherwise it will be seen to fail but only every now and then.
+We set the seed of a random number generator so that the test is reproducible, otherwise the test will fail sporadically and unpredicatably.
 
 We can calculate the probability of this test failing for a population with $n$ individuals---it is the well-known 'birthday paradox'.
 There are '$n$ choose 2' $\binom{n}{2}$ possible pairs of individuals.
@@ -447,7 +447,7 @@ fullSim2 <- function(t, N, strains){
 pop <- fullSim2(t = 1, N = 12, strains = 3)
 ```
 
-Similarly, we tested earlier if the `strains` argument of `initialisePop()` worked by verifying if the returned population had the correct number of strains.
+Similarly, we checked earlier if the `strains` argument of `initialisePop()` worked by verifying if the returned population had the correct number of strains.
 However, if we set the `strains` argument to be greater than the number of individuals in the population, the current function does not error nor give the answer we expected either.
 \newline
 ```{r, edge2, ref = "edge2", codecap = "Sometimes the best way to avoid bugs it using adequate error checks on variables at the function start", eval = FALSE}
@@ -468,7 +468,7 @@ Both of these cases are serious or annoying and can be difficult to debug afterw
 A common case to check with epidemiological datasets is whether code correctly handles missing data (normally represented as `NA`, `" "` or `''`). 
 Often the simplest solution is to include argument checks at the beginning of functions and use `expect_error()` to error check.
 
-We test how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
+We check how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
 We have also updated `fullSim3()` to provide a check on the length of `t` with an informative message.
 \newline
 ```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect inputs"}
