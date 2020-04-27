@@ -1,6 +1,7 @@
 *.pdf
 *.aux
 *.html
+*unit_testing.tex
 *.log
 .Rproj.user
 *.Rproj
