@@ -1,0 +1,9 @@
+\usepackage{caption}
+\usepackage{floatrow}
+
+\DeclareNewFloatType{chunk}{placement=h, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{Code~\arabic{chunk}}
+\makeatletter
+\@addtoreset{chunk}{section}
+\makeatother

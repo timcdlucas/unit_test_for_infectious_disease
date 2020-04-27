@@ -1,7 +1,6 @@
 *.pdf
 *.aux
 *.html
-*.tex
 *.log
 .Rproj.user
 *.Rproj
