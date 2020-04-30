@@ -71,6 +71,7 @@ set.seed(01011885)
 \newpage
 # Introduction
 
+
 Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
 For instance models are currently providing advice to governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility].
 Similarly, policy on endemic infectious diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
@@ -123,7 +124,7 @@ If a change causes the older tests to break, this points to the introduction of 
 Then if the bug re-emerges it will be caught.
 4. You can write tests before you write code---also known as test-driven development.
 This can help development planning: write tests that define the desired functionality and continue programming, provided all tests keep passing.
-Frameworks for formalising this are discussed in Sections \@ref(frameworks) and [7](ci).
+Frameworks for formalising this are discussed in later in the paper.
 
 # Bug in a multi-strain re-infection model
 
