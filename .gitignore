@@ -5,3 +5,4 @@
 *.log
 .Rproj.user
 *.Rproj
+.DS_Store
