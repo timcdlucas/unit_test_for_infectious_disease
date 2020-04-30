@@ -18,6 +18,9 @@ author:
   - name: Timothy M Pollington
     email: timothy.pollington@gmail.com
     affiliation: [Big Data Institute, MathSys CDT]
+  - name: Emma L Davis
+    email: emma.davis@bdi.ox.ac.uk
+    affiliation: Big Data Institute
   - name: T Déirdre Hollingsworth
     email: timcdlucas@gmail.com
     affiliation: Big Data Institute
@@ -32,7 +35,6 @@ abstract: |
   Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
-  
   We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. 
 
 author_summary: |
