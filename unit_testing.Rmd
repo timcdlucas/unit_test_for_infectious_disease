@@ -404,16 +404,23 @@ However, it can be difficult to determine how many times is reasonable to run a 
 This strategy works best when we have a specific bug that occurred relatively frequently (perhaps once every ten simulations or so).
 We say that if the bug does not occur even once in 500 simulations, then we are pretty sure we have fixed it.
 In our original buggy code we found that the proportions remained identical for entire simulations.
-For a reasonably large simulation we would expect this to happen seldom, so we can run the full simulation a number of times to check that this specific bug does not occur.
+For a reasonably large simulation we would expect this to seldom happen, so we can run short simulations to check that this specific bug does not occur by confirming that the proportion of each strain is not always the same between the first and last time point.
 \newline
 ```{r, returningstrain,ref = "returningstrain", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
 set.seed(11121955)
-manySims <- replicate(500, fullSim(t = 30, N = 40, strains = 3), 
+manySims <- replicate(500, fullSim(t = 20, N = 40, strains = 3), 
                       simplify = FALSE)
 
-expect_true(all(sapply(manySims, 
-                       function(x) 
-                         length(unique(apply(x, 1, table))) > 1)))
+# Define a function that calculates whether
+#   whether the strain proportions are the
+#   same in the first and last time point.
+diffProportions <- function(x){
+  !identical(table(x[1, ]), table(x[20, ]))
+}
+
+# Check that at least one simulation had 
+# non-identical proportions.
+expect_true(any(sapply(manySims, diffProportions)))
 ```
 
 # Further testing
