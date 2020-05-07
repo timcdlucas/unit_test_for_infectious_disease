@@ -9,7 +9,12 @@ title: |
   | Unit testing for disease modelling
   |
   | First steps in unit testing for your disease model
-  
+  |
+  | Checking your code: unit testing for infectious disease modelling.
+  |
+  | Using unit testing to build robust infectious disease models.
+  |
+  | Responsible modelling: Unit testing for infectious disease epidemiology. +1
 author:
   - name: Tim CD Lucas
     email: timcdlucas@gmail.com
@@ -31,12 +36,12 @@ address:
     address: MathSys CDT, University of Warwick, UK
 abstract: |
   Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
-  Models of infectious disease help guide health policy that can affect millions of people. 
+  Models of infectious disease have guided health policy for epidemics including COVID-19 and Ebola as well for endemic diseases such as malaria and tuberculosis. 
+  that can affect millions of people. 
   Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
   We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. 
-
 author_summary: |
 bibliography: unit_testing.bib
 output:
@@ -76,18 +81,35 @@ For instance models are currently providing advice to governments on their respo
 Similarly, policy on endemic infectious diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
 The decisions based on these models could significantly affect, to different degrees, the health outcomes of millions of people globally.
 
-Given the importance of modelling results, it is vital that they are both correct and trusted.
+Given the importance of modelling results, it is vital that they are coded correctly as well as trusted.
 The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
 
 > "I'm conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19. To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics..." [@ferg_tweet].
 
 The tweet garnered considerable backlash, with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
 Until the code is published we cannot comment on how it was tested. 
-Our aim here is certainly not to single out a single scientist. Indeed testing is scant in epidemiology, especially in fast-moving epidemics TODO[substantiate].
+Bugs have been found in code used by many researchers [@bhandari2019characterization] or lead to retractions [@retract].
+Outside of epidemiology, a paper that informed austerity policies globally was found to be fatally flawed [@] while in engineering bugs have caused spacecraft a Mars Climate orbiter and the Mariner 1 spacecraft to be lost or destroyed [@nasa, @mars].
+
+However, the goal of this paper is not to single out any particular model or group, but instead to address a perceived chronic lack of rigorous testing across the field in general. 
+Testing is currently either not implemented or not documented and reported, which reduces trust in model outputs, particularly during fast-moving epidemics with high public profile such as COVID-19.
 
 Today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
-As the mathematical methods depend on numerical solutions rather than analytical pen-and-paper methods, it soon becomes difficult to tell a bug is present based on model outputs.
+As the mathematical methods depend on numerical solutions rather than analytical pen-and-paper methods, it becomes increasingly difficult to tell when a bug is present based on model outputs.
+<!--
+I have a list of high impact bugs, but in summary a few highlights:
+- Omission of a minus sign in 1995 cost Fidelity Magellan Fund £1.6million
+- In 2013 a PhD student found basic mistakes in a globally influential economics study that was used by many countries to inform austerity
+- London 2012 Olympics over-sold 10,000 synchronised swimming tickets
+- 2010: MI5 incorrectly bugged over 100 phones due to a code formatting error
+- Mars Climate orbiter lost in space due to failure to convert between imperial and metric units (1998)
+- Mariner 1 space craft lost in 1962 due to omission of a hyphen
+- Kerberas security system trivial to break for 8 years due to failure to correctly seed random number generator
+--https://retractionwatch.com/2018/11/05/data-mishap-forces-retraction-of-paper-on-gun-laws-domestic-killings/#more-76505
+https://retractionwatch.com/2020/05/05/doing-the-right-thing-researchers-retract-clinician-burnout-study-after-realizing-their-error/
+https://retractionwatch.com/2016/09/26/error-in-one-line-of-code-sinks-2016-seer-cancer-study/
+--->
 
 The workflow followed by many is to write some code, run the full model and examine plots of the output.
 This crude *ad hoc* testing approach can miss many bugs.
