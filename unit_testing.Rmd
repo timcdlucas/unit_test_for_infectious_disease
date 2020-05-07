@@ -1,19 +1,5 @@
 ---
 title: |
-  | Unit testing for infectious disease modelling 
-  |
-  | A beginner's guide to unit testing for infectious disease epidemiologists 
-  |
-  | A guide for effective unit testing for robust, infectious disease code
-  |
-  | Unit testing for disease modelling
-  |
-  | First steps in unit testing for your disease model
-  |
-  | Checking your code: unit testing for infectious disease modelling.
-  |
-  | Using unit testing to build robust infectious disease models.
-  |
   | Responsible modelling: Unit testing for infectious disease epidemiology. +1
 author:
   - name: Tim CD Lucas
