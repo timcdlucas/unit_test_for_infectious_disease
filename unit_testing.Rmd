@@ -21,9 +21,8 @@ address:
   - code: MathSys CDT
     address: MathSys CDT, University of Warwick, UK
 abstract: |
-  Models are one of the cornerstones of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
+  Modelling is one of the central methods for studying infectious disease epidemiology and is increasingly reliant on computers rather than pen-and-paper methods. 
   Models of infectious disease have guided health policy for epidemics including COVID-19 and Ebola as well for endemic diseases such as malaria and tuberculosis. 
-  that can affect millions of people. 
   Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method that aims to avoid bugs in code.
