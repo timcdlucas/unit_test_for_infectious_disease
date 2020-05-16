@@ -21,7 +21,7 @@ address:
   - code: MathSys CDT
     address: MathSys CDT, University of Warwick, UK
 abstract: |
-  Models are the keystone of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
+  Models are one of the cornerstones of infectious disease epidemiology and are increasingly reliant on computers rather than pen-and-paper methods. 
   Models of infectious disease have guided health policy for epidemics including COVID-19 and Ebola as well for endemic diseases such as malaria and tuberculosis. 
   that can affect millions of people. 
   Yet a single bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
@@ -62,11 +62,14 @@ set.seed(01011885)
 \newpage
 # Introduction
 
-Modelling is a hugely important tool in epidemiology as a way to understand fundamental biological processes, test intervention efficacy and forecast disease burden. 
-For instance models are currently providing advice to governments on their response to the COVID-19 pandemic [@ihme; @imperial; @hellewell2020feasibility].
-Similarly, policy on endemic infectious diseases is also directed by models TODO [an_ntd_paper_that_definitely_influenced_policy]. 
-The decisions based on these models could significantly affect, to different degrees, the health outcomes of millions of people globally.
+<!--
+Modelling is an important tool for understanding fundamental biological processes in infectious disease dynamics,, evaluating potential intervention efficacy and forecasting disease burden. 3  At the time of writing, infectious disease modellers are playing a central role on the interpretation of available data on the COVID19 pandemic  to inform policy design and evaluation.  [1–3]. This work builds on a long history of modelling for policy (cite Heesterbeek Science 2015)., and a general understanding of the dynamics of these systems.. 
+--->
 
+Modelling is an important tool for understanding fundamental biological processes in infectious disease dynamics, evaluating potential intervention efficacy and forecasting disease burden.
+At the time of writing, infectious disease modellers are playing a central role in the interpretation of available data on the COVID19 pandemic to inform policy design and evaluation [@ihme; @imperial; @hellewell2020feasibility].
+Similarly, policy on endemic infectious diseases, such duration and frquency of control programs and spatial prioritisation, is also directed by models [@behrend2020modelling]. 
+This work builds on a long history of modelling for policy [@heesterbeek2015modeling] and a general understanding of the dynamics of these systems.
 
 <!--
 I have a list of high impact bugs, but in summary a few highlights:
@@ -90,20 +93,20 @@ https://retractionwatch.com/2016/09/26/error-in-one-line-of-code-sinks-2016-seer
 
 Given the importance of modelling results, it is vital that they are both coded correctly and trusted.
 Bugs have been found in code used by many researchers [@bhandari2019characterization] or lead to retractions [@retract].
-Outside of epidemiology, a paper that informed austerity policies globally was found to be fatally flawed [@] while in engineering bugs have caused spacecraft, a Mars Climate orbiter and the Mariner 1, to be lost or destroyed [@nasa; @board1999mars].
+Outside of epidemiology, a paper that informed austerity policies globally was found to be fatally flawed [@herndon2014does] while in engineering bugs have caused spacecraft, a Mars Climate orbiter and the Mariner 1, to be lost or destroyed [@nasa; @board1999mars].
 The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
 
 > "I'm conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19. To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics..." [@ferg_tweet].
 
 The code that was released did not include any tests [@ferg_github].
-The tweet and lack of tests garnered considerable backlash, with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
-It is important to note that much of this criticism was politically motivated.
-Furthermore, the goal of this paper is not to single out any particular model or group, but instead to address a perceived chronic lack of rigorous testing a cross the field in general. 
-Testing is currently either not implemented or not documented and reported, which reduces trust in model outputs, particularly during fast-moving epidemics with high public profile such as COVID-19.
+The tweet and lack of tests garnered considerable backlash (much of which was politically motivated), with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
+It is important to note however, that this is not an unusual statement for our field, or for some of the authors of this article. 
+To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) to provide scientific robustness and reliability [@den2019guidelines], but clearly more can be done.
 
-Today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
+Infectious disease modellers are rarely trained as professional programmers.  
+However, todays's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
-As the mathematical methods depend on numerical solutions rather than analytical pen-and-paper methods, it becomes increasingly difficult to tell when a bug is present based on model outputs.
+As the mathematical methods depend on numerical solutions rather than analytical pen-and-paper methods, it becomes increasingly difficult to tell if a bug is present based on model outputs.
 
 The workflow followed by many is to write some code, run the full model and examine plots of the output.
 This crude *ad hoc* testing approach can miss many bugs.
