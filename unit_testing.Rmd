@@ -202,8 +202,8 @@ This simple example demonstrates that:
 * While plotting simulation runs are an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. It is a generally ineffective method because a human has to perform this scan every test run.
 
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
-
-
+\newline
+\newline
 The cause of the bug is that `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone swaps their infection pathogen on a one-to-one basis rather than one-to-many as required by the model.
 Setting `replace = TRUE` fixes this and when we plot the proportion of each pathogen (Fig. \@ref(fig:correctplots)) we see the correct behaviour (one pathogen drifting to fixation).
 We will now develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end (\@ref(correctcode)). 
@@ -449,43 +449,93 @@ expect_true(any(sapply(manySims, diffProportions)))
 ```
 
 # Further testing
-## Test edge cases and special cases {-#corners}
 
-When writing tests it is easy to focus on standard behaviour.
-However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
+## Test incorrect inputs {-#testincorrect}
 
-For example, in \emph{R}, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
-Code that relies on the returned object being a matrix would fail this vector edge case.
+<!--
+Incorrect inputs:
+  explain expect_error with a function that errors. 
+  show that sometimes things don't error and we need to force it to.
 
-Equally special cases can be triggered with parameter sets that do not match the extrema of parameter space. 
-This is where understanding of the functional form of the model can help. 
-Consider a function `divide(x, y)` that divides `x` by `y`.
-We could test this function by noting that `y * divide(x, y)` should return `x`.
-If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
+Edge cases:
+  Show that something that is "correct" might still error.
+  
+--->
 
-In our example model, we might consider testing edge cases such as one individual, one iteration and one pathogen.
-Here we consider running the simulation for one iteration.
-```{r, edge, eval = FALSE}
-pop <- fullSim(t = 1, N = 12, pathogens = 3)
+As well as testing that functions work when given the correct inputs, we must also test that they behave sensibly when given the wrong inputs.
+This typically involves the user inputting argument values that do not make sense.
+This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values.
+Therefore it is useful to test that functions fail gracefully if they are given incorrect inputs.
+This is especially true for 'external' functions, available to a user on a package's front-end.
+However, it is not always obvious what constitutes an 'incorrect value' even to the person who wrote the code.
+In some cases, inputting incorrect argument values may cause the function to fail quickly. 
+In other cases code may run silently giving false results or take a long time to give an error.
+Both of these cases are serious or annoying and can be difficult to debug afterwards.
+\newline
+\newline
+Often for these cases, the expected behaviour of the function should be to give an error.
+There is no correct output for an epidemiological model with -1 pathogens, instead the function should give an informative error message.
+Often the simplest solution is to include argument checks at the beginning of functions.
+We can then use the `expect_error()` function to check that the function gives an error when it should do.
+This function takes an expression as its first argument and errors if the expression does not throw an error.
+The second argument can be given a string; if the string does not occur in the error message, then the test also fails.
+This second argument can be used to check that the correct error is given.
+\newline
+\newline
+We check how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
+In this case, the function quickly throws an error which is what we want.
+\newline
+```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect time inputs"}
+expect_error(fullSim(t = 1:100, N = 4, pathogens = 3), 
+             'must be of length')
+
 ```
 
-In fact, running `fullSim()` with only one iteration, errors without a useful error message.
-We have fixed this with an error check at the top of the function that returns a more useful error message if `t = 1` (or any integer less than two) is used.
+Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
+Here presumably the intent is to run a simulation with three pathogens: 1, 2 and 3.
 \newline
-```{r, erroronspecialcase, ref = "erroronspecialcase", codecap = "Testing a special case", eval = FALSE}
+```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
+expect_error(fullSim(t = 5, N = 4, pathogens = 1:3))
+```
+
+This test fails because the function does not throw an error.
+Instead the code takes the first element of `pathogens` and ignores the rest.
+Therefore, a simulation is run with one pathogen, not three, which is almost certainly not what the user wanted.
+Here, the safest fix is to add an explicit argument check at the top of the function.
+
+```{r, wrong1c, ref = "wrong1c", codecap = "New definition of the fullSim function and a passing test for incorrect pathogen inputs"}
 fullSim2 <- function(t, N, pathogens){
-  stopifnot(t > 1)
+  # Check that the pathogens argument is correct
+  if(length(pathogens) != 1) stop('Pathogens must be length 1') 
+  
   pop <- initialisePop(t, N, pathogens) 
   for(i in seq(2, t)){
     pop <- updatePop(pop, i, N)
   }
   return(pop)
 }
-pop <- fullSim2(t = 1, N = 12, pathogens = 3)
+
+expect_error(fullSim2(t = 5, N = 4, pathogens = 1:3), 
+             'Pathogens must be')
 ```
 
 
-Similarly, we checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying if the returned population had the correct number of pathogens.
+## Test edge cases and special cases {-#corners}
+
+When writing tests it is easy to focus on standard behaviour.
+However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
+For example, in \emph{R}, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
+Code that relies on the returned object being a matrix would fail in this edge case.
+\newline
+\newline
+Similarly, special cases can be triggered with parameter sets that do not match the extrema of parameter space. 
+This is where understanding of the functional form of the model can help. 
+Consider a function `divide(x, y)` that divides `x` by `y`.
+We could test this function by noting that `y * divide(x, y)` should return `x`.
+If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
+\newline
+\newline
+We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying if the returned population had the correct number of pathogens.
 However, if we set the `pathogens` argument to be greater than the number of individuals in the population, the current function does not error nor give the answer we expected either.
 Instead, we get a population with the same number of pathogens as individuals.
 \newline
@@ -512,34 +562,6 @@ expect_error(initialisePop(t = 10, N = 2, pathogens = 11))
 ```
 
 
-## Test incorrect inputs {-#testincorrect}
-
-Bugs may be discovered by other users when new, uncleaned data meets functions previously tested on complete datasets. 
-Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
-This is especially true for 'external' functions, available to a user on a package's front-end.
-Some cases may quickly fail, but sometimes code may run silently giving false results or take a long time to give an error.
-Both of these cases are serious or annoying and can be difficult to debug afterwards.
-
-A common case to check with epidemiological datasets is whether code correctly handles missing data (typically represented as `NA`in R). 
-Often the simplest solution is to include argument checks at the beginning of functions and use `expect_error()` to check that the function gives an error when it should do.
-
-We check how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
-We have also updated `fullSim3()` to provide a check on the length of `t` with an informative message.
-\newline
-```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect inputs"}
-expect_error(pop <- fullSim(t = 1:100, N = 4))
-
-fullSim3 <- function(t, N, pathogens){
-  stopifnot(t > 1)
-  stopifnot(length(t) == 1)
-  pop <- initialisePop(t, N, pathogens) 
-  for(i in seq(2, t)){
-    pop <- updatePop(pop, i, N)
-  }
-  return(pop)
-}
-```
-
 # Unit testing frameworks {#frameworks}
 
 Most programming languages have established testing packages.
@@ -548,7 +570,8 @@ When structuring \emph{R} code as a package, tests should be kept in the directo
 All the tests in a package can then be run with `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to a package build.
 If the code is to be part of a package then these tools are essential to run the code within the context of a build environment.
 These tools also provide a clean environment to highlight if a test was previously relying on objects defined outside of the test script.
-
+\newline
+\newline
 Other programming languages have similar testing frameworks too.
 Their specifics differ but the main concept of comparing a function evaluation to the expected output remains the same.
 In \emph{Julia} there is the $\texttt{Test}$ package [@juliatest]. 
@@ -585,12 +608,13 @@ In this setup, whenever you push code changes from your local computer to the on
 Furthermore these tests can be automated irrespective of changes to your code or tests: since dependencies with other packages and knock-on changes from them into a bug in your code can be automatically found and notified to you by email.
 There are various continuous integration services such as travis-ci.org, GitHub actions and GitLab pipelines.
 These services are often free on a limited basis, or free if your code is open source.
-
+\newline
+\newline
 We briefly describe the setup of the simplest case.
 Setting up travis CI is very straightforward for \emph{R} code organised into a package and hosted openly on GitHub. 
 Within your version-controlled folder that contains the \emph{R} code you add a one-liner `.travis.yml` file that contains a description of which language the code uses.
-
-```{awk, travis, eval = FALSE}
+\newline
+```{awk, travis, ref = "travis", codecap = "A basic travis yml file.", eval = FALSE}
 language:r
 ```
 
@@ -604,7 +628,8 @@ More details can be found in @wickham2015r Chapter 14.3.
 It is vital that infectious disease models are coded to minimise bugs.
 Unit testing is a well-defined, principled way we can do this.
 There are many frameworks that make aspects of unit testing automatic and more informative and these should be used where possible.
-
+\newline
+\newline
 Setting it up is simple but writing good tests is a skill that takes time, practice and thought.
 However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results. 
 These qualities are important for the reproducibility of science, but are particularly relevant where code may be shared between individuals or groups, or where you wish to publish your code as a package to be used by others.
