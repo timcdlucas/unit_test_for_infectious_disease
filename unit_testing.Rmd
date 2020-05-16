@@ -410,26 +410,18 @@ expect_true(all(manyPops %in% c("11", "22", "12", "21")))
 
 While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
-For example, the clearest test to distinguish between our original, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one in a single time step.
-In any given run this is never guaranteed, but the larger the population size (and equivalently the sample size) the more likely it is to occur. 
-Though we need to be sure that the failure of the test is very rare. 
-We set the seed of a random number generator so that the test is reproducible, otherwise the test will fail sporadically and unpredicatably.
-
-We can calculate the probability of this test failing for a population with 100 individuals; it is the well-known 'birthday paradox'.
-There are $\binom{100}{2} = 4950$ possible pairs of individuals (i.e. '100 choose 2') .
-The probability of a pair of individuals being infected by the same person is 1 in 100.
-To see this, consider that whoever individual 1 is infected by (individual $i$), the probability that individual 2 is also infected by individual $i$ is just 1 in 100.
-Therefore, the probability that two individuals are not infected by the same individualis $1 - 1/100$.
-For the test to fail, all 4950 possible pairs would have to not be infected by the same individual, giving $(1 - 1/100) ^ 4950 \approx 10^{-21}$.
-In general, the probability of the test failing for a population with $n$ individuals is $(1 - 1/n) ^ {\binom{n}{2}}$.
+For example, the clearest test to distinguish between our original, buggy code and our correct code is that in the correct code there is the possibility for one individual to infect more than one individuals in a single time step.
+In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
+With a population of one thousand, the probability that no individual infects two others is vanishingly rare.
+We set the seed of a random number generator so that the test is reproducible, otherwise the test could fail sporadically and unpredicatably.
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Computing the probability of the stochastic test failing for 1000 individuals", results='hide'}
 set.seed(10261985)
 n <- 1e3
 infector_pathogen <- chooseInfector(n)
-expect_true(any(duplicated(infector_pathogen)))
 
-(1 - (1 / n)) ^ choose(n, 2) # probability of failing
+# If an individual infects more than one individual, 
+expect_true(any(duplicated(infector_pathogen)))
 ```
 
 If we have an event that we know should not happen, we can use a large number of simulations to provide stronger evidence that is does not stochastically occur.
@@ -462,16 +454,19 @@ expect_true(any(sapply(manySims, diffProportions)))
 When writing tests it is easy to focus on standard behaviour.
 However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
 
-For example, in \emph{R}, selecting one column from a matrix e.g. `[,2]` returns a vector while selecting two or more columns e.g. `[,2:3]` returns a matrix.
+For example, in \emph{R}, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
 Code that relies on the returned object being a matrix would fail this vector edge case.
 
 Equally special cases can be triggered with parameter sets that do not match the extrema of parameter space. 
-This is where understanding of the functional form of the model can help. Consider a function `divide(x, y)` that divides `x` by `y`. 
-If we test the (mathematically bloated) calculation `2 * divide(x, 2) == x` we would believe it works for nearly all values of division, unless we ever try `y = 0`.
+This is where understanding of the functional form of the model can help. 
+Consider a function `divide(x, y)` that divides `x` by `y`.
+We could test this function by noting that `y * divide(x, y)` should return `x`.
+If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
 
 In our example model, we might consider testing edge cases such as one individual, one iteration and one pathogen.
+Here we consider running the simulation for one iteration.
 ```{r, edge, eval = FALSE}
-pop <- fullSim(t = 1, N = 12)
+pop <- fullSim(t = 1, N = 12, pathogens = 3)
 ```
 
 In fact, running `fullSim()` with only one iteration, errors without a useful error message.
@@ -489,26 +484,44 @@ fullSim2 <- function(t, N, pathogens){
 pop <- fullSim2(t = 1, N = 12, pathogens = 3)
 ```
 
+
 Similarly, we checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying if the returned population had the correct number of pathogens.
 However, if we set the `pathogens` argument to be greater than the number of individuals in the population, the current function does not error nor give the answer we expected either.
+Instead, we get a population with the same number of pathogens as individuals.
 \newline
 ```{r, edge2, ref = "edge2", codecap = "Sometimes the best way to avoid bugs it using adequate error checks on variables at the function start", eval = FALSE}
 pop <- initialisePop(t = 10, N = 2, pathogens = 11) 
 expect_equal(length(unique(pop[1,])), 11)
 ```
 
-Here again the best solution is a `stopifnot(pathogens > N)` error check at the beginning of the function.
+This is not a bug as such in the sense that it cannot be fixed.
+Instead this test has highlighted that requesting more pathogens than individuals does not make sense.
+The best solution here is to add a check at the beginning of the function.
+Our expectation for how the function should work then changes, we now expect that the function should return an error if the user asks for more pathogens than individuals.
+We can test that the function works as we expect using the `expect_error()` function.
+\newline
+```{r, edge3, ref = "edge3", codecap = "We can test whether a function throws an error when we expect it to.", eval = FALSE}
+
+initialisePop <- function(t, N, pathogens){
+  if(pathogens > N) stop('pathogens must be less than N')
+  I <- matrix(data = NA, nrow = t, ncol = N)
+  I[1,] <- rep(x = letters[1:pathogens], length.out = N)
+  return(I)
+}
+expect_error(initialisePop(t = 10, N = 2, pathogens = 11))
+```
+
 
 ## Test incorrect inputs {-#testincorrect}
 
-Bugs may be discovered by other users when new uncleaned data meets functions previously tested on complete datasets. 
+Bugs may be discovered by other users when new, uncleaned data meets functions previously tested on complete datasets. 
 Therefore it is useful to test that functions fail gracefully if they are given inputs of the wrong class.
 This is especially true for 'external' functions, available to a user on a package's front-end.
-Some cases may quickly fail, but sometimes code may run silently giving false results or take long to reach failure.
+Some cases may quickly fail, but sometimes code may run silently giving false results or take a long time to give an error.
 Both of these cases are serious or annoying and can be difficult to debug afterwards.
 
-A common case to check with epidemiological datasets is whether code correctly handles missing data (normally represented as `NA`, `" "` or `''`). 
-Often the simplest solution is to include argument checks at the beginning of functions and use `expect_error()` to error check.
+A common case to check with epidemiological datasets is whether code correctly handles missing data (typically represented as `NA`in R). 
+Often the simplest solution is to include argument checks at the beginning of functions and use `expect_error()` to check that the function gives an error when it should do.
 
 We check how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
 We have also updated `fullSim3()` to provide a check on the length of `t` with an informative message.
@@ -530,7 +543,7 @@ fullSim3 <- function(t, N, pathogens){
 # Unit testing frameworks {#frameworks}
 
 Most programming languages have established testing packages.
-For \emph{R}, there is the $\texttt{testthat}$ package.
+For \emph{R}, there is the $\texttt{testthat}$ package as already discussed.
 When structuring \emph{R} code as a package, tests should be kept in the directory `tests/testthat`; further requirements to the structure can be found in @wickham2015r Chapter 7.
 All the tests in a package can then be run with `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to a package build.
 If the code is to be part of a package then these tools are essential to run the code within the context of a build environment.
@@ -574,8 +587,8 @@ There are various continuous integration services such as travis-ci.org, GitHub 
 These services are often free on a limited basis, or free if your code is open source.
 
 We briefly describe the setup of the simplest case.
-For \emph{R} code organised into a package and hosted openly on GitHub, then setting up travis CI is very straightforward.
-Within your version-controlled folder you add a one-liner `.travis.yml` file that contains a description of which language the code uses.
+Setting up travis CI is very straightforward for \emph{R} code organised into a package and hosted openly on GitHub. 
+Within your version-controlled folder that contains the \emph{R} code you add a one-liner `.travis.yml` file that contains a description of which language the code uses.
 
 ```{awk, travis, eval = FALSE}
 language:r
@@ -586,12 +599,18 @@ You then need to sign up to travis-ci.org and point it to the correct GitHub rep
 To authenticate and trigger the first automatic test you need to make a minor change to your code, commit and push to GitHub.
 More details can be found in @wickham2015r Chapter 14.3.
 
-# Conclusions
+# Concluding remarks
 
 It is vital that infectious disease models are coded to minimise bugs.
-Unit testing is the principled way we can do this.
-There are many frameworks that make aspects of testing automatic and more informative and these should be used where possible.
-Setting it up is simple but writing good tests is a skill that takes time, practice and thought, but also saves time, effort and unintended harm from incorrect code.
+Unit testing is a well-defined, principled way we can do this.
+There are many frameworks that make aspects of unit testing automatic and more informative and these should be used where possible.
+
+Setting it up is simple but writing good tests is a skill that takes time, practice and thought.
+However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results. 
+These qualities are important for the reproducibility of science, but are particularly relevant where code may be shared between individuals or groups, or where you wish to publish your code as a package to be used by others.
+Our aim in this paper was to demonstrate tailored results for infectious disease modelling. 
+There are number of standard programming approaches to unit testing which would be good followup reading (wickham2015r Chapter 7, @osborne2014ten, @wilson2014best). 
+As demonstrated here, it is initially time consuming to program in this way, but over time it will become habitual and both you and the policy-makers who use your models will benefit from it.
 
 # Code availability
 
