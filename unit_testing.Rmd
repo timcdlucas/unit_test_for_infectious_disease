@@ -103,7 +103,7 @@ The tweet and lack of tests garnered considerable backlash (much of which was po
 It is important to note however, that this is not an unusual statement for our field, or for some of the authors of this article. 
 To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) to provide scientific robustness and reliability [@den2019guidelines], but clearly more can be done.
 
-Infectious disease modellers are rarely trained as professional programmers.  
+Infectious disease modellers are rarely trained as professional programmers. 
 However, todays's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
 As the mathematical methods depend on numerical solutions rather than analytical pen-and-paper methods, it becomes increasingly difficult to tell if a bug is present based on model outputs.
@@ -121,7 +121,7 @@ In this primer we introduce unit testing and demonstrate its use on an example i
 We also give an overview of the available testing frameworks in various languages commonly used by infectious disease modellers.
 
 # Unit testing foundations
-At the heart of every unit test is a function output, its known/expected value and a process to compare the two.
+At the heart of every unit test is a function output, its known or expected value and a process to compare the two.
 For the square root function $\sqrt{x}$ (`sqrt(x)` in \emph{R} [@R]), we would write a test that runs the function for the number 4 i.e. `sqrt(x = 4)` and compares it to the correct answer i.e. 2.
 However, often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover standard usage as well as _corner case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
@@ -197,19 +197,18 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>%
 Usually we would make some output plots to explore if our code is performing sensibly.
 Plotting the time course of individuals' infection pathogen indicates repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
 However, if we look at the proportion of each pathogen through time (not shown here) we quickly see that the pathogen proportions are identical through time and so there must be a bug hiding.
-This simple example demonstrates that:
-
-* Bugs can be subtle.
-* It is not easy to notice an error, even in just 7 lines of code. Perhaps you can find it? The solution is in the next paragraph.
-* It is much easier to debug code when you know there is a bug. 
-* While plotting simulation runs are an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. It is a generally ineffective method because a human has to perform this scan every test run.
-
+This simple example demonstrates that: 
+Firstly, bugs can be subtle.
+Secondly, it is not easy to notice an error, even in just 7 lines of code. 
+Thirdly, it is much easier to debug code when you know there is a bug. 
+Fourthly, while plotting simulation runs is an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. 
+Manually checking plots is a time consuming and non-scalable method because a human has to perform this scan every test run.
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
 \newline
 \newline
 The cause of the bug is that `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone swaps their infection pathogen on a one-to-one basis rather than one-to-many as required by the model.
-Setting `replace = TRUE` fixes this and when we plot the proportion of each pathogen (Fig. \@ref(fig:correctplots)) we see the correct behaviour (one pathogen drifting to fixation).
-We will now develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end (\@ref(correctcode)). 
+Setting `replace = TRUE` fixes this (\@ref(correctcode)) and when we plot the proportion of each pathogen (Fig. \@ref(fig:correctplots)) we see the correct behaviour (one pathogen drifting to fixation).
+In the subsequent sections we will develop this example as we consider different concepts in unit testing, resulting in well-tested code by the end. 
 \newline
 ```{r, correctcode, ref = "correctcode", codecap = "Corrected base code", results = 'hide', echo = TRUE}
 N <- 12
@@ -231,15 +230,15 @@ for(t in seq(2, t)){
   matplot(type = 'l', xlab = 'Time', ylab = 'Proportion', lwd = 2)
 ```
 
-# Basic testing
-To ensure the unit test is evaluating the same code as is used in the actual analysis, the model code needs to be defined once within a function.
-This same function is then used for the unit test in isolation or as part of the larger model codebase.
+# Basic unit testing
+## Write small functions {-#compactfuns}
 
-## Write compact functions {-#compactfuns}
+To ensure the unit tests are evaluating the same code as is used in the actual analysis, the model code needs to be defined once within a function.
+This same function is then used for the unit tests as well as part of the larger model codebase.
 Make your functions compact with a single clearly-defined operation.
-We have defined a function `initialisePop()` to initialise the population and another `updatePop()` to run the simulation (\@ref(compactfunctions)).
+We have defined a function, `initialisePop()`, to initialise the population and another, `updatePop()`, to run one iteration of the simulation (\@ref(compactfunctions)).
 Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
-We also modify `initialisePop(..., pathogens)` so that we can vary the number of pathogens.
+At this stage we have also modified the code so that we can vary the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
 \newline
 ```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into more compact functions", result = 'hide'}
 initialisePop <- function(t, N, pathogens){
@@ -273,8 +272,8 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 
 `initialisePop()` has three arguments that require testing.
 First we initialise the population, and then alter each argument in turn.
-Arguments `t` and `N` directly change the expected dimension of matrix `I` so we check them together.
-For the last argument we test that the number of pathogens is equal to the `pathogens` requested.
+Arguments `t` and `N` directly change the expected dimension of the returned matrix so we check that the output of the function is the expected size.
+For the `pathogen` argument we test that the number of pathogens is equal to the number requested.
 \newline
 ```{r, test_all_args, ref = "testallargs", codecap = "Test all function arguments in turn", results = 'hide'}
 pop1 <- initialisePop(t = 2, N = 3, pathogens = 3) 
@@ -315,7 +314,7 @@ expect_true(all(!is.na(pop2[1:2,])))
 In the end an entire model only runs when its functions work together seamlessly. 
 So we next check their connections; achieved through nesting functions together, or defining them at a higher level.
 Developing at a higher level means we should check macro aspects of the model.
-We now expect there to be no `NA`s left in matrix `I` and every element to be one of the pathogens.
+We now expect there to be no `NA`s left in the population matrix and every element to be one of "a", "b" or "c".
 \newline
 ```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check higher-level functionality", result = 'hide'}
 fullSim <- function(t, N, pathogens){
@@ -327,7 +326,9 @@ fullSim <- function(t, N, pathogens){
 }
 
 pop <- fullSim(t = 12, N = 20, pathogens = 3)
-expect_true(!any(is.na(pop))) # expect no NAs
+
+# expect no NAs
+expect_true(!any(is.na(pop))) 
 # expect all 3 pathogens contained within
 expect_true(all(pop %in% c("a", "b", "c"))) 
 ```
