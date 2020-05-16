@@ -561,33 +561,24 @@ If we write code that tests standard values of `x` and `y` such as `2 * divide(3
 \newline
 \newline
 We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying if the returned population had the correct number of pathogens.
-However, if we set the `pathogens` argument to be greater than the number of individuals in the population, the current function does not error nor give the answer we expected either.
-Instead, we get a population with the same number of pathogens as individuals.
+However, if we set the `pathogens` argument to be greater than the number of individuals in the population we get a population with `N` pathogens.
+The function does not therefore pass the test we defined in \@ref(testallargs).
 \newline
 ```{r, edge2, ref = "edge2", codecap = "initialisePop does not give a population with the correct number of pathogens if N is less than pathogens.", eval = FALSE}
-pop <- initialisePop(t = 10, N = 2, pathogens = 3) 
-expect_equal(length(unique(pop[1,])), 3)
+pop <- initialisePop(t = 10, N = 4, pathogens = 5) 
+expect_equal(length(unique(pop[1,])), 5)
 ```
 
-Again, the best solution here is to add a check at the beginning of the function.
-We now expect that the function should return an error if the user asks for more pathogens than individuals.
+For edge cases like this it may be rather subjective what the correct behaviour should be.
+It might be appropriate for the function to throw an error or give a warning if the user requests more pathogens than individuals.
+Here however, we will decide that this behaviour is actually the behaviour we want.
+The test above was still useful to highlight the behaviour.
+Now however, our expected output from the function has changed and so we change our test to reflect that; we now expect a population with `N` pathogens.
 \newline
-```{r, edge3, ref = "edge3", codecap = "Check that pathogens is not larger than N", eval = FALSE}
-
-initialisePop <- function(t, N, pathogens){
-  
-  # Argument checks
-  if(length(pathogens) > 1) stop('pathogens must have length 1')
-  if(length(t) > 1) stop('t must have length 1')
-  if(pathogens > N) stop('N must be greater than pathogens')
-  
-  I <- matrix(data = NA, nrow = t, ncol = N)
-  I[1,] <- rep(x = letters[1:pathogens], length.out = N)
-  return(I)
-}
-
-expect_error(initialisePop(t = 10, N = 2, pathogens = 3),
-             'N must be')
+```{r, edge3, ref = "edge3", codecap = "Check that pathogens is equal to N", eval = FALSE}
+N <- 4
+pop <- initialisePop(t = 10, N = N, pathogens = N + 1) 
+expect_equal(length(unique(pop[1,])), N)
 ```
 
 
