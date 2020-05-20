@@ -105,7 +105,7 @@ These increases in model complexity are accompanied with growing codebases.
 As the mathematical methods depend increasingly on numerical solutions rather than analytical pen-and-paper methods, it becomes more difficult to tell if a bug is present based on model outputs alone.
 
 Traditionally, the workflow is to write the complete code, run the model and examine plots of the output.
-This crude *ad hoc* testing approach can miss many bugs.
+This crude _ad hoc_ testing approach can miss many bugs.
 Furthermore, this workflow is biased as models that show expected behaviour are assumed bug-free, whereas the opposite gets more scrutiny.
 
 _Unit testing_ is a formally-defined, principled framework that compares comprehensive output scenarios from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
@@ -118,7 +118,7 @@ We also outline the available testing frameworks in various languages commonly u
 
 # Unit testing foundations
 At the heart of every _unit test_ is a function output, its known or expected value and a process to compare the two.
-For the square root function $\sqrt{x}$ (`sqrt(x)` in _R_ [@R]), we could write a test that runs the function for the number 4 i.e. `sqrt(x = 4)` and compares it to the correct answer i.e. 2.
+For the square root function $\sqrt{x}$ (`sqrt(x)` in _R_), we could write a test that runs the function for the number 4, i.e. `sqrt(x = 4)`, and compares it to the correct answer i.e. 2.
 However, often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover standard usage as well as _corner case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
@@ -135,25 +135,25 @@ There are a number of ways to incorporate unit testing into your programming wor
 2. These same tests should be regularly run as you develop new code.
 If a change causes the older tests to break, this points to the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
 3. Whenever a bug is found in the code outside of the existing testing framework, a new test should be written to capture it. 
-Then if the bug re-emerges it should be caught.
+Then if the bug re-emerges it will hopefully be caught.
 4. You can write tests before you write code---also known as test-driven development.
-This can help development planning: write tests that define the desired functionality and continue programming, provided all tests keep passing.
-Frameworks for formalising this are discussed later in the paper.
+This can help development planning: write tests that define the desired functionality and continue programming, until all the tests pass.
 
 # An example multi-pathogen re-infection model
-
-Here we define a toy epidemiological model and then demonstrate how to effectively write unit tests for it in _R_ code.
-Consider a multi-pathogen system, with a population of $N$ infected individuals who each get superinfected by a new pathogen at every time step (Fig. \ref{fig:modelexample}).
-In this toy example, we imagine that individuals can only be infected with one pathogen at a time.
-Some aspects of this model could reflect the dynamics of a population where specific antibiotics are used regularly i.e. each time step an individual is infected, diagnosed and treated suboptimally, leaving the individual susceptible to infection from any pathogen, including the one they were just treated for. The aim of this model however is not to be realistic but serve as learning tool with succinct code.
 ```{r modelexample, echo=FALSE, out.width="100%", fig.cap="The 3-pathogen system with arrows showing the possible transitions at every time step.", out.width = 150}
 include_graphics("unit_testing_files/modelexample.png")
 ```
-Each individual is defined by the pathogen they are currently infected with $I_{it} \in \{a, b, c\}$ for a 3-pathogen system. 
+
+Here we define a toy epidemiological model and then demonstrate how to effectively write unit tests for it in _R_ code.
+Consider a multi-pathogen system, with a population of $N$ infected individuals who each get infected by a new pathogen at every time step (Fig. \ref{fig:modelexample}).
+In this toy example, we imagine that individuals can only be infected with one pathogen at a time.
+Some aspects of this model could reflect the dynamics of a population where specific antibiotics are used regularly i.e. each time step an individual is infected, diagnosed and treated suboptimally, leaving the individual susceptible to infection from any pathogen, including the one they were just treated for. The aim of this model however is not to be realistic but serve as a learning tool with succinct code.
+
+Each individual $i$, at time $t$, is defined by the pathogen they are currently infected with $I_{it} \in \{a, b, c\}$ for a 3-pathogen system. 
 The population is therefore defined by a length $N$ state vector $\mathbf{I}_t$ = $(I_{it})_{i=[1,N]}$.
-Each time step, everyone's infection status is updated as:
+Each time step, every individual's infection status is updated as:
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
-That is, at each iteration $t$, the new infection status of each individual $i$ is a Uniform random sample from the set of infection statuses in the previous iteration (including itself $I_{i,t-1}$).
+That is, at each iteration, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iteration (including itself $I_{i,t-1}$).
 Certainly this toy model is naïve as it is governed by mass-action principles, ignoring contact and spatial dynamics. 
 Nevertheless it will serve its purpose. 
 \@ref(firstcode) shows our first attempt at implementing this model.
@@ -196,14 +196,14 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>%
 ```
 
 Usually we would make some output plots to explore if our code is performing sensibly.
-Plotting the time course of individuals' infection pathogen indicates repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
+Plotting the time course of one individuals' infection pathogen indicates repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
 However, if we look at the proportion of each pathogen through time (not shown here) we quickly see that the pathogen proportions are identical through time and so there must be a bug hiding.
-This simple example demonstrates that: 
+This simple example demonstrates a number of points.
 Firstly, bugs can be subtle.
 Secondly, it is not easy to notice an error, even in just 7 lines of code. 
 Thirdly, it is much easier to debug code when you know there is a bug. 
 Fourthly, while plotting simulation runs is an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. 
-Manually checking plots is a time consuming and non-scalable method because a human has to perform this scan every test run.
+Additionally, manually checking plots is a time consuming and non-scalable method because a human has to perform this scan every test run.
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
 \newline
 \newline
@@ -242,7 +242,7 @@ We have defined a function, `initialisePop()`, to initialise the population and 
 Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
 At this stage we have also enabled the varying of the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
 \newline
-```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into more compact functions", result = 'hide'}
+```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
 initialisePop <- function(t, N, pathogens){
   I <- matrix(data = NA, nrow = t, ncol = N)
   I[1,] <- rep(x = letters[1:pathogens], length.out = N)
@@ -295,7 +295,7 @@ expect_equal(length(unique(pop4[1,])), 5)
 
 We can also cover cases that expose deviations from the logical structure of the system.
 After initialising our population, we expect all the rows other than the first to contain `NA`.
-We also expect each of the pathogens $a$, $b$ and $c$ to occur at least once on the first row if `pathogens` $\geq 3$ and `N` $\geq 3$.
+We also expect each of the pathogens $a$, $b$ and $c$ to occur at least once on the first row if `pathogens` $= 3$ and `N` $\geq 3$.
 Finally, `updatePop()` performs a single simulation time step, so we expect only one additional row to be populated.
 Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\@ref(testcomplex)).
 \newline
@@ -315,7 +315,8 @@ expect_true(all(!is.na(pop2[1:2,])))
 
 In the end an entire model only runs when its functions work together seamlessly. 
 So we next check their connections; achieved through nesting functions together, or defining them at a higher level and checking the macro aspects of the model.
-After `fullSim()` is run in \@ref(combinesimplefunc), we would expect there to be no `NA`s left in the population matrix and every element to be either $a$, $b$ or $c$.
+We define a function `fullSim()` that runs both `initialisePop()` and `updatePop()` to yield one complete simulation.
+We would expect there to be no `NA`s in the output from `fullSim()` and every element to be either $a$, $b$ or $c$.
 \newline
 ```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check higher-level functionality", result = 'hide'}
 fullSim <- function(t, N, pathogens){
@@ -366,7 +367,7 @@ addInfectionStatus <- function(x, t, new_status){
   x[t,] <- new_status
 }
 
-updatePopCombined <- function(x, t, N){
+updatePop <- function(x, t, N){
   infector_pathogen <- chooseInfector(N)
   new_status <- newInfectionStatus(x[t-1,], infector_pathogen)
   x[t,] <- addInfectionStatus(x, t, new_status)
@@ -374,8 +375,9 @@ updatePopCombined <- function(x, t, N){
 }
 ```
 
-Two-thirds of `updatePopCombined()` is deterministic so can be checked as previously discussed.
-We still have `chooseInfector()` that is irreducibly stochastic, however there is a suitable technique for it in \@ref(teststochlargenum).
+Now, two-thirds of `updatePop()` is deterministic so can be checked as previously discussed.
+We still have `chooseInfector()` that is irreducibly stochastic.
+We now examine some techniques for directly testing the stochastic parts of a model.
 
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
