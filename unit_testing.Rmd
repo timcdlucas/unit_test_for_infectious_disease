@@ -23,7 +23,7 @@ address:
 abstract: |
   Modelling is one of the central methods for studying infectious disease epidemiology and is increasingly reliant on computers rather than pen-and-paper methods. 
   Models of infectious disease have guided health policy for epidemics including COVID-19 and Ebola as well as for endemic diseases such as malaria and tuberculosis. 
-  Yet a single coding bug could bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
+  Yet a single coding bug may bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
   Software engineering already provides a solution in _unit testing_, a coding method to avoid such bugs.
   We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. 
@@ -62,9 +62,9 @@ set.seed(01011885)
 # Introduction
 
 Modelling is an important tool for understanding fundamental biological processes in infectious disease dynamics, evaluating potential intervention efficacy and forecasting disease burden.
-At the time of writing, infectious disease modellers are playing a central role in the interpretation of available data on the COVID19 pandemic to inform policy design and evaluation [@ihme; @imperial; @hellewell2020feasibility].
+At the time of writing, infectious disease modellers are playing a central role in the interpretation of available data on the COVID-19 pandemic to inform policy design and evaluation [@ihme; @imperial; @hellewell2020feasibility].
 Similarly, policy on endemic infectious diseases, such as duration and frequency of control programmes and spatial prioritisation, is also directed by models [@behrend2020modelling]. 
-This work builds on a long history of modelling for policy [@heesterbeek2015modeling] and a general understanding of the dynamics of these systems.
+Such research builds on a long history of modelling for policy [@heesterbeek2015modeling] and a general understanding of the dynamics of infectious disease systems.
 
 <!--
 I have a list of high impact bugs, but in summary a few highlights:
@@ -86,9 +86,10 @@ https://retractionwatch.com/2016/09/26/error-in-one-line-of-code-sinks-2016-seer
 # Does have a basic regression test but this was probably added recently.
 --->
 
-Given the importance of modelling results, it is vital that they are both coded correctly and trusted.
+Given the importance of modelling results, it is vital that the code they rely on is both coded correctly and trusted.
 Bugs have been found in code used by many researchers [@bhandari2019characterization] and may lead to retractions [@retract].
-Outside of epidemiology, a paper that informed austerity policies globally was found to be fatally flawed [@herndon2014does] while in engineering bugs have caused the Mars Climate orbiter and the Mariner 1 spacecraft, to become lost or destroyed [@nasa; @board1999mars].
+Outside of epidemiology, a paper that informed austerity policies globally was found to be fatally flawed [@herndon2014does].
+In engineering bugs caused the Mars Climate orbiter and the Mariner 1 spacecraft to become lost or destroyed [@nasa; @board1999mars].
 The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
 
 > "I'm conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19. To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics..." [@ferg_tweet].
@@ -99,9 +100,9 @@ It is important to note however, that this is not an unusual statement for our f
 To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness and reliability [@den2019guidelines], yet this is not enough if the models themselves lack internal validity.
 
 Infectious disease modellers are rarely trained as professional programmers. 
-However, todays's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
+However, today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
-As the mathematical methods depend on numerical solutions rather than analytical pen-and-paper methods, it becomes increasingly difficult to tell if a bug is present based on model outputs alone.
+As the mathematical methods depend increasingly on numerical solutions rather than analytical pen-and-paper methods, it becomes more difficult to tell if a bug is present based on model outputs alone.
 
 Traditionally, the workflow is to write the complete code, run the model and examine plots of the output.
 This crude *ad hoc* testing approach can miss many bugs.
@@ -145,7 +146,7 @@ Here we define a toy epidemiological model and then demonstrate how to effective
 Consider a multi-pathogen system, with a population of $N$ infected individuals who each get superinfected by a new pathogen at every time step (Fig. \ref{fig:modelexample}).
 In this toy example, we imagine that individuals can only be infected with one pathogen at a time.
 Some aspects of this model could reflect the dynamics of a population where specific antibiotics are used regularly i.e. each time step an individual is infected, diagnosed and treated suboptimally, leaving the individual susceptible to infection from any pathogen, including the one they were just treated for. The aim of this model however is not to be realistic but serve as learning tool with succinct code.
-```{r modelexample, echo=FALSE, out.width="100%", fig.cap="The 3-pathogen system with arrows showing the possible transitions at every time step."}
+```{r modelexample, echo=FALSE, out.width="100%", fig.cap="The 3-pathogen system with arrows showing the possible transitions at every time step.", out.width = 150}
 include_graphics("unit_testing_files/modelexample.png")
 ```
 Each individual is defined by the pathogen they are currently infected with $I_{it} \in \{a, b, c\}$ for a 3-pathogen system. 
@@ -223,7 +224,7 @@ for(t in seq(2, t)){
 }
 ```
 
-```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each pathogen drifting to either superiority or extinction. Each pathogen is a different line.', out.width = "75%"}
+```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each pathogen drifting to either dominance or extinction. Each pathogen is a different line.', out.width = "75%"}
 (apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) / N) %>% 
   t %>% 
   matplot(type = 'l', xlab = 'Time', ylab = 'Proportion', lwd = 3, lty = c(1,2,4), 
@@ -432,7 +433,9 @@ However, it can be difficult to determine how many times is reasonable to run a 
 This strategy works best when we have a specific bug that occurred relatively frequently (perhaps once every ten simulations or so).
 We say that if the bug does not occur even once in 500 simulations, then we are pretty sure we have fixed it.
 In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
-For a reasonably large simulation we would expect this to seldom happen, so we can run short simulations to check that this specific bug does not occur by confirming that the proportion of each pathogen is not always the same between the first and last time point.
+We would expect this to happen only very rarely.
+We can run a large number of short simulations to check that this specific bug does not occur by confirming that the proportion of each pathogen is not always the same between the first and last time point.
+As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we know the bug has been fixed.
 \newline
 ```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
 set.seed(11121955)
