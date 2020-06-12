@@ -38,7 +38,7 @@ output:
 csl: plos.csl
 ---
 
-```{r, setup, echo=FALSE, results = 'hide'}
+```{r, setup, echo=FALSE, results = 'hide', message = FALSE}
 rm(list = ls())
 library(knitr)
 oldSource <- knit_hooks$get("source")
@@ -96,7 +96,10 @@ The issue of trust was highlighted recently when Neil Ferguson, one of the leadi
 
 The code that was released did not include any tests [@ferg_github].
 The tweet and lack of tests garnered considerable backlash (much of which was politically motivated), with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
-It is important to note however, that this is not an unusual statement for our field, or for some of the authors of this article. 
+Subsequent work has tidied the code base, and added documentation, while independent code reviews have supported the results of the study [@ferg_check].
+It is understandable that during the fast-moving, early stages of a pandemic, other priorities were put above testing and documenting the code.
+However, this simply reinforces that case should be taken with code when it is first written so that it is already well tested for when it is needed under short deadlines.
+It is also important to note, that a lack of tests is not unusual in our field, or for some of the authors of this article. 
 To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness and reliability [@den2019guidelines], yet this is not enough if the models themselves lack internal validity.
 
 Infectious disease modellers are rarely trained as professional programmers. 
@@ -416,12 +419,12 @@ expect_true(all(manyPops %in% c("11", "22", "12", "21")))
 
 While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
-For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one in a single time step.
+For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
 In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
 With a population of one thousand, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
 We set the seed of a random number generator so that the test is reproducible, otherwise it will be hard to locate the bug when it occurs sporadically.
 \newline
-```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Computing the probability of the stochastic test failing for 1000 individuals", results='hide'}
+```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
 set.seed(10261985)
 n <- 1e3
 infector_pathogen <- chooseInfector(n)
@@ -432,7 +435,7 @@ expect_true(any(duplicated(infector_pathogen)))
 
 If we have an event that we know should not happen, we can use a large number of simulations to provide stronger evidence that is does not stochastically occur.
 However, it can be difficult to determine how many times is reasonable to run a simulation, especially if time is short.
-This strategy works best when we have a specific bug that occurred relatively frequently (perhaps once every ten simulations or so).
+This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
 We say that if the bug does not occur even once in 500 simulations, then we are pretty sure we have fixed it.
 In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
 We would expect this to happen only very rarely.
