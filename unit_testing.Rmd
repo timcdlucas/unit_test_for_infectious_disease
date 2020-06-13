@@ -242,12 +242,12 @@ for(t in seq(2, t)){
 # Basic unit testing
 ## Write small functions {-#compactfuns}
 
-To ensure the unit tests are evaluating the exact code as run in the analysis, the model code should be defined once within a function.
-This same function is then run in both unit tests as well as part of the larger model codebase.
-Make your functions compact with a single clearly-defined operation.
+To ensure the unit tests are evaluating the exact code as run in the analysis, code should be structured in functions, which can be used to both run unit tests with and to generate results as part of a larger model codebase.
+Make your functions compact with a single clearly-defined task.
 We have defined a function, `initialisePop()`, to initialise the population and another, `updatePop()`, to run one iteration of the simulation (\@ref(compactfunctions)).
 Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
 At this stage we have also enabled the varying of the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
+The first iteration of the simulation, `I[1,]`, is initialised with a repeating sequence of letters.
 \newline
 ```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
 initialisePop <- function(t, N, pathogens){
@@ -264,17 +264,23 @@ updatePop <- function(x, t, N){
 
 ## Test simple cases first {-#easycases}
 
-If we start with a small population with few pathogens, we can then easily anticipate what the initialised population will look like (\@ref(testsimplefirst)).
+If we start with a small population with few pathogens, we can then easily work out exactly what the initialised population should look like (\@ref(testsimplefirst)).
+When we initialise a population with three individuals and three pathogens, we will get the sequence "a", "b", "c" as seen in the first test.
+When the number of individuals is greater than the number of pathogens, the sequence will repeated as seen in the second test.
+Finally, when the number of individuals is greater than the number of pathogens, but is not a multiple of the number of pathogens, the sequence will have an incomplete repeat at the end as seen in the third test.
+In this sequence of tests, we have taken our logical understanding of what the function should do, and used it to make predictions of what the results should be.
+We then test that the result is the same as what we expect.
 \newline
 ```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect", results = 'hide'}
-pop1 <- initialisePop(t = 2, N = 3, pathogens = 2) 
-expect_equal(pop1[1,], c("a", "b", "a"))
+pop1 <- initialisePop(t = 2, N = 3, pathogens = 3) 
+expect_equal(pop1[1,], c("a", "b", "c"))
 
-pop2 <- initialisePop(t = 2, N = 3, pathogens = 3) 
-expect_equal(pop2[1,], c("a", "b", "c"))
+pop2 <- initialisePop(t = 2, N = 6, pathogens = 3) 
+expect_equal(pop2[1,], c("a", "b", "c", "a", "b", "c"))
 
-pop3 <- initialisePop(t = 2, N = 4, pathogens = 2) 
-expect_equal(pop3[1,], c("a", "b", "a", "b"))
+pop3 <- initialisePop(t = 2, N = 5, pathogens = 3) 
+expect_equal(pop3[1,], c("a", "b", "c", "a", "b"))
+
 ```
 
 ## Test all arguments {-#testargs}
@@ -282,7 +288,7 @@ expect_equal(pop3[1,], c("a", "b", "a", "b"))
 `initialisePop()` has three arguments to check.
 First we initialise the population, and then alter each argument in turn (\@ref(testallargs)).
 Arguments `t` and `N` directly change the expected dimension of the returned matrix so we check that the output of the function is the expected size.
-For the `pathogen` argument we test that the number of pathogens is equal to the number requested.
+For the `pathogens` argument we test that the number of pathogens is equal to the number requested.
 \newline
 ```{r, test_all_args, ref = "testallargs", codecap = "Test all function arguments in turn", results = 'hide'}
 pop1 <- initialisePop(t = 2, N = 3, pathogens = 3) 
@@ -316,6 +322,9 @@ expect_true(all(c("a", "b", "c") %in% pop1[1,]))
 pop2 <- updatePop(pop1, t = 2, N = 12)
 # after update expect 1st & 2nd row not to have NAs
 expect_true(all(!is.na(pop2[1:2,]))) 
+# and also expect that rows other than the 1st & 2nd are still NAs.
+expect_true(all(is.na(pop2[-c(1:2),]))) 
+
 ```
 
 ## Combine simple functions and test them at a higher-level{-#combine}
@@ -356,40 +365,35 @@ Isolate the stochastic parts of your code.
 For example, `updatePop()` performs stochastic and deterministic operations in one line (\@ref(compactfunctions)).
 Firstly, `updatePop()` stochastically samples who gets infected by whom at iteration `t`.
 Then it takes those infection events and assigns the new infectious status for each individual.
-Finally, it adds the new infectious statuses to the full population matrix for that iteration.
 We demonstrate in \@ref(splitdeterstoch) how this could be split.
-We accept this is a fairly exaggerated example and splitting a single line of code into three functions is rare!
-The more common scenario is splitting a multi-line function which also brings benefits of code organisation so it does not feel like extra effort. 
+We accept this is a fairly exaggerated example and splitting a single line of code into two functions is rare!
+The more common scenario is splitting a multi-line function into smaller functions which also brings benefits of code organisation so it does not feel like extra effort. 
 \newline
 ```{r, split_deter_stoch, ref = "splitdeterstoch", codecap = "Isolation of the determistic and stochastic elements"}
 chooseInfector <- function(N){
   sample(x = N, size = N, replace = TRUE)
 }
 
-newInfectionStatus <- function(old_status, infector_pathogen){
-  old_status[infector_pathogen]
-}
-
-addInfectionStatus <- function(x, t, new_status){
-  x[t,] <- new_status
+updateInfectionStatus <- function(x, t, infector_pathogen){
+  x[t, ] <- x[t - 1, infector_pathogen]
+  return(x)
 }
 
 updatePop <- function(x, t, N){
   infector_pathogen <- chooseInfector(N)
-  new_status <- newInfectionStatus(x[t-1,], infector_pathogen)
-  x[t,] <- addInfectionStatus(x, t, new_status)
+  x <- updateInfectionStatus(x, t, infector_pathogen)
   return(x)
 }
 ```
 
-Now, two-thirds of `updatePop()` is deterministic so can be checked as previously discussed.
+Now, half of `updatePop()` is deterministic so can be checked as previously discussed.
 We still have `chooseInfector()` that is irreducibly stochastic.
 We now examine some techniques for directly testing the stochastic parts of a model.
 
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
-In the same way that we used simple parameters values, we can often find simple cases for which our stochastic functions become deterministic.
-For example, samples from $X\sim\text{Bernoulli}(p)$ always give zeroes for $p=0$ or ones for $p=1$.
+In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which our stochastic functions become deterministic.
+For example, samples from $X\sim\text{Bernoulli}(p)$ always be zeroes for $p=0$ or ones for $p=1$.
 In the case of a single pathogen (\@ref(teststochdetermin)), the model is no longer stochastic.
 So initialisation with one pathogen means the second time step should equal the first.
 \newline
@@ -426,7 +430,8 @@ This typically involves large sample sizes or numbers of stochastic runs.
 For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
 In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
 With a population of one thousand, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
-We set the seed of a random number generator so that the test is reproducible, otherwise it will be hard to locate the bug when it occurs sporadically.
+As this test is now stochastic we should set the seed of the random number generator so that the test is reproducible.
+Setting the seed with `set.seed` means that each time the code is run, the same pseudo-random numbers will be generated.
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
 set.seed(10261985)
@@ -440,7 +445,8 @@ expect_true(any(duplicated(infector_pathogen)))
 If we have an event that we know should not happen, we can use a large number of simulations to provide stronger evidence that is does not stochastically occur.
 However, it can be difficult to determine how many times is reasonable to run a simulation, especially if time is short.
 This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
-We say that if the bug does not occur even once in 500 simulations, then we are pretty sure we have fixed it.
+If the bug occurs every ten simulations and we have not fixed it we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
+Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
 In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
 We would expect this to happen only very rarely.
 We can run a large number of short simulations to check that this specific bug does not occur by confirming that the proportion of each pathogen is not always the same between the first and last time point.
@@ -458,8 +464,9 @@ diffProportions <- function(x){
   !identical(table(x[1, ]), table(x[20, ]))
 }
 
-# Check that at least one simulation had 
-# non-identical proportions.
+# Check that at least one simulation had non-identical
+#   proportions. sapply runs the function diffProportions 
+#   on each list element of manySims i.e. each simulation.
 expect_true(any(sapply(manySims, diffProportions)))
 ```
 
@@ -471,26 +478,29 @@ As well as testing that functions work when given the correct inputs, we must al
 This typically involves the user inputting argument values that do not make sense.
 This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values.
 Therefore it is useful to test that functions fail gracefully if they are given incorrect inputs.
-This is especially true for 'external' functions, available to a user on a package's front-end.
+This is especially true for external, exported functions, available to a user on a package's front-end.
 However, it is not always obvious what constitutes an 'incorrect value' even to the person who wrote the code.
 In some cases, inputting incorrect argument values may cause the function to fail quickly. 
 In other cases code may run silently giving false results or take a long time to give an error.
-Both of these cases are serious or annoying and can be difficult to debug afterwards.
+Both of these cases can be serious or annoying and difficult to debug afterwards.
 \newline
 \newline
 Often for these cases, the expected behaviour of the function should be to give an error.
 There is no correct output for an epidemiological model with -1 pathogens. 
 Instead the function should give an informative error message.
 Often the simplest solution is to include argument checks at the beginning of functions.
-We can then use the `expect_error()` function to check that the function gives an error when it should.
-This function takes an expression as its first argument and errors if the expression does not throw an error.
+We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
+Tf the expression does not throw an error the test should throw an error (as this is not the expected behaviour).
+Conversely, if the expression does throw an error the test should pass and not throw an error. 
+We can use the `expect_error()` function for this task.
+This function takes an expression as its first argument and reports an error if the given expression does not throw an error as expected.
 \newline
 \newline
 We can first check that the code sensibly handles the user inputting a string instead of an integer for the number of pathogens.
 Because this expression throws an error, `expect_error()` does not throw an error and the test passes.
 \newline
 ```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect pathogen inputs", warning = FALSE}
-expect_error(initialisePop(t = 10, N = 4, pathogens = 'three'))
+expect_error(initialisePop(t = 10, N = 4, pathogens = "three"))
 ```
 
 Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
@@ -510,7 +520,7 @@ The same test now passes because `initialisePop()` throws an error when a vector
 initialisePop <- function(t, N, pathogens){
   
   # Add an argument check
-  if(length(pathogens) > 1) stop('pathogens must have length 1')
+  if(length(pathogens) > 1) stop("pathogens must have length 1")
   
   I <- matrix(data = NA, nrow = t, ncol = N)
   I[1,] <- rep(x = letters[1:pathogens], length.out = N)
@@ -535,8 +545,8 @@ The test will only pass if the error message contains the string provided.
 initialisePop <- function(t, N, pathogens){
   
   # Argument checks
-  if(length(pathogens) > 1) stop('pathogens must have length 1')
-  if(length(t) > 1) stop('t must have length 1')
+  if(length(pathogens) > 1) stop("pathogens must have length 1")
+  if(length(t) > 1) stop("t must have length 1")
 
   I <- matrix(data = NA, nrow = t, ncol = N)
   I[1,] <- rep(x = letters[1:pathogens], length.out = N)
@@ -544,7 +554,7 @@ initialisePop <- function(t, N, pathogens){
 }
 
 expect_error(fullSim(t = 1:100, N = 4, pathogens = 3), 
-             regexp = 't must have')
+             regexp = "t must have")
 
 ```
 
@@ -576,7 +586,8 @@ For edge cases like this it may be rather subjective what the correct behaviour 
 It might be appropriate for the function to throw an error or give a warning if the user requests more pathogens than individuals.
 Here however, we will decide that this behaviour is acceptable.
 The test above was still useful to highlight this unusual case.
-As our expected output from the function has changed, we should change our test to reflect that; we now expect a population with `N` pathogens.
+As our expected output from the function has changed, we should change our test; we now expect a population with `N` pathogens.
+We should however retain the test in \@ref(testallargs) so that we have two tests: one test checks that when `pathogens < N`, the number of unique pathogens in the population is equal to `pathogens`; the other test checks that when `pathogens > N`, the number of unique pathogens is equal to `N`.
 \newline
 ```{r, edge3, ref = "edge3", codecap = "Check that pathogens is equal to N", eval = FALSE}
 N <- 4
@@ -634,7 +645,7 @@ These services are often free on a limited basis, or free if your code is open s
 \newline
 \newline
 We briefly describe the setup of the simplest case---Travis CI.
-Setting it up is very straightforward for _R_ code already organised into a package and hosted openly on GitHub. 
+Setting testing up is very straightforward for _R_ code already organised into a package and hosted openly on GitHub. 
 Within your version-controlled folder that contains the _R_ code, you add a one-liner `.travis.yml` file that contains a description of which language the code uses.
 \newline
 ```{awk, travis, ref = "travis", codecap = "A basic travis yml file.", eval = FALSE}
@@ -657,7 +668,7 @@ Setting it up is simple but writing good tests is a skill that takes time, pract
 However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results. 
 These qualities are important for the reproducibility of science, but are particularly relevant where code may be shared between individuals or groups, or where you wish to publish your code as a package to be used by others.
 Our aim in this paper was to demonstrate tailored results for infectious disease modelling. 
-There are number of standard programming approaches to unit testing which would be good followup reading (wickham2015r Chapter 7, @osborne2014ten, @wilson2014best). 
+There are number of standard programming approaches to unit testing which would be good followup reading (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best). 
 As demonstrated here, it is initially time consuming to program in this way, but over time it will become habitual and both you and the policy-makers who use your models will benefit from it.
 
 # Code availability
@@ -665,12 +676,12 @@ As demonstrated here, it is initially time consuming to program in this way, but
 Please see the fully-reproducible and version-controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease}.
 
 # Funding sources
-TMP & TDH gratefully acknowledge funding of the NTD Modelling Consortium by the Bill & Melinda Gates Foundation (BMGF) (grant number OPP1184344). 
+TMP, TDH, TCDL and ELD gratefully acknowledge funding of the NTD Modelling Consortium by the Bill & Melinda Gates Foundation (BMGF) (grant number OPP1184344). 
 Views, opinions, assumptions or any other information set out in this article should not be
 attributed to BMGF or any person connected with them. 
 TMP's PhD is supported by the Engineering & Physical Sciences Research Council, Medical
 Research Council and University of Warwick (grant number EP/L015374/1).
-TMP thanks Big Data Institute for hosting him during this work. 
+TMP thanks the Big Data Institute for hosting him during this work. 
 All funders had no role in the study design, collection, analysis, interpretation of data,
 writing of the report, or decision to submit the manuscript for publication.
 
