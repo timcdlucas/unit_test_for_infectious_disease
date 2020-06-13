@@ -11,7 +11,8 @@ License: MIT + file LICENSE
 Imports:
     ggplot2,
     rmarkdown,
-    testthat
+    testthat,
+    tidyr
 Suggests:
     bookdown,
     rticles
