@@ -20,12 +20,12 @@ address:
   - code: MathSys CDT
     address: MathSys CDT, University of Warwick, UK
 abstract: |
-  Modelling is one of the central methods for studying infectious disease epidemiology and is increasingly reliant on large-scale computation and inference. 
-  Models of infectious disease have guided health policy for epidemics including COVID-19 and Ebola as well as for endemic diseases such as malaria and tuberculosis. 
+  Infectious disease epidemiology is increasingly reliant on large-scale computation and inference. 
+  Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases such as malaria and tuberculosis. 
   Yet a single coding bug may bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
-  Software engineering already provides a solution in _unit testing_, a coding method to avoid such bugs, but unit testing is rarely used in infectious disease epidemiology, partly because of a lack of easily applicable case studies from this field.
-  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. 
+  Unit testing is a coding method to avoid such bugs, but unit testing is rarely used in epidemiology.
+  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models. 
 keywords: unit testing, software development, reproducible science, computational models
 bibliography: unit_testing.bib
 output:
