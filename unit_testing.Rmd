@@ -4,20 +4,19 @@ title: |
 author: 
   - name: Tim CD Lucas
     email: timcdlucas@gmail.com
-    affiliation: Big Data Institute
+    affiliation: [Big Data Institute, Imperial]
     corresponding: timcdlucas@gmail.com
   - name: Timothy M Pollington
-    email: timothy.pollington@gmail.com
     affiliation: [Big Data Institute, MathSys CDT]
   - name: Emma L Davis
-    email: emma.davis@bdi.ox.ac.uk
     affiliation: Big Data Institute
   - name:  T Déirdre Hollingsworth
-    email: timcdlucas@gmail.com
     affiliation: Big Data Institute
 address:
   - code: Big Data Institute
     address: Big Data Institute, Li Ka Shing Centre for Health Information and Discovery, University of Oxford, UK
+  - code: Imperial
+    address: Centre for Environment and Health, School of Public Health, Imperial College, UK
   - code: MathSys CDT
     address: MathSys CDT, University of Warwick, UK
 abstract: |
@@ -25,13 +24,13 @@ abstract: |
   Models of infectious disease have guided health policy for epidemics including COVID-19 and Ebola as well as for endemic diseases such as malaria and tuberculosis. 
   Yet a single coding bug may bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
-  Software engineering already provides a solution in _unit testing_, a coding method to avoid such bugs , but unit testing is rarely used in infectious disease epidemiology, partly because of a lack of easily applicable case studies from this field.
+  Software engineering already provides a solution in _unit testing_, a coding method to avoid such bugs, but unit testing is rarely used in infectious disease epidemiology, partly because of a lack of easily applicable case studies from this field.
   We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models and encourage modellers to try it out in their next script. 
-author_summary: |
+keywords: unit testing, software development, reproducible science, computational models
 bibliography: unit_testing.bib
 output:
   bookdown::pdf_book:
-    base_format: rticles::plos_article
+    base_format: rticles::elsevier_article
     includes:
       in_header: preamble.tex
     number_sections: true
@@ -88,7 +87,7 @@ https://retractionwatch.com/2016/09/26/error-in-one-line-of-code-sinks-2016-seer
 --->
 
 Given the importance of modelling results, it is vital that the code they rely on is both coded correctly and trusted.
-Bugs can be caused by typoes, code behaving in unexpected ways, or logical flaws in the construction of the code.
+Bugs can be caused by typos, code behaving in unexpected ways, or logical flaws in the construction of the code.
 Outside of epidemiology, bugs have been found in code that had been used by many researchers [@bhandari2019characterization] and may lead to retractions [@retract].
 Bugs have also been found in highly influential work; a paper that informed austerity policies globally was found to have a fatal computational mistake [@herndon2014does].
 In engineering bugs caused the Mars Climate orbiter and the Mariner 1 spacecraft to become lost or destroyed [@nasa; @board1999mars].
@@ -97,18 +96,18 @@ The issue of trust was highlighted recently when Neil Ferguson, one of the leadi
 
 > "I'm conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19. To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics..." [@ferg_tweet].
 
-The code that was released did not include any tests [@ferg_github] but subsequent work has added documentation, while independent code reviews have supported the results of the study [@ferg_check].
-The tweet and lack of tests garnered considerable backlash (some of which may have been politically motivated [@ferg_pol] more?todo), with observers from the software industry noting that code should be both documented and tested to ensure its correctness.
+The code that was released did not include any tests [@ferg_github] but subsequent work has added documentation, while independent code reviews have supported the results of the study [@ferg_check; @it].
+The tweet and lack of tests garnered considerable backlash (some of which may have been politically motivated [@ferg_pol]), with observers from the software industry noting that code should be both documented and tested to ensure its correctness [@it].
 It is understandable that during the fast-moving, early stages of a pandemic, other priorities were put above testing and documenting the code.
 However, this simply reinforces that time should be taken to test and document code when it is first written so that it is already well tested for when it is needed under short deadlines.
-It is also important to note, that a lack of tests is not unusual in our field, or for some of the authors of this article. 
+It is also important to note that a lack of tests is not unusual in our field, or for some of the authors of this article. 
 To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness and reliability [@den2019guidelines], yet this is not enough if the models themselves lack internal validity.
 
 
-Infectious disease modellers are rarely trained as professional programmers and recently some
-observers have made the case that this was due to a lack of funding. 
-It is also notable that there are few texts available which apply unit testing to this area. 
-Infectious disease modellers have sought to address these issues (as in the case above) by having multiple, independently developed models to inform policy, to address structural and parameter uncertainty.
+Infectious disease modellers are rarely trained as professional programmers [@it] and recently some
+observers have made the case that this has been due to a lack of funding [@funds]. 
+It is also notable that there are few texts available which demonstrate the use of unit testing to check infectious disease models. 
+Infectious disease modellers have sought to address these issues (as in the case above) by having multiple, independently developed models to inform policy, to address structural and parameter uncertainty [@den2019guidelines; @hollingsworth2017learning].
 
 Whilst there many drivers and attempts to address this problem with code robusteness, today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
@@ -120,15 +119,15 @@ Furthermore, this workflow is biased as models that show expected behaviour are 
 
 _Unit testing_ is a formally-defined, principled framework that compares comprehensive output scenarios from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
 Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _python_ [@python] and are standard practice in the software industry.
-These testing concepts also apply to ecology and other sciences but here we focus on infectious diseases.
+These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
 Infectious disease modelling presents specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
 
-In this primer we introduce unit testing with a demonstration on an infectious disease model.
+In this primer we introduce unit testing with a demonstration of an infectious disease model.
 We also outline the available testing frameworks in various languages commonly used by modellers.
 
 # Unit testing foundations
 At the heart of every _unit test_ is a function output, its known or expected value and a process to compare the two.
-For the square root function $\sqrt{x}$ (`sqrt(x)` in _R_), we could write a test that runs the function for the number 4, i.e. `sqrt(x = 4)`, and compares it to the correct answer i.e. 2.
+For the square root function ($\sqrt{x}$ or `sqrt(x)` in _R_), we could write a test that runs the function for the number 4, i.e. `sqrt(x = 4)`, and compares it to the correct answer i.e. 2.
 However, often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover standard usage as well as _corner case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
@@ -172,7 +171,7 @@ t <- 20 # study length
 # create the matrix to store the simulation data
 I <- matrix(data = NA, nrow = t, ncol = N)
 
-# Initialise the population at t = 1 with a fixed configuration
+# Initialise the population at t = 1 with a repeating configuration
 I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
 # At each time step, everyone is re-infected 
@@ -201,7 +200,7 @@ apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>%
 ```
 
 Usually we would make some output plots to explore if our code is performing sensibly.
-Plotting the time course of one individuals' infection pathogen indicates repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
+Plotting the time course of which pathogen is infecting one individual shows repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
 However, if we look at the proportion of each pathogen through time (not shown here) we quickly see that the pathogen proportions are identical through time and so there must be a bug that we had not originally noticed.
 This simple example demonstrates a number of points.
 Firstly, bugs can be subtle.
@@ -271,7 +270,7 @@ updatePop <- function(x, t, N){
 
 If we start with a small population with few pathogens, we can then easily work out exactly what the initialised population should look like (\@ref(testsimplefirst)).
 When we initialise a population with three individuals and three pathogens, we will get the sequence "a", "b", "c" as seen in the first test.
-When the number of individuals is greater than the number of pathogens, the sequence will repeated as seen in the second test.
+When the number of individuals is greater than the number of pathogens, the sequence will be repeated as seen in the second test.
 Finally, when the number of individuals is greater than the number of pathogens, but is not a multiple of the number of pathogens, the sequence will have an incomplete repeat at the end as seen in the third test.
 In this sequence of tests, we have taken our logical understanding of what the function should do, and used it to make predictions of what the results should be.
 We then test that the result is the same as what we expect.
@@ -398,7 +397,7 @@ We now examine some techniques for directly testing the stochastic parts of a mo
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
 In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which our stochastic functions become deterministic.
-For example, samples from $X\sim\text{Bernoulli}(p)$ always be zeroes for $p=0$ or ones for $p=1$.
+For example, samples from $X\sim\text{Bernoulli}(p)$ will always be zeroes for $p=0$ or ones for $p=1$.
 In the case of a single pathogen (\@ref(teststochdetermin)), the model is no longer stochastic.
 So initialisation with one pathogen means the second time step should equal the first.
 \newline
@@ -447,14 +446,17 @@ infector_pathogen <- chooseInfector(n)
 expect_true(any(duplicated(infector_pathogen)))
 ```
 
-If we have an event that we know should not happen, we can use a large number of simulations to provide stronger evidence that is does not stochastically occur.
+If we have an event that we know should never happen, we can use a large number of simulations to provide stronger evidence that it does not stochastically occur.
 However, it can be difficult to determine how many times is reasonable to run a simulation, especially if time is short.
 This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
 If the bug occurs every ten simulations and we have not fixed it we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
 Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
+\newline
+\newline
+Similarly, a bug might cause an event that should be rare to happen very regularly or even every time the code is run.
 In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
 We would expect this to happen only very rarely.
-We can run a large number of short simulations to check that this specific bug does not occur by confirming that the proportion of each pathogen is not always the same between the first and last time point.
+We can run a large number of short simulations to check that this specific bug is not still occurring by confirming that the proportion of each pathogen is not always the same between the first and last time point.
 As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we know the bug has been fixed.
 \newline
 ```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
@@ -495,7 +497,7 @@ There is no correct output for an epidemiological model with -1 pathogens.
 Instead the function should give an informative error message.
 Often the simplest solution is to include argument checks at the beginning of functions.
 We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
-Tf the expression does not throw an error the test should throw an error (as this is not the expected behaviour).
+If the expression does not throw an error the test should throw an error (as this is not the expected behaviour).
 Conversely, if the expression does throw an error the test should pass and not throw an error. 
 We can use the `expect_error()` function for this task.
 This function takes an expression as its first argument and reports an error if the given expression does not throw an error as expected.
@@ -509,7 +511,7 @@ expect_error(initialisePop(t = 10, N = 4, pathogens = "three"))
 ```
 
 Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
-Here presumably the intent is to run a simulation with three pathogens: 1, 2 and 3.
+Here we are imagining that the users intent wass to run a simulation with three pathogens: 1, 2 and 3.
 \newline
 ```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
 expect_error(initialisePop(t = 5, N = 4, pathogens = 1:3))
@@ -578,7 +580,7 @@ We could test this function by noting that `y * divide(x, y)` should return `x`.
 If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
 \newline
 \newline
-We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying if the returned population had the correct number of pathogens.
+We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying that the returned population had the correct number of pathogens.
 However, if we set the `pathogens` argument to be greater than the number of individuals in the population we get a population with `N` pathogens.
 The function does not therefore pass the test we defined in \@ref(testallargs).
 \newline
@@ -611,10 +613,10 @@ If the code is to be part of a package then these tools are essential to run the
 These tools also provide a clean environment to highlight if a test was previously relying on objects defined outside of the test script.
 \newline
 \newline
-Other programming languages have similar testing frameworks too.
+Other programming languages have similar testing frameworks.
 Their specifics differ but the main concept of comparing a function evaluation to the expected output remains the same.
 In _Julia_ there is the $\texttt{Test}$ package [@juliatest]. 
-The basic structure for tests with this package are demonstrated below.
+The basic structure for tests with this package is demonstrated below.
 We name the test and write a single expression that evaluates to `TRUE` or `FALSE`.
 For a _Julia_ package, unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
 \newline
@@ -627,7 +629,7 @@ end
 Finally, in _python_ we have the $\texttt{unittest}$ framework [@pythonunittest]; tests must be written into a class that inherits from the `TestCase` class.
 The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
-Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with `test_`.
+Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with "`test_`".
 \newline
 ```{r, testpy, ref = "testpy", codecap = "python test example", eval = FALSE}
 import unittest
@@ -649,9 +651,9 @@ There are various continuous integration services such as travis-ci.org, GitHub 
 These services are often free on a limited basis, or free if your code is open source.
 \newline
 \newline
-We briefly describe the setup of the simplest case---Travis CI.
+We briefly describe the setup of the simplest case usign Travis CI.
 Setting testing up is very straightforward for _R_ code already organised into a package and hosted openly on GitHub. 
-Within your version-controlled folder that contains the _R_ code, you add a one-liner `.travis.yml` file that contains a description of which language the code uses.
+Within your version-controlled folder that contains the _R_ code, you add a one-liner file named "`.travis.yml`" that contains a description of which language the code uses.
 \newline
 ```{awk, travis, ref = "travis", codecap = "A basic travis yml file.", eval = FALSE}
 language:r
@@ -669,7 +671,7 @@ Unit testing is a well-defined, principled way we can do this.
 There are many frameworks that make aspects of unit testing automatic and more informative and these should be used where possible.
 \newline
 \newline
-Setting it up is simple but writing good tests is a skill that takes time, practice and thought.
+The basic principles of unit testing are simple but writing good tests is a skill that takes time, practice and thought.
 However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results. 
 These qualities are important for the reproducibility of science, but are particularly relevant where code may be shared between individuals or groups, or where you wish to publish your code as a package to be used by others.
 Our aim in this paper was to demonstrate tailored results for infectious disease modelling. 
