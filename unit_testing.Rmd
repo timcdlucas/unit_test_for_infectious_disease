@@ -34,7 +34,6 @@ output:
     includes:
       in_header: preamble.tex
     number_sections: true
-csl: plos.csl
 ---
 
 ```{r, setup, echo=FALSE, results = 'hide', message = FALSE}
@@ -43,7 +42,7 @@ library(knitr)
 oldSource <- knit_hooks$get("source")
 knit_hooks$set(source = function(x, options) {
   x <- oldSource(x, options)
-  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref,"}", x), x)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref, "}", x), x)
   ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
 })
 library(ggplot2)
@@ -60,6 +59,8 @@ set.seed(01011885)
 ```
 \newpage
 # Introduction
+
+\linenumbers
 
 Modelling is an important tool for understanding fundamental biological processes in infectious disease dynamics, evaluating potential intervention efficacy and forecasting disease burden.
 At the time of writing, infectious disease modellers are playing a central role in the interpretation of available data on the COVID-19 pandemic to inform policy design and evaluation [@ihme; @imperial; @hellewell2020feasibility].
@@ -147,8 +148,10 @@ Then if the bug re-emerges it will hopefully be quickly flagged so that the deve
 If a change causes the older tests to break, this points to the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
 
 # An example multi-pathogen re-infection model
+
+
 ```{r modelexample, echo=FALSE, out.width="100%", fig.cap="The 3-pathogen system with arrows showing the possible transitions at every time step.", out.width = 150}
-include_graphics("unit_testing_files/modelexample.png")
+include_graphics("figures/modelexample.png")
 ```
 
 Here we define a toy epidemiological model and then demonstrate how to effectively write unit tests for it in _R_ code.
@@ -318,15 +321,18 @@ Instead of testing by their numerical values, we verify logical statements of th
 \newline
 ```{r, test_complex, ref = "testcomplex", codecap = "Test more complex cases using your understanding of the system", results = 'hide'}
 pop1 <- initialisePop(t = 20, N = 12, pathogens = 3) 
+
 # expect all except the first row are NAs
 expect_true(all(is.na(pop1[-1,]))) 
-# expect all 3 pathogens at t = 1
+
+# the unique values of pop1[1,] should be a, b, c
+#   and nothing else.
 expect_true(setequal(c("a", "b", "c"), pop1[1,])) 
 
 pop2 <- updatePop(pop1, t = 2, N = 12)
 # after update expect 1st & 2nd row not to have NAs
 expect_true(all(!is.na(pop2[1:2,]))) 
-# and also expect that rows other than the 1st & 2nd are still NAs.
+# and also expect that rows other than 1st & 2nd are NAs.
 expect_true(all(is.na(pop2[-c(1:2),]))) 
 
 ```
@@ -422,8 +428,11 @@ In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vecto
 `replicate()` runs the expression 300 times, but in your unit test you should choose a value high enough so that you are confident that all of the distinct outcomes will have occurred at least once.
 \newline
 ```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values", results = 'hide'}
-# Collapse each draw into a single string to make comparisons easier.
-manyPops <- replicate(300, paste0(chooseInfector(N = 2), collapse = ""))
+# Collapse each draw into a single string
+#   to make comparisons easier.
+manyPops <- 
+  replicate(300, paste0(chooseInfector(N = 2), collapse = ""))
+
 expect_true(all(manyPops %in% c("11", "22", "12", "21")))
 ```
 
@@ -474,7 +483,7 @@ diffProportions <- function(x){
 # Check that at least one simulation had non-identical
 #   proportions. sapply runs the function diffProportions 
 #   on each list element of manySims i.e. each simulation.
-expect_true(any(sapply(manySims, diffProportions)))
+expect_true(any(vapply(manySims, diffProportions, TRUE)))
 ```
 
 # Further testing
