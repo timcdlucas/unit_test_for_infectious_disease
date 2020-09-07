@@ -176,8 +176,8 @@ I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
 # At each time step, everyone is re-infected 
 # by someone from the previous time step.
-for(t in seq(2, t)){
-  I[t,] <- sample(x = I[t-1,], size = N)
+for(time in seq(2, t)){
+  I[time,] <- sample(x = I[time-1,], size = N)
 }
 ```
 
@@ -223,8 +223,8 @@ I <- matrix(data = NA, nrow = t, ncol = N)
 
 I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
 
-for(t in seq(2, t)){
-  I[t,] <- sample(x = I[t-1,], size = N, replace = TRUE)
+for(time in seq(2, t)){
+  I[time,] <- sample(x = I[time-1,], size = N, replace = TRUE)
 }
 ```
 
@@ -321,7 +321,7 @@ pop1 <- initialisePop(t = 20, N = 12, pathogens = 3)
 # expect all except the first row are NAs
 expect_true(all(is.na(pop1[-1,]))) 
 # expect all 3 pathogens at t = 1
-expect_true(all(c("a", "b", "c") %in% pop1[1,])) 
+expect_true(setequal(c("a", "b", "c"), pop1[1,])) 
 
 pop2 <- updatePop(pop1, t = 2, N = 12)
 # after update expect 1st & 2nd row not to have NAs
