@@ -282,7 +282,7 @@ When we initialise a population with three individuals and three pathogens, we w
 When the number of individuals is greater than the number of pathogens, the sequence will be repeated as seen in the second test.
 Finally, when the number of individuals is greater than the number of pathogens, but is not a multiple of the number of pathogens, the sequence will have an incomplete repeat at the end as seen in the third test.
 In this sequence of tests, we have taken our logical understanding of what the function should do, and used it to make predictions of what the results should be.
-We then test that the result is the same as what we expect.
+We then test that the result is the same as what we expect and if everything is correct the code will return no output.
 \newline
 ```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect", results = 'hide'}
 pop1 <- initialisePop(t = 2, N = 3, pathogens = 3) 
@@ -295,6 +295,23 @@ pop3 <- initialisePop(t = 2, N = 5, pathogens = 3)
 expect_equal(pop3[1,], c("a", "b", "c", "a", "b"))
 
 ```
+
+In contrast, if we had defined our `initialisePop()` function incorrectly, the test would fail and return an error.
+\newline
+```{r, test_error, ref = "testerror", codecap = "If our code is incorrect, the test will return an error.", eval = FALSE}
+
+# A broken function that does not add the pathogens.
+initialisePopBroken <- function(t, N, pathogens){
+  I <- matrix(data = NA, nrow = t, ncol = N)
+  return(I)
+}
+
+popBroken <- initialisePopBroken(t = 2, N = 3, pathogens = 3) 
+expect_equal(popBroken[1,], c("a", "b", "c"))
+
+Error: popBroken[1, ] not equal to c("a", "b", "c").
+```
+
 
 ## Test all arguments {-#testargs}
 
