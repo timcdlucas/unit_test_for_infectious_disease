@@ -170,6 +170,9 @@ $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 That is, at each iteration, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iteration (including itself $I_{i,t-1}$).
 Certainly this toy model is naïve as it is governed by mass-action principles, ignoring contact and spatial dynamics. 
 Nevertheless it will serve its purpose. 
+Before writing any code we can consider some of the behaviour we would expect from this model.
+Firstly, we would expect an individual to be repeatedly infected with different strains.
+Secondly, we would expect the proportions of the different pathogens to stochastically drift until all but one pathogen goes extinct.
 \@ref(firstcode) shows our first attempt at implementing this model.
 \newline
 ```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model", results='hide'}
@@ -188,7 +191,7 @@ for(time in seq(2, t)){
 }
 ```
 
-```{r, firstplots, echo = FALSE, fig.cap = 'Infection profile for individual 1, who is initially infected with pathogen $a$.', out.width = "75%"}
+```{r firstplots, echo = FALSE, fig.cap = 'Infection profile for individual 1, who is initially infected with pathogen $a$ but then reinfected with different pathogens', out.width = "75%"}
 library(ggplot2)
 d1 <- data.frame(time = seq(t), pathogen = (I[, 1]), stringsAsFactors = TRUE)
 ggplot(d1, aes(time, as.numeric(pathogen))) +
@@ -201,14 +204,25 @@ ggplot(d1, aes(time, as.numeric(pathogen))) +
           text = element_text(size = 20, family = "serif"))
 ```
 
-```{r, bug_show_plot, include = FALSE}
-apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) %>% 
-      t %>% matplot(type = 'l')
+
+```{r, incorrectplot, echo = FALSE, fig.cap =' The proportion of each pathogen through time as given by Code 1. Each pathogen is a different line but are overplotted. The proportions of each pathogen do not stochastically drift as we would expect.', out.width = "75%"}
+
+(apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) / N) %>% 
+  t %>% 
+  data.frame %>% 
+  cbind(Time = seq_len(nrow(I))) %>% 
+  pivot_longer(cols = -Time, names_to = 'Pathogen', values_to = 'Proportion') %>% 
+  ggplot(aes(x = Time, y = Proportion, colour = Pathogen, linetype = Pathogen)) +
+    geom_line() +
+    theme_minimal() +
+    theme(panel.grid.minor = element_blank(),
+          text = element_text(size = 20, family = "serif"))
+
 ```
 
 Usually we would make some output plots to explore if our code is performing sensibly.
 Plotting the time course of which pathogen is infecting one individual shows repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
-However, if we look at the proportion of each pathogen through time (not shown here) we quickly see that the pathogen proportions are identical through time and so there must be a bug that we had not originally noticed.
+However, if we look at the proportion of each pathogen through time  (Fig. \@ref(fig:incorrectplot)) we quickly see that the pathogen proportions are identical through time and so there must be a bug that we had not originally noticed.
 This simple example demonstrates a number of points.
 Firstly, bugs can be subtle.
 Secondly, it is not easy to notice an error, even in just 7 lines of code. 
@@ -216,8 +230,9 @@ Thirdly, it is much easier to debug code when you know there is a bug.
 Fourthly, while plotting simulation runs is an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. 
 Additionally, manually checking plots is a time consuming and non-scalable method because a human has to perform this scan every test run.
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
-\newline
-\newline
+
+
+
 The cause of the bug is that `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone transmits their infection pathogen on a one-to-one basis rather than one-to-many as required by the model.
 Setting `replace = TRUE` fixes this (\@ref(correctcode)) and when we plot the proportion of each pathogen (Fig. \@ref(fig:correctplots)) we see the correct behaviour (a single pathogen drifting to dominance).
 In the subsequent sections we will develop this base example as we consider different concepts in unit testing, resulting in well-tested code by the end. 
@@ -242,7 +257,7 @@ for(time in seq(2, t)){
   data.frame %>% 
   cbind(Time = seq_len(nrow(I))) %>% 
   pivot_longer(cols = -Time, names_to = 'Pathogen', values_to = 'Proportion') %>% 
-  ggplot(aes(x = Time, y = Proportion, colour = Pathogen)) +
+  ggplot(aes(x = Time, y = Proportion, colour = Pathogen, linetype = Pathogen)) +
     geom_line() +
     theme_minimal() +
     theme(panel.grid.minor = element_blank(),
