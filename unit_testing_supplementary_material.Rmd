@@ -1,0 +1,354 @@
+---
+title: |
+  | Responsible modelling: Unit testing for infectious disease epidemiology.
+author: Tim CD Lucas, Timothy M Pollington, Emma L Davis and  T Déirdre Hollingsworth
+output:
+  bookdown::pdf_book:
+    includes:
+      in_header: preamble.tex
+    number_sections: true
+---
+  
+  ```{r, setup, echo=FALSE, results = 'hide', message = FALSE}
+rm(list = ls())
+library(knitr)
+oldSource <- knit_hooks$get("source")
+knit_hooks$set(source = function(x, options) {
+  x <- oldSource(x, options)
+  x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref, "}", x), x)
+  ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
+})
+library(ggplot2)
+library(tidyr)
+library(testthat)
+knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
+                      out.extra = '', out.width = "0.6\\textwidth",
+                      fig.align='center', fig.pos = "h")
+set.seed(01011885)
+
+# You might need to install the package rticles for the formatting to work.
+# To build run
+# rmarkdown::render('unit_testing.Rmd')
+```
+
+
+# A more realistic modelling example 
+
+
+Here we define a simple, but more realistic epidemiological model compared to the main text.
+We again demonstrate how to effectively write unit tests for it in _R_ code.
+We aim to follow the same structure as in the main text but in this example we do not need to worry about the code being short.
+
+
+We will implement a stochastic, continuous time, SIR model using code from [EpiEcipes](http://epirecip.es/epicookbook/chapters/sir-stochastic-discretestate-continuoustime/r)  as a starting point.
+\newline
+```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model", results='hide'}
+
+    set.seed(20200908)
+
+    beta <- 0.2/1000
+    gamma <- 0.05 
+    N <- 1000 
+    S0 <- 999 
+    I0 <- 1
+    R0 <- 0
+    tf <- 200    
+
+    time <- 0
+    S <- S0
+    I <- I0
+    R <- R0
+    ta <- numeric(0)
+    Sa <- numeric(0)
+    Ia <- numeric(0)
+    Ra <- numeric(0)
+    while (time < tf) {
+        ta <- c(ta, time)
+        Sa <- c(Sa, S)
+        Ia <- c(Ia, I)
+        Ra <- c(Ra, R)
+        pf1 <- beta * S * I
+        pf2 <- gamma * I
+        pf <- pf1 + pf2
+        dt <- rexp(1, rate = pf)
+        time <- time + dt
+        if (time > tf) {
+            break
+        }
+        ru <- runif(1)
+        if (ru < (pf1/pf)) {
+            S <- S - 1
+            I <- I + 1
+        } else {
+            I <- I - 1
+            R <- R + 1
+        }
+        if (I == 0) {
+            break
+        }
+    }
+    results <- data.frame(time = ta, S = Sa, I = Ia, R = Ra)
+```
+
+```{r firstplots, echo = FALSE, fig.cap = 'Infection profile for individual 1, who is initially infected with pathogen $a$ but then reinfected with different pathogens', out.width = "75%"}
+
+
+```
+
+
+
+# Basic unit testing
+## Write small functions {-#compactfuns}
+
+To ensure the unit tests are evaluating the exact code as run in the analysis, code should be structured in functions, which can be used to both run unit tests with and to generate results as part of a larger model codebase.
+Make your functions compact with a single clearly-defined task.
+We have defined a function, `initialisePop()`, to initialise the population and another, `updatePop()`, to run one iteration of the simulation (\@ref(compactfunctions)).
+Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
+Furthermore, it facilitates other good programming practices such as defensive programming and good documentation.
+Defensive programming entails writing checks in the code such that the code will fail fast and informatively if incorrect inputs are used; checking the class and dimensions of inputs in the first few lines of a function is a good way to catch bugs early.
+At this stage we have also enabled the varying of the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
+The first iteration of the simulation, `I[1,]`, is initialised with a repeating sequence of letters.
+\newline
+```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
+
+```
+
+## Test simple cases first {-#easycases}
+
+If we start with a small population with few pathogens, we can then easily work out exactly what the initialised population should look like (\@ref(testsimplefirst)).
+When we initialise a population with three individuals and three pathogens, we will get the sequence "a", "b", "c" as seen in the first test.
+When the number of individuals is greater than the number of pathogens, the sequence will be repeated as seen in the second test.
+Finally, when the number of individuals is greater than the number of pathogens, but is not a multiple of the number of pathogens, the sequence will have an incomplete repeat at the end as seen in the third test.
+In this sequence of tests, we have taken our logical understanding of what the function should do, and used it to make predictions of what the results should be.
+We then test that the result is the same as what we expect and if everything is correct the code will return no output.
+\newline
+```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect", results = 'hide'}
+
+```
+
+In contrast, if we had defined our `initialisePop()` function incorrectly, the test would fail and return an error.
+\newline
+```{r, test_error, ref = "testerror", codecap = "If our code is incorrect, the test will return an error.", eval = FALSE}
+
+```
+
+
+## Test all arguments {-#testargs}
+
+`initialisePop()` has three arguments to check.
+First we initialise the population, and then alter each argument in turn (\@ref(testallargs)).
+Arguments `t` and `N` directly change the expected dimension of the returned matrix so we check that the output of the function is the expected size.
+For the `pathogens` argument we test that the number of pathogens is equal to the number requested.
+\newline
+```{r, test_all_args, ref = "testallargs", codecap = "Test all function arguments in turn", results = 'hide'}
+
+```
+
+## Does the function logic meet your expectations? {-#complexcases}
+
+We can also cover cases that expose deviations from the logical structure of the system.
+After initialising our population, we expect all the rows other than the first to contain `NA`.
+We also expect each of the pathogens $a$, $b$ and $c$ to occur at least once on the first row if `pathogens` $= 3$ and `N` $\geq 3$.
+Finally, `updatePop()` performs a single simulation time step, so we expect only one additional row to be populated.
+Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\@ref(testcomplex)).
+\newline
+```{r, test_complex, ref = "testcomplex", codecap = "Test more complex cases using your understanding of the system", results = 'hide'}
+
+```
+
+## Combine simple functions and test them at a higher-level{-#combine}
+
+In the end an entire model only runs when its functions work together seamlessly. 
+So we next check their connections; achieved through nesting functions together, or defining them at a higher level and checking the macro aspects of the model.
+We define a function `fullSim()` that runs both `initialisePop()` and `updatePop()` to yield one complete simulation.
+We would expect there to be no `NA`s in the output from `fullSim()` and every element to be either $a$, $b$ or $c$.
+\newline
+```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check higher-level functionality", result = 'hide'}
+
+```
+
+# Stochastic code
+
+Stochastic simulations are a common feature in infectious disease models.
+Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be.
+We can check very broad-scale properties, like \@ref(combinesimplefunc), where we check the range of pathogen values.
+However, code could still pass and be wrong (for example the base example (\@ref(firstcode)) would still pass that test).
+There are however a number of approaches that can help.
+
+## Split stochastic and deterministic parts {-#splitstochastic}
+
+Isolate the stochastic parts of your code.
+For example, `updatePop()` performs stochastic and deterministic operations in one line (\@ref(compactfunctions)).
+Firstly, `updatePop()` stochastically samples who gets infected by whom at iteration `t`.
+Then it takes those infection events and assigns the new infectious status for each individual.
+We demonstrate in \@ref(splitdeterstoch) how this could be split.
+We accept this is a fairly exaggerated example and splitting a single line of code into two functions is rare!
+  The more common scenario is splitting a multi-line function into smaller functions which also brings benefits of code organisation so it does not feel like extra effort. 
+\newline
+```{r, split_deter_stoch, ref = "splitdeterstoch", codecap = "Isolation of the determistic and stochastic elements"}
+
+```
+
+Now, half of `updatePop()` is deterministic so can be checked as previously discussed.
+We still have `chooseInfector()` that is irreducibly stochastic.
+We now examine some techniques for directly testing the stochastic parts of a model.
+
+## Pick a smart parameter for a deterministic result{-#deterministicparams}
+
+In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which our stochastic functions become deterministic.
+For example, samples from $X\sim\text{Bernoulli}(p)$ will always be zeroes for $p=0$ or ones for $p=1$.
+In the case of a single pathogen (\@ref(teststochdetermin)), the model is no longer stochastic.
+So initialisation with one pathogen means the second time step should equal the first.
+\newline
+```{r, test_stoch_determin, ref = "teststochdetermin", codecap = "A stochastic function can output deterministically if you can find the right parameter set.", results = 'hide'}
+
+```
+
+## Test all possible answers (if few) {-#allpossible}
+
+Working again with a simple parameter set, there are some cases where the code is stochastic, but with a small, finite set of outputs. 
+So we can run the function exhaustively and check it returns all of the possible outputs.
+For a population of two people, `chooseInfector()` returns a length-2 vector with the possible elements of 1 or 2.
+There are four possibilities when drawing who is infected by whom.
+Both individuals can be infected by individual 1, giving the vector {1, 1}. 
+Both individuals can be infected by individual 2, giving {2, 2}. 
+Both individuals can infect themselves, giving {1, 2}. 
+Or finally both individuals can infect each other, giving {2, 1}.
+In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vector with the indices of the infector for each infectee. 
+`paste0()` then turns this length-2 vector into a length-1 string with two characters; we expect this to be one of "11", "22", "12" or "21".
+`replicate()` runs the expression 300 times, but in your unit test you should choose a value high enough so that you are confident that all of the distinct outcomes will have occurred at least once.
+\newline
+```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values", results = 'hide'}
+
+```
+
+## Use very large samples for the stochastic part {-#largesamples}
+
+While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
+This typically involves large sample sizes or numbers of stochastic runs.
+For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
+In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
+With a population of one thousand, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
+As this test is now stochastic we should set the seed of the random number generator so that the test is reproducible.
+Setting the seed with `set.seed` means that each time the code is run, the same pseudo-random numbers will be generated.
+\newline
+```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
+set.seed(10261985)
+```
+
+If we have an event that we know should never happen, we can use a large number of simulations to provide stronger evidence that it does not stochastically occur.
+However, it can be difficult to determine how many times is reasonable to run a simulation, especially if time is short.
+This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
+If the bug occurs every ten simulations and we have not fixed it we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
+Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
+\newline
+\newline
+Similarly, a bug might cause an event that should be rare to happen very regularly or even every time the code is run.
+In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
+We would expect this to happen only very rarely.
+We can run a large number of short simulations to check that this specific bug is not still occurring by confirming that the proportion of each pathogen is not always the same between the first and last time point.
+As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we know the bug has been fixed.
+\newline
+```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
+set.seed(11121955)
+
+```
+
+# Further testing
+
+## Test incorrect inputs {-#testincorrect}
+
+As well as testing that functions work when given the correct inputs, we must also test that they behave sensibly when given wrong ones.
+This typically involves the user inputting argument values that do not make sense.
+This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values.
+Therefore it is useful to test that functions fail gracefully if they are given incorrect inputs.
+This is especially true for external, exported functions, available to a user on a package's front-end.
+However, it is not always obvious what constitutes an 'incorrect value' even to the person who wrote the code.
+In some cases, inputting incorrect argument values may cause the function to fail quickly. 
+In other cases code may run silently giving false results or take a long time to give an error.
+Both of these cases can be serious or annoying and difficult to debug afterwards.
+\newline
+\newline
+Often for these cases, the expected behaviour of the function should be to give an error.
+There is no correct output for an epidemiological model with -1 pathogens. 
+Instead the function should give an informative error message.
+Often the simplest solution is to use defensive programming and include argument checks at the beginning of functions.
+We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
+If the expression does not throw an error the test should throw an error (as this is not the expected behaviour).
+Conversely, if the expression does throw an error the test should pass and not throw an error. 
+We can use the `expect_error()` function for this task.
+This function takes an expression as its first argument and reports an error if the given expression does not throw an error as expected.
+\newline
+\newline
+We can first check that the code sensibly handles the user inputting a string instead of an integer for the number of pathogens.
+Because this expression throws an error, `expect_error()` does not throw an error and the test passes.
+\newline
+```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect pathogen inputs", warning = FALSE}
+```
+
+Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
+Here we are imagining that the users intent wass to run a simulation with three pathogens: 1, 2 and 3.
+\newline
+```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
+```
+
+This test fails because the function does not throw an error.
+Instead the code takes the first element of `pathogens` and ignores the rest.
+Therefore, a population is created with one pathogen, not three, which is almost certainly not what the user wanted.
+Here, the safest fix is to add an explicit argument check at the top of the function as implemented below.
+The same test now passes because `initialisePop()` throws an error when a vector is supplied to the `pathogens` argument.
+\newline
+```{r, wrong1c, ref = "wrong1c", codecap = "New definition, using defensive programming, of the initialisePop() function  and a passing test for incorrect pathogen inputs"}
+
+```
+
+We can similarly check how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
+In \@ref(wrong1c), `initialisePop()` does not throw an error if a vector is supplied to `t`. 
+However, `fullSim()` does throw an error if a vector is supplied to `t`.
+While it is a good thing that `fullSim()` throws an error, the error message is not very informative.
+If the code that runs before the error is thrown (in this case the `initialisePop()` function) takes a long time, it can also be time consuming to work out what threw the error.
+It is also a signature of fragile code that the error is coincidental; a small change in the code might stop the error from occurring.
+These considerations all point towards defensive programming as a good solution.
+We can add an additional argument check to `initialisePop()`.
+Importantly, we then want to check that `fullSim()` errors in the correct place (i.e. in `initialisePop()` rather than afterwards).
+We can achieve this using the `regexp` argument of `expect_error()` that compares the actual error message to the expected error messages.
+The test will only pass if the error message contains the string provided.
+\newline
+```{r, wrong2, ref = "wrong2", codecap = "Another new definition of the initialisePop() function and a passing test for the fullSim() function."}
+
+
+```
+
+## Test edge cases and special cases {-#corners}
+
+When writing tests it is easy to focus on standard behaviour.
+However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
+For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
+Code that relies on the returned object being a matrix would fail in this edge case.
+\newline
+\newline
+Similarly, special cases can be triggered with parameter sets that do not match the extrema of parameter space. 
+This is where understanding of the functional form of the model can help. 
+Consider a function `divide(x, y)` that divides `x` by `y`.
+We could test this function by noting that `y * divide(x, y)` should return `x`.
+If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
+\newline
+\newline
+We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying that the returned population had the correct number of pathogens.
+However, if we set the `pathogens` argument to be greater than the number of individuals in the population we get a population with `N` pathogens.
+The function does not therefore pass the test we defined in \@ref(testallargs).
+\newline
+```{r, edge2, ref = "edge2", codecap = "initialisePop() does not give a population with the correct number of pathogens if N is less than the number of pathogens.", eval = FALSE}
+```
+
+For edge cases like this it may be rather subjective what the correct behaviour should be.
+It might be appropriate for the function to throw an error or give a warning if the user requests more pathogens than individuals.
+Here however, we will decide that this behaviour is acceptable.
+The test above was still useful to highlight this unusual case.
+As our expected output from the function has changed, we should change our test; we now expect a population with `N` pathogens.
+We should however retain the test in \@ref(testallargs) so that we have two tests: one test checks that when `pathogens < N`, the number of unique pathogens in the population is equal to `pathogens`; the other test checks that when `pathogens > N`, the number of unique pathogens is equal to `N`.
+\newline
+```{r, edge3, ref = "edge3", codecap = "Check that pathogens is equal to N", eval = FALSE}
+```
+
+
