@@ -122,10 +122,9 @@ _Unit testing_ is a formally-defined, principled framework that compares compreh
 Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _python_ [@python] and are standard practice in the software industry.
 These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
 Infectious disease modelling presents specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
-There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming [@wickham2019advanced Chapter 9] and careful documentation [@wickham2015r Chapter 5] and while important, these are not the focus of this paper.
+There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming [@wickham2019advanced Chapter 9] and careful documentation [@wickham2015r Chapter 5] but while important, these are not the focus of this paper.
 In this primer we introduce unit testing with a demonstration of an infectious disease model.
-We also give a brief introduction to the available testing frameworks in various languages commonly used by modellers.
-
+While we use R throughout to exemplify the unit testing framework, the concepts apply equally well to the various languages commonly used by modellers such as _Julia_ and _python_; we therefore briefly direct the reader towards available testing frameworks for those languages in Section \@ref(frameworks).
 
 
 # Unit testing foundations
@@ -222,7 +221,7 @@ ggplot(d1, aes(time, as.numeric(pathogen))) +
 
 Usually we would make some output plots to explore if our code is performing sensibly.
 Plotting the time course of which pathogen is infecting one individual shows repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
-However, if we look at the proportion of each pathogen through time  (Fig. \@ref(fig:incorrectplot)) we quickly see that the pathogen proportions are identical through time and so there must be a bug that we had not originally noticed.
+However, if we plot the proportion of each pathogen (Fig. \@ref(fig:incorrectplot)) we quickly see that instead of stochastically varying the proportions are identical through time and so there must be a bug that we had not originally noticed.
 This simple example demonstrates a number of points.
 Firstly, bugs can be subtle.
 Secondly, it is not easy to notice an error, even in just 7 lines of code. 
@@ -489,7 +488,7 @@ set.seed(10261985)
 n <- 1e3
 infector_pathogen <- chooseInfector(n)
 
-# If an individual infects more than one individual, 
+# Test if an individual infects more than one individual, 
 expect_true(any(duplicated(infector_pathogen)))
 ```
 
@@ -511,9 +510,9 @@ set.seed(11121955)
 manySims <- replicate(500, fullSim(t = 20, N = 40, pathogens = 3), 
                       simplify = FALSE)
 
-# Define a function that calculates whether
-#   the pathogen proportions are the same
-#   in the first and last time point.
+# Define a function that returns TRUE if the
+#   pathogen proportions are the same in the 
+#   first and last time point and FALSE otherwise.
 diffProportions <- function(x){
   !identical(table(x[1, ]), table(x[20, ]))
 }
@@ -655,10 +654,14 @@ expect_equal(length(unique(pop[1,])), N)
 
 Most programming languages have established testing packages.
 For _R_, there is the $\texttt{testthat}$ package as already discussed as well as other packages such as $\texttt{tinytest}$ which has the benefit of having no dependencies.
+When structuring _R_ code as standalone scripts, the tests should be saved in a separate script or scripts either in the same directory as the scripts in with functions are defined or within a subdirectory in the same project directory. 
+The testing script needs to load all the functions it is going to test (with `source()` for example) and then run the tests.
 When structuring _R_ code as a package, tests should be kept in the directory `tests/testthat`; further requirements to the structure can be found in @wickham2015r Chapter 7.
 All the tests in a package can then be run with `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to the package build.
 If the code is to be part of a package then these tools are essential to run the code within the context of a build environment.
 These tools also provide a clean environment to highlight if a test was previously relying on objects defined outside of the test script.
+Furthermore, organising code in a package provides further benefits such as tools to aid the writing of documentation, systematic handling of further dependencies and tools to track whether every line of code in the package is tested such as the \texttt{covr} package [@covr].
+The practice of organising code as a package, even if there is no expectation that others will use the code, is under appreciated and underused in epidemiology.
 \newline
 \newline
 Other programming languages have similar testing frameworks.
@@ -710,7 +713,7 @@ language:r
 This file can also be created with `use_travis()` from the $\texttt{usethis}$ package.
 You then sign up to travis-ci.org and point it to the correct GitHub repository.
 To authenticate and trigger the first automatic test you need to make a minor change to your code, commit and push to GitHub.
-More details can be found in @wickham2015r Chapter 14.3.
+More details on setting up Travis, and how to continuously track test coverage  using \texttt{covr} and codecov, can be found in @wickham2015r Chapter 14.3.
 
 # Concluding remarks
 
