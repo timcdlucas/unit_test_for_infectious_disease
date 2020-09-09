@@ -6,3 +6,10 @@
 .Rproj.user
 *.Rproj
 .DS_Store
+*.spl
+cover_letter/*
+epidemics_sub_1/*
+plos_sub_1/*
+responses/*
+*.out
+*.txt
