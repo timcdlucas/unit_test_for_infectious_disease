@@ -9,7 +9,7 @@ output:
     number_sections: true
 ---
   
-  ```{r, setup, echo=FALSE, results = 'hide', message = FALSE}
+```{r, setup, echo=FALSE, results = 'hide', message = FALSE}
 rm(list = ls())
 library(knitr)
 oldSource <- knit_hooks$get("source")
@@ -18,17 +18,20 @@ knit_hooks$set(source = function(x, options) {
   x <- ifelse(!is.null(options$ref), paste0("\\label{", options$ref, "}", x), x)
   ifelse(!is.null(options$codecap), paste0("\\captionof{chunk}{", options$codecap,"}", x), x)
 })
-library(ggplot2)
-library(tidyr)
-library(testthat)
+
 knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
                       out.extra = '', out.width = "0.6\\textwidth",
                       fig.align='center', fig.pos = "h")
-set.seed(01011885)
 
 # You might need to install the package rticles for the formatting to work.
 # To build run
 # rmarkdown::render('unit_testing.Rmd')
+```
+
+```{r, libs, echo=FALSE, results = 'hide', message = FALSE}
+library(ggplot2)
+library(testthat)
+library(reshape2)
 ```
 
 
@@ -41,57 +44,87 @@ We aim to follow the same structure as in the main text but in this example we d
 
 
 We will implement a stochastic, continuous time, SIR model using code from [EpiEcipes](http://epirecip.es/epicookbook/chapters/sir-stochastic-discretestate-continuoustime/r)  as a starting point.
+In order to have continuous time dynamics we use the Gillespie algorithm.
+In each iteration of the model, exactly one event happens, either an infection or a recovery. 
+The time steps in between events are a continuous, positive number that are drawn from an exponential distribution with a rate equal to the sum of two event rates (i.e. infection and recovery).
 \newline
 ```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model", results='hide'}
 
-    set.seed(20200908)
+# set the seed so that our simulations are
+#   reproducible.
+set.seed(20200908)
 
-    beta <- 0.2/1000
-    gamma <- 0.05 
-    N <- 1000 
-    S0 <- 999 
-    I0 <- 1
-    R0 <- 0
-    tf <- 200    
+# Define parameters
+beta <- 0.001 # Tranmsission parameter
+gamma <- 0.4 # Recovery parameter
+N <- 1000 # Population size
+S0 <- 990 # Starting number of susceptibles.
+I0 <- 10 # Starting number of infected.
+R0 <- N - S0 - I0 # Starting number of Recovered.
+tf <- 2000  # Run until time reaches this value.
 
-    time <- 0
-    S <- S0
-    I <- I0
-    R <- R0
-    ta <- numeric(0)
-    Sa <- numeric(0)
-    Ia <- numeric(0)
-    Ra <- numeric(0)
-    while (time < tf) {
-        ta <- c(ta, time)
-        Sa <- c(Sa, S)
-        Ia <- c(Ia, I)
-        Ra <- c(Ra, R)
-        pf1 <- beta * S * I
-        pf2 <- gamma * I
-        pf <- pf1 + pf2
-        dt <- rexp(1, rate = pf)
-        time <- time + dt
-        if (time > tf) {
-            break
-        }
-        ru <- runif(1)
-        if (ru < (pf1/pf)) {
-            S <- S - 1
-            I <- I + 1
-        } else {
-            I <- I - 1
-            R <- R + 1
-        }
-        if (I == 0) {
-            break
-        }
+# Initialise the simulation.
+time <- 0
+S <- S0
+I <- I0
+R <- R0
+ta <- numeric(0)
+Sa <- numeric(0)
+Ia <- numeric(0)
+Ra <- numeric(0)
+
+# Run the simulation until time reaches
+#   tf.
+while (time < tf) {
+  
+    ta <- c(ta, time)
+    Sa <- c(Sa, S)
+    Ia <- c(Ia, I)
+    Ra <- c(Ra, R)
+    
+    # Infection rate.
+    pf1 <- beta * S * I
+    # Transmission rate
+    pf2 <- gamma * I
+    # Total rate of all events
+    pf <- pf1 + pf2
+    # Draw waiting time for this event.
+    dt <- rexp(1, rate = pf)
+    # Increment the current time.
+    time <- time + dt
+    
+    # If we have reach time tf, finish the simulation
+    if (time > tf) {
+        break
     }
-    results <- data.frame(time = ta, S = Sa, I = Ia, R = Ra)
+    
+    # Select whether the event is a transmission
+    #   or recovery event.
+    if (runif(1) < (pf1 / pf)) {
+        # Transmission event.
+        S <- S - 1
+        I <- I + 1
+    } else {
+        # Recovery event
+        I <- I - 1
+        R <- R + 1
+    }
+    
+    # If the epidemic is extinct, end the simulation
+    if (I == 0) {
+        break
+    }
+}
+
+results <- data.frame(time = ta, S = Sa, I = Ia, R = Ra)
 ```
 
 ```{r firstplots, echo = FALSE, fig.cap = 'Infection profile for individual 1, who is initially infected with pathogen $a$ but then reinfected with different pathogens', out.width = "75%"}
-
+sir_out_long <- melt(results,"time")
+ggplot(sir_out_long, 
+       aes(x = time, y = value, colour = variable, group = variable))+
+  geom_line(lwd = 2) +
+  xlab("Time") + ylab("Number")
 
 ```
 
@@ -102,14 +135,85 @@ We will implement a stochastic, continuous time, SIR model using code from [EpiE
 
 To ensure the unit tests are evaluating the exact code as run in the analysis, code should be structured in functions, which can be used to both run unit tests with and to generate results as part of a larger model codebase.
 Make your functions compact with a single clearly-defined task.
-We have defined a function, `initialisePop()`, to initialise the population and another, `updatePop()`, to run one iteration of the simulation (\@ref(compactfunctions)).
-Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
-Furthermore, it facilitates other good programming practices such as defensive programming and good documentation.
-Defensive programming entails writing checks in the code such that the code will fail fast and informatively if incorrect inputs are used; checking the class and dimensions of inputs in the first few lines of a function is a good way to catch bugs early.
-At this stage we have also enabled the varying of the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
-The first iteration of the simulation, `I[1,]`, is initialised with a repeating sequence of letters.
+We have ... (\@ref(compactfunctions)).
 \newline
 ```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
+
+initialiseSim <- function(S0, I0, R0){
+  sim <- list()
+  sim$time <- 0
+  sim$S <- S0
+  sim$I <- I0
+  sim$R <- R0
+  sim$ta <- numeric(0)
+  sim$Sa <- numeric(0)
+  sim$Ia <- numeric(0)
+  sim$Ra <- numeric(0)
+  return(sim)
+}
+
+sim <- initialiseSim(S0, I0, R0)
+
+runSim <- function(sim, beta, gamma, tf){
+  # Run the simulation until time reaches
+  #   tf.
+  while (time < tf) {
+    
+      sim$ta <- c(sim$ta, sim$time)
+      sim$Sa <- c(sim$Sa, sim$S)
+      sim$Ia <- c(sim$Ia, sim$I)
+      sim$Ra <- c(sim$Ra, sim$R)
+      
+      # Infection rate.
+      pf1 <- beta * sim$S * sim$I
+      # Transmission rate
+      pf2 <- gamma * sim$I
+      # Total rate of all events
+      pf <- pf1 + pf2
+      # Draw waiting time for this event.
+      dt <- rexp(1, rate = pf)
+      # Increment the current time.
+      sim$time <- sim$time + dt
+      
+      # If we have reach time tf, finish the simulation
+      if (sim$time > tf) {
+          break
+      }
+      
+      # Select whether the event is a transmission
+      #   or recovery event.
+      if (runif(1) < (pf1 / pf)) {
+          # Transmission event.
+          sim$S <- sim$S - 1
+          sim$I <- sim$I + 1
+      } else {
+          # Recovery event
+          sim$I <- sim$I - 1
+          sim$R <- sim$R + 1
+      }
+      
+      # If the epidemic is extinct, end the simulation
+      if (sim$I == 0) {
+          break
+      }
+  }
+  results <- data.frame(time = sim$ta, S = sim$Sa, I = sim$Ia, R = sim$Ra)
+  return(results)
+}
+  
+sim <- runSim(sim, beta, gamma, tf)
+
+
+```
+
+
+
+```{r dontplot, eval = FALSE}
+sir_out_long <- melt(sim,"time")
+ggplot(sir_out_long, 
+       aes(x = time, y = value, colour = variable, group = variable))+
+  geom_line(lwd = 2) +
+  xlab("Time") + ylab("Number")
 
 ```
 
