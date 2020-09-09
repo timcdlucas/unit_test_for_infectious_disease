@@ -120,7 +120,7 @@ results <- data.frame(time = ta, S = Sa, I = Ia, R = Ra)
 ```
 
 ```{r firstplots, echo = FALSE, fig.cap = 'Infection profile for individual 1, who is initially infected with pathogen $a$ but then reinfected with different pathogens', out.width = "75%"}
-sir_out_long <- melt(results,"time")
+sir_out_long <- melt(results, "time")
 ggplot(sir_out_long, 
        aes(x = time, y = value, colour = variable, group = variable))+
   geom_line(lwd = 2) +
@@ -152,46 +152,72 @@ initialiseSim <- function(S0, I0, R0){
   return(sim)
 }
 
-sim <- initialiseSim(S0, I0, R0)
+addNew <- function(sim){
+  sim$ta <- c(sim$ta, sim$time)
+  sim$Sa <- c(sim$Sa, sim$S)
+  sim$Ia <- c(sim$Ia, sim$I)
+  sim$Ra <- c(sim$Ra, sim$R)
+  return(sim)
+}
+
+infection <- function(sim){
+  sim$S <- sim$S - 1
+  sim$I <- sim$I + 1
+  return(sim)
+}
+
+recovery <- function(sim){
+  sim$I <- sim$I - 1
+  sim$R <- sim$R + 1
+  return(sim)
+}
+
+nextEvent <- function(sim, pf1, pf){
+  # Select whether the event is a transmission
+  #   or recovery event.
+  if (runif(1) < (pf1 / pf)) {
+    # Transmission event.
+    sim <- infection(sim)
+  } else {
+    # Recovery event
+    sim <- recovery(sim)
+  }
+  return(sim)
+}
+
+calcRates <- function(sim, beta, gamma){
+  rates <- list()
+  # Infection rate.
+  rates$pf1 <- beta * sim$S * sim$I
+  # Transmission rate
+  rates$pf2 <- gamma * sim$I
+  # Total rate of all events
+  rates$pf <- rates$pf1 + rates$pf2
+  # Draw waiting time for this event.
+  rates$dt <- rexp(1, rate = rates$pf)
+  return(rates)
+}
+
+
 
 runSim <- function(sim, beta, gamma, tf){
   # Run the simulation until time reaches
   #   tf.
-  while (time < tf) {
-    
-      sim$ta <- c(sim$ta, sim$time)
-      sim$Sa <- c(sim$Sa, sim$S)
-      sim$Ia <- c(sim$Ia, sim$I)
-      sim$Ra <- c(sim$Ra, sim$R)
+  while (sim$time < tf) {
       
-      # Infection rate.
-      pf1 <- beta * sim$S * sim$I
-      # Transmission rate
-      pf2 <- gamma * sim$I
-      # Total rate of all events
-      pf <- pf1 + pf2
-      # Draw waiting time for this event.
-      dt <- rexp(1, rate = pf)
+      sim <- addNew(sim)
+      
+      rates <- calcRates(sim, beta, gamma)
+
       # Increment the current time.
-      sim$time <- sim$time + dt
+      sim$time <- sim$time + rates$dt
       
       # If we have reach time tf, finish the simulation
       if (sim$time > tf) {
           break
       }
       
-      # Select whether the event is a transmission
-      #   or recovery event.
-      if (runif(1) < (pf1 / pf)) {
-          # Transmission event.
-          sim$S <- sim$S - 1
-          sim$I <- sim$I + 1
-      } else {
-          # Recovery event
-          sim$I <- sim$I - 1
-          sim$R <- sim$R + 1
-      }
-      
+      sim <- nextEvent(sim, rates$pf1, rates$pf)      
       # If the epidemic is extinct, end the simulation
       if (sim$I == 0) {
           break
@@ -201,7 +227,9 @@ runSim <- function(sim, beta, gamma, tf){
   return(results)
 }
   
-sim <- runSim(sim, beta, gamma, tf)
+sim <- initialiseSim(S0, I0, R0)
+
+simulation <- runSim(sim, beta, gamma, tf)
 
 
 ```
@@ -209,7 +237,7 @@ sim <- runSim(sim, beta, gamma, tf)
 
 
 ```{r dontplot, eval = FALSE}
-sir_out_long <- melt(sim,"time")
+sir_out_long <- melt(simulation, "time")
 ggplot(sir_out_long, 
        aes(x = time, y = value, colour = variable, group = variable))+
   geom_line(lwd = 2) +
