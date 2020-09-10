@@ -212,12 +212,14 @@ runSim <- function(sim, beta, gamma, tf){
       # Increment the current time.
       sim$time <- sim$time + rates$dt
       
-      # If we have reach time tf, finish the simulation
+      # If we have reached time tf, finish the simulation
       if (sim$time > tf) {
           break
       }
       
-      sim <- nextEvent(sim, rates$pf1, rates$pf)      
+      # Do the next event.
+      sim <- nextEvent(sim, rates$pf1, rates$pf)   
+      
       # If the epidemic is extinct, end the simulation
       if (sim$I == 0) {
           break
@@ -390,53 +392,135 @@ expect_true(all((simulation[, -1] - round(simulation[, -1])) < 1e-10))
 Stochastic simulations are a common feature in infectious disease models.
 Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be.
 We can check very broad-scale properties, like \@ref(combinesimplefunc), where we check the range of pathogen values.
-However, code could still pass and be wrong (for example the base example (\@ref(firstcode)) would still pass that test).
 There are however a number of approaches that can help.
 
 ## Split stochastic and deterministic parts {-#splitstochastic}
 
 Isolate the stochastic parts of your code.
-For example, `updatePop()` performs stochastic and deterministic operations in one line (\@ref(compactfunctions)).
-Firstly, `updatePop()` stochastically samples who gets infected by whom at iteration `t`.
-Then it takes those infection events and assigns the new infectious status for each individual.
-We demonstrate in \@ref(splitdeterstoch) how this could be split.
-We accept this is a fairly exaggerated example and splitting a single line of code into two functions is rare!
-  The more common scenario is splitting a multi-line function into smaller functions which also brings benefits of code organisation so it does not feel like extra effort. 
+For example, `nextEvent` performs stochastic and deterministic operations.
+The function is copied below (\@ref(splitdeterstoch1)) for reference.
 \newline
-```{r, split_deter_stoch, ref = "splitdeterstoch", codecap = "Isolation of the determistic and stochastic elements"}
+```{r, split_deter_stoch1, ref = "splitdeterstoch1", codecap = "Isolation of the determistic and stochastic elements"}
+nextEvent <- function(sim, pf1, pf){
+  # Select whether the event is a transmission
+  #   or recovery event.
+  if (runif(1) < (pf1 / pf)) {
+    # Transmission event.
+    sim <- infection(sim)
+  } else {
+    # Recovery event
+    sim <- recovery(sim)
+  }
+  return(sim)
+}
 
 ```
+The function takes a random uniform number to determine whether an infection or recovery event takes place.
+It then performs that event, althought we note we have already pulled much of the code out into the two functions `infection()` and `recovery()`.
+However, we can split this code into two functions, one (`nextEvent()`) completely deterministic, and one very small function (`chooseEvent()`) that carries out the stochastic component.
+The deterministic function an be tested using the guidelines above while in the following sections we will look at methods to test the stochastic function.
+We note that perhaps a better method here would be to make the first argument of `nextEvent()` take a random uniform number.
+In that case `nextEvent()` would be deterministic and the only stochastic code would be a single call to `runif`.
+Given that the `runif` function is a built in R function that is well tested, we would not have to test it.
+However, for demonstration purposes we have split the function as below show that we can subsequently demonstrate how to test stochastic functions.
+```{r, split_deter_stoch2, ref = "splitdeterstoch2", codecap = "Isolation of the determistic and stochastic elements"}
 
-Now, half of `updatePop()` is deterministic so can be checked as previously discussed.
-We still have `chooseInfector()` that is irreducibly stochastic.
-We now examine some techniques for directly testing the stochastic parts of a model.
+chooseEvent <- function(pf1, pf){
+  runif(1) < (pf1 / pf)
+}
+
+nextEvent <- function(sim, infection){
+  # Select whether the event is a transmission
+  #   or recovery event.
+  if (infection) {
+    # Transmission event.
+    sim <- infection(sim)
+  } else {
+    # Recovery event
+    sim <- recovery(sim)
+  }
+  return(sim)
+}
+
+# Initialise test sim
+sim1 <- initialiseSim(S0 = 1, I0 = 1, R0 = 0)
+
+# Infection event, expect 1 fewer S and 1 more I.
+sim2 <- nextEvent(sim1, TRUE)
+expect_equal(sim2$S, 0)
+expect_equal(sim2$I, 2)
+
+# Recovery event, expect 1 fewer I and 1 more R.
+sim3 <- nextEvent(sim1, FALSE)
+
+expect_equal(sim3$I, 0)
+expect_equal(sim3$R, 1)
+```
+
+We now need to redefine `runSim()` to account for these modified functions.
+```{r, redefRunSim, ref = "redefRunSim", codecap = "Redfine the runSim function."}
+runSim <- function(sim, beta, gamma, tf){
+  # Run the simulation until time reaches
+  #   tf.
+  while (sim$time < tf) {
+      
+      sim <- addNew(sim)
+      
+      rates <- calcRates(sim, beta, gamma)
+
+      # Increment the current time.
+      sim$time <- sim$time + rates$dt
+      
+      # If we have reached time tf, finish the simulation
+      if (sim$time > tf) {
+          break
+      }
+      
+      # Do the next event.
+      event <- chooseEvent(rates$pf1, rates$pf)
+      sim <- nextEvent(sim, event)   
+      
+      # If the epidemic is extinct, end the simulation
+      if (sim$I == 0) {
+          break
+      }
+  }
+  results <- data.frame(time = sim$ta, S = sim$Sa, I = sim$Ia, R = sim$Ra)
+  return(results)
+}
+  
+
+
 
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
 In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which our stochastic functions become deterministic.
 For example, samples from $X\sim\text{Bernoulli}(p)$ will always be zeroes for $p=0$ or ones for $p=1$.
-In the case of a single pathogen (\@ref(teststochdetermin)), the model is no longer stochastic.
-So initialisation with one pathogen means the second time step should equal the first.
+In the case of the function `chooseEvent()`, this function is deterministic if `pf1` (the infection rate) is zero in which case the function will return `FALSE` i.e. if the infection rate is zero, the next event will not be an infection event.
+The function is also deterministic if `pf1` is equal to `pf`.
+This occurs when `pf2`, the recovery rate, is zero and therefore the next rate will certainly be an infection rate.
 \newline
 ```{r, test_stoch_determin, ref = "teststochdetermin", codecap = "A stochastic function can output deterministically if you can find the right parameter set.", results = 'hide'}
-
+expect_equal(chooseEvent(0, 1), FALSE)
+expect_equal(chooseEvent(0, 5), FALSE)
+expect_equal(chooseEvent(1, 1), TRUE)
+expect_equal(chooseEvent(5, 5), TRUE)
 ```
 
 ## Test all possible answers (if few) {-#allpossible}
 
 Working again with a simple parameter set, there are some cases where the code is stochastic, but with a small, finite set of outputs. 
-So we can run the function exhaustively and check it returns all of the possible outputs.
-For a population of two people, `chooseInfector()` returns a length-2 vector with the possible elements of 1 or 2.
-There are four possibilities when drawing who is infected by whom.
-Both individuals can be infected by individual 1, giving the vector {1, 1}. 
-Both individuals can be infected by individual 2, giving {2, 2}. 
-Both individuals can infect themselves, giving {1, 2}. 
-Or finally both individuals can infect each other, giving {2, 1}.
-In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vector with the indices of the infector for each infectee. 
-`paste0()` then turns this length-2 vector into a length-1 string with two characters; we expect this to be one of "11", "22", "12" or "21".
-`replicate()` runs the expression 300 times, but in your unit test you should choose a value high enough so that you are confident that all of the distinct outcomes will have occurred at least once.
+So we can run the function exhaustively and check it only returns possible outputs.
+For the function `chooseEvent()` this is trivially true; for anly valid values of `pf1` and `pf` it should return either `TRUE` or `FALSE`.
 \newline
 ```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values", results = 'hide'}
+out1 <- replicate(300, chooseEvent(1, 1))
+out2 <- replicate(300, chooseEvent(0, 1))
+out3 <- replicate(300, chooseEvent(1, 2))
+
+expect_true(all(out1 %in% c(TRUE, FALSE)))
+expect_true(all(out2 %in% c(TRUE, FALSE)))
+expect_true(all(out3 %in% c(TRUE, FALSE)))
 
 ```
 
@@ -444,14 +528,20 @@ In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vecto
 
 While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
-For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
-In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
-With a population of one thousand, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
-As this test is now stochastic we should set the seed of the random number generator so that the test is reproducible.
-Setting the seed with `set.seed` means that each time the code is run, the same pseudo-random numbers will be generated.
+For example, if `pf1` is positive but smaller than `pf` we expect the `chooseEvent()` to sometimes return `TRUE` and sometimes to return `FALSE`.
+If we run the function only twice, we might get two `TRUE`s or two `FALSE`s.
+However, if we run the function thousands times, and `pf1` is approximately half of `pf` (i.e. infection and recovery events are equally likely) it is almost certain that we will get at least one of each logical value.
+
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
 set.seed(10261985)
+out3 <- replicate(5000, chooseEvent(1, 2))
+
+# Check that both TRUE and FALSE are returned
+#   and simultaneously check that ONLY TRUE or FALSE
+#   is returned.
+expect_true(setequal(out3, c(TRUE, FALSE)))
+
 ```
 
 If we have an event that we know should never happen, we can use a large number of simulations to provide stronger evidence that it does not stochastically occur.
@@ -459,18 +549,24 @@ However, it can be difficult to determine how many times is reasonable to run a 
 This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
 If the bug occurs every ten simulations and we have not fixed it we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
 Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
-\newline
-\newline
-Similarly, a bug might cause an event that should be rare to happen very regularly or even every time the code is run.
-In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
-We would expect this to happen only very rarely.
-We can run a large number of short simulations to check that this specific bug is not still occurring by confirming that the proportion of each pathogen is not always the same between the first and last time point.
-As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we know the bug has been fixed.
+As an example of this, the number of susceptibles in an SIR model should never increase.
+So we can run the simulation a number of times and check that it doesn't occur.
+However, without a preknown bug, it is impossible to know how many runs of the simulation we would need to run before finding the bug, so in this example we will simply run 100.
 \newline
 ```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
 set.seed(11121955)
+sim <- initialiseSim(100, 4, 0)
+
+out <-  replicate(100, runSim(sim, 0.1, 0.04, 30), simplify = FALSE)
+
+# Does S ever increase?
+#   This returns TRUE if every element of the S vector is
+#   the same size or smaller than the previous element.
+decreasing <- sapply(out, function(x) all(diff(x$S) <= 0))
+expect_true(all(decreasing))
 
 ```
+
 
 # Further testing
 
