@@ -328,32 +328,22 @@ expect_equal(r4$pf2, 2)
 ## Does the function logic meet your expectations? {-#complexcases}
 
 We can also cover cases that expose deviations from the logical structure of the system.
-After initialising our population, we expect all the rows other than the first to contain `NA`.
-We also expect each of the pathogens $a$, $b$ and $c$ to occur at least once on the first row if `pathogens` $= 3$ and `N` $\geq 3$.
-Finally, `updatePop()` performs a single simulation time step, so we expect only one additional row to be populated.
-Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\@ref(testcomplex)).
-\newline
-```{r, test_complex, ref = "testcomplex", codecap = "Test more complex cases using your understanding of the system", results = 'hide'}
-
-```
-
-
-
 The function `addNew()` changes the object ready for a new iteration in the simulation.
 Therefore the length of a number of elements should increase by one.
+Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\@ref(testcomplex)).
 \newline
-```{r, test_simple_second, ref = "testsimplesecond", codecap = "It is use", results = 'hide'}
+```{r, test_complex, ref = "testomplex", codecap = "Test logical structure of the code rather than the specific numerical values.", results = 'hide'}
 
-sim1 <- initialiseSim(S0, I0, R0)
-sim2 <- infection(sim)
+sim1 <- initialiseSim(10, 5, 0)
+sim2 <- addNew(sim1)
 
-# Check that the classes are change by the right amount.
-expect_equal(sim2$S, sim1$S - 1 )
-expect_equal(sim2$I, sim1$I + 1 )
+# Check that the vectors get 1 longer.
+expect_equal(length(sim2$ta), length(sim1$ta) + 1)
+expect_equal(length(sim2$Sa), length(sim1$Sa) + 1)
 
 # Check that some other elements of the object are unchanged.
-expect_equal(sim2$R, sim1$R)
-expect_equal(sim2$time, sim1$time)
+expect_equal(length(sim2$S), length(sim1$S))
+expect_equal(length(sim2$time), length(sim1$time))
 
 ```
 
