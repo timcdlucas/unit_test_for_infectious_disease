@@ -488,7 +488,7 @@ runSim <- function(sim, beta, gamma, tf){
   results <- data.frame(time = sim$ta, S = sim$Sa, I = sim$Ia, R = sim$Ra)
   return(results)
 }
-  
+```
 
 
 
@@ -531,7 +531,6 @@ This typically involves large sample sizes or numbers of stochastic runs.
 For example, if `pf1` is positive but smaller than `pf` we expect the `chooseEvent()` to sometimes return `TRUE` and sometimes to return `FALSE`.
 If we run the function only twice, we might get two `TRUE`s or two `FALSE`s.
 However, if we run the function thousands times, and `pf1` is approximately half of `pf` (i.e. infection and recovery events are equally likely) it is almost certain that we will get at least one of each logical value.
-
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
 set.seed(10261985)
@@ -584,7 +583,7 @@ Both of these cases can be serious or annoying and difficult to debug afterwards
 \newline
 \newline
 Often for these cases, the expected behaviour of the function should be to give an error.
-There is no correct output for an epidemiological model with -1 pathogens. 
+There is no correct output for an epidemiological model with a negative number of susceptible individuals. 
 Instead the function should give an informative error message.
 Often the simplest solution is to use defensive programming and include argument checks at the beginning of functions.
 We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
@@ -594,44 +593,52 @@ We can use the `expect_error()` function for this task.
 This function takes an expression as its first argument and reports an error if the given expression does not throw an error as expected.
 \newline
 \newline
-We can first check that the code sensibly handles the user inputting a string instead of an integer for the number of pathogens.
+We can first check that the `calcRates()` function  sensibly handles the user inputting a string instead of an number for the number of $\beta$ parameter.
 Because this expression throws an error, `expect_error()` does not throw an error and the test passes.
 \newline
-```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect pathogen inputs", warning = FALSE}
+```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect parameter inputs", warning = FALSE}
+
+sim <- initialiseSim(100, 4, 0)
+expect_error(calcRates(sim, beta = 'beta', 0.04))
+
 ```
 
-Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
-Here we are imagining that the users intent wass to run a simulation with three pathogens: 1, 2 and 3.
+Now we contrast what happens if the user inputs a negative number for the $\beta$ parameter.
 \newline
 ```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
+> sim <- initialiseSim(100, 4, 0)
+> expect_error(calcRates(sim, beta = -1, 0.04))
+NAs producedError: `calcRates(sim, beta = -1, 0.04)` did not throw an error.
 ```
 
-This test fails because the function does not throw an error.
-Instead the code takes the first element of `pathogens` and ignores the rest.
-Therefore, a population is created with one pathogen, not three, which is almost certainly not what the user wanted.
-Here, the safest fix is to add an explicit argument check at the top of the function as implemented below.
-The same test now passes because `initialisePop()` throws an error when a vector is supplied to the `pathogens` argument.
-\newline
-```{r, wrong1c, ref = "wrong1c", codecap = "New definition, using defensive programming, of the initialisePop() function  and a passing test for incorrect pathogen inputs"}
+The call to `calcRates()` did not throw an error and therefore `expect_error()` did throw an error.
+The easiest way to protect against this would be to use defensive programming and check the types of the arguments.
+We demonstrate this is \@ref(wrong1c).
+Here we have added two checks that confirm that `beta` and `gamma` are positive.
+Given that `calcRates()` is run thousands of times (once per iteration) it might be more sensible to run these checks only once at the top of `runSim()` but we are showing them here to avoid pasting the longer function again and for consistency with the previous two examples.
+
+```{r, wrong1c, ref = "wrong1c", codecap = "Add defensive programming so that calcRates fails when it should do.", eval = TRUE}
+
+calcRates <- function(sim, beta, gamma){
+  stopifnot(beta >= 0)
+  stopifnot(gamma >= 0)
+  rates <- list()
+  # Infection rate.
+  rates$pf1 <- beta * sim$S * sim$I
+  # Transmission rate
+  rates$pf2 <- gamma * sim$I
+  # Total rate of all events
+  rates$pf <- rates$pf1 + rates$pf2
+  # Draw waiting time for this event.
+  rates$dt <- rexp(1, rate = rates$pf)
+  return(rates)
+}
+
+sim <- initialiseSim(100, 4, 0)
+expect_error(calcRates(sim, beta = -1, 0.04))
 
 ```
 
-We can similarly check how the code handles a user inputting a vector of numbers to the `t` argument (perhaps thinking it needed a vector of all time points to run).
-In \@ref(wrong1c), `initialisePop()` does not throw an error if a vector is supplied to `t`. 
-However, `fullSim()` does throw an error if a vector is supplied to `t`.
-While it is a good thing that `fullSim()` throws an error, the error message is not very informative.
-If the code that runs before the error is thrown (in this case the `initialisePop()` function) takes a long time, it can also be time consuming to work out what threw the error.
-It is also a signature of fragile code that the error is coincidental; a small change in the code might stop the error from occurring.
-These considerations all point towards defensive programming as a good solution.
-We can add an additional argument check to `initialisePop()`.
-Importantly, we then want to check that `fullSim()` errors in the correct place (i.e. in `initialisePop()` rather than afterwards).
-We can achieve this using the `regexp` argument of `expect_error()` that compares the actual error message to the expected error messages.
-The test will only pass if the error message contains the string provided.
-\newline
-```{r, wrong2, ref = "wrong2", codecap = "Another new definition of the initialisePop() function and a passing test for the fullSim() function."}
-
-
-```
 
 ## Test edge cases and special cases {-#corners}
 
