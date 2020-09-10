@@ -133,6 +133,12 @@ For the square root function ($\sqrt{x}$ or `sqrt(x)` in _R_), we could write a 
 However, often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover standard usage as well as _corner case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
+Unit testing is therefore testing code at low levels, the unit being a single function.
+This focus on low level functions is beneficial for a number of reasons. 
+First, it allows you to work out the exact expected result of a function call.
+Second, if you do find bugs, they are easier to isolate and fix if you are working at these low levels.
+Third, code that either calls the low level functions or relies on outputs from them is easier to in turn test and debug.
+
 In _R_, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While a variety of test functions can make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
 `expect_true()` takes one argument: an expression that should evaluate to `TRUE`.
@@ -557,7 +563,7 @@ expect_error(initialisePop(t = 10, N = 4, pathogens = "three"))
 ```
 
 Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
-Here we are imagining that the users intent wass to run a simulation with three pathogens: 1, 2 and 3.
+Here we are imagining that the users intent was to run a simulation with three pathogens: 1, 2 and 3.
 \newline
 ```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
 expect_error(initialisePop(t = 5, N = 4, pathogens = 1:3))
