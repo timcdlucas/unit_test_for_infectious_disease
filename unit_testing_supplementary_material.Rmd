@@ -140,15 +140,16 @@ We have split the code into a number of functions that do relatively well define
 ```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
 
 initialiseSim <- function(S0, I0, R0){
-  sim <- list()
-  sim$time <- 0
-  sim$S <- S0
-  sim$I <- I0
-  sim$R <- R0
-  sim$ta <- numeric(0)
-  sim$Sa <- numeric(0)
-  sim$Ia <- numeric(0)
-  sim$Ra <- numeric(0)
+  sim <- list(
+    time = 0,
+    S = S0,
+    I = I0,
+    R = R0,
+    ta = numeric(0),
+    Sa = numeric(0),
+    Ia = numeric(0),
+    Ra = numeric(0)
+  )
   return(sim)
 }
 
@@ -640,36 +641,107 @@ expect_error(calcRates(sim, beta = -1, 0.04))
 ```
 
 
-## Test edge cases and special cases {-#corners}
+## Test special cases {-#corners}
 
 When writing tests it is easy to focus on standard behaviour.
-However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
+However, bugs often occur at _special cases_---when the code behaves qualitatively differently at a certain value of a paramete or at certain combinations of parameter values.
 For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
-Code that relies on the returned object being a matrix would fail in this edge case.
-\newline
-\newline
-Similarly, special cases can be triggered with parameter sets that do not match the extrema of parameter space. 
+Code that relies on the returned object being a matrix would fail in this special case.
+These special cases can often be triggered with parameter sets that are at the edge of parameter space. 
 This is where understanding of the functional form of the model can help. 
 Consider a function `divide(x, y)` that divides `x` by `y`.
 We could test this function by noting that `y * divide(x, y)` should return `x`.
 If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
 \newline
 \newline
-We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying that the returned population had the correct number of pathogens.
-However, if we set the `pathogens` argument to be greater than the number of individuals in the population we get a population with `N` pathogens.
-The function does not therefore pass the test we defined in \@ref(testallargs).
+In our example we might want to test whether the code works with $\beta = 0$ and $\gamma = 0$ (\@ref(edge2)).
+We again run the simulation and test that the macro properties of the output are correct i.e. that the function returns a data frame with four columns and no NAs.
+While setting `beta = 0` works fine, setting `gamma = 0` does not.
 \newline
-```{r, edge2, ref = "edge2", codecap = "initialisePop() does not give a population with the correct number of pathogens if N is less than the number of pathogens.", eval = FALSE}
+```{r, edge2, ref = "edge2", codecap = "", eval = FALSE}
+> sim <- initialiseSim(100, 4, 0)
+> simulation1 <- runSim(sim, beta = 0, gamma = 1, 10)
+
+> # Check the shape of the output
+> expect_true(inherits(simulation1, 'data.frame'))
+> expect_equal(ncol(simulation1), 4)
+
+> # Test for NAs
+> expect_true(all(!is.na(simulation1)))
+
+> simulation2 <- runSim(sim, beta = 1, gamma = 0, 10)
+Error in while (sim$time < tf) { : missing value where TRUE/FALSE needed
+
 ```
 
-For edge cases like this it may be rather subjective what the correct behaviour should be.
-It might be appropriate for the function to throw an error or give a warning if the user requests more pathogens than individuals.
-Here however, we will decide that this behaviour is acceptable.
-The test above was still useful to highlight this unusual case.
-As our expected output from the function has changed, we should change our test; we now expect a population with `N` pathogens.
-We should however retain the test in \@ref(testallargs) so that we have two tests: one test checks that when `pathogens < N`, the number of unique pathogens in the population is equal to `pathogens`; the other test checks that when `pathogens > N`, the number of unique pathogens is equal to `N`.
+In general, requesting a simulation with a recovery rate of zero is not unmeaningful; this is not an objectively wrong use of the function. 
+The error occurs because once all the individuals are in the infectious class both the infection rate is zero ($\beta S I = 1 \times 0 \times 100 = 0$) and the transmission rate is zero ($\gamma I = 0 \times 100 = 0$).
+Therefore in the `rexp(1, rate = rates$pf)` in `calcRates` we are trying to draw a random number from an exponential distribution with a rate of zero which is undefined.
+Therefore `rates$dt` is set as `NaN`, `sim$time` subsequently becomes `NaN` and the expression `while (sim$time < tf)` errors because `NaN < 10` returns an NA rather than either a `TRUE` or a `FALSE`.
+For special cases like this it may be rather subjective what the correct behaviour should be.
+It might be appropriate to simply declare that this parameter value is not allowed; setting $\gamma = 0$ means this is no longer an SIR model but is instead an SI model.
+This should be stated in the documentation and the function should throw an error.
+This is what we will do here (\@ref(edge3)).
+We change our defensive lines in `calcRates` so that `gamma` must be greater than 0 rather than great or equal than zero.
+We then add a test that checks that this argument is checked properly.
 \newline
-```{r, edge3, ref = "edge3", codecap = "Check that pathogens is equal to N", eval = FALSE}
+```{r, edge3, ref = "edge3", codecap = "Use defensive programming to check for gamma = 0.", eval = TRUE}
+
+calcRates <- function(sim, beta, gamma){
+  stopifnot(beta >= 0)
+  stopifnot(gamma > 0)
+  rates <- list()
+  # Infection rate.
+  rates$pf1 <- beta * sim$S * sim$I
+  # Transmission rate
+  rates$pf2 <- gamma * sim$I
+  # Total rate of all events
+  rates$pf <- rates$pf1 + rates$pf2
+  # Draw waiting time for this event.
+  rates$dt <- rexp(1, rate = rates$pf)
+  return(rates)
+}
+
+sim <- initialiseSim(100, 4, 0)
+
+
+expect_error(runSim(sim, beta = 1, gamma = 0, 10), 
+             'gamma > 0 is not TRUE')
+
 ```
 
+Finally we might also want to check that the function works with very large values of `beta` and `gamma`.
+\newline
+```{r, edge4, ref = "edge4", codecap = "", eval = FALSE}
+sim <- initialiseSim(100, 4, 0)
+simulation1 <- runSim(sim, beta = 1e5, gamma = 1, 10)
+
+# Check the shape of the output
+expect_true(inherits(simulation1, 'data.frame'))
+expect_equal(ncol(simulation1), 4)
+
+# Test for NAs
+expect_true(all(!is.na(simulation1)))
+
+
+simulation2 <- runSim(sim, beta = 1, gamma = 1e5, 10)
+
+# Check the shape of the output
+expect_true(inherits(simulation2, 'data.frame'))
+expect_equal(ncol(simulation2), 4)
+
+# Test for NAs
+expect_true(all(!is.na(simulation2)))
+
+
+simulation3 <- runSim(sim, beta = 1e5, gamma = 1e5, 10)
+
+# Check the shape of the output
+expect_true(inherits(simulation3, 'data.frame'))
+expect_equal(ncol(simulation3), 4)
+
+# Test for NAs
+expect_true(all(!is.na(simulation3)))
+
+```
 
