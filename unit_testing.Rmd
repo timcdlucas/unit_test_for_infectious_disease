@@ -110,8 +110,10 @@ observers have made the case that this has been due to a lack of funding [@funds
 It is also notable that there are few texts available which demonstrate the use of unit testing to check infectious disease models. 
 Infectious disease modellers have sought to address these issues (as in the case above) by having multiple, independently developed models to inform policy, to address structural and parameter uncertainty [@den2019guidelines; @hollingsworth2017learning].
 
-Whilst there many drivers and attempts to address this problem with code robustness, today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
+Whilst there are many drivers and attempts to address the problem with code robustness, today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes [@willem2017lessons; @ferguson2006strategies].
 These increases in model complexity are accompanied with growing codebases. 
+Furthermore, while there are some general packages for epidemiological modelling [@jenness2018epimodel; @santos2015epidynamics], it is very common for epidemiologists to study a new model and to therefore code it from scratch. 
+Unlike, established packages that have had time to mature and fix many bugs, newly programmed models are more prone to errors.
 As the mathematical methods depend increasingly on numerical solutions rather than analytical pen-and-paper methods, it becomes more difficult to tell if a bug is present based on model outputs alone.
 
 Traditionally, the workflow is to write the complete code, run the model and examine plots of the output.
