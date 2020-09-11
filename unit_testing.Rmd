@@ -132,8 +132,8 @@ While we use R throughout to exemplify the unit testing framework, the concepts 
 # Unit testing foundations
 At the heart of every _unit test_ is a function output, its known or expected value and a process to compare the two.
 For the square root function ($\sqrt{x}$ or `sqrt(x)` in _R_), we could write a test that runs the function for the number 4, i.e. `sqrt(x = 4)`, and compares it to the correct answer i.e. 2.
-However, often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
-Instead we devise tests that cover standard usage as well as _corner case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
+However, often function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
+Instead we devise tests that cover standard usage as well as _special case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
 The definition of unit testing is that it tests code with zero dependencies outside of the test definition.
 This is in contrast to integration testing that tests how these small units integrate with other units of code, including dependencies. 
@@ -149,7 +149,7 @@ Third, code that either calls the low level functions or relies on outputs from 
 In _R_, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While a variety of test functions can make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
 `expect_true()` takes one argument: an expression that should evaluate to `TRUE`.
-For our square root example above, we would write `expect_true(sqrt(4) == 2)`.
+For the square root example above, we would write `expect_true(sqrt(4) == 2)`.
 `expect_equal()` takes two arguments, an expression and the expected output; 
 so we would write `expect_equal(sqrt(4), 2)`.
 
@@ -321,7 +321,7 @@ expect_equal(pop3[1,], c("a", "b", "c", "a", "b"))
 
 ```
 
-In contrast, if we had defined our `initialisePop()` function incorrectly, the test would fail and return an error.
+In contrast, if we had defined the `initialisePop()` function incorrectly, the test would fail and return an error.
 \newline
 ```{r, test_error, ref = "testerror", codecap = "If our code is incorrect, the test will return an error.", eval = FALSE}
 
@@ -362,7 +362,7 @@ expect_equal(length(unique(pop4[1,])), 5)
 ## Does the function logic meet your expectations? {-#complexcases}
 
 We can also cover cases that expose deviations from the logical structure of the system.
-After initialising our population, we expect all the rows other than the first to contain `NA`.
+After initialising the population, we expect all the rows other than the first to contain `NA`.
 We also expect each of the pathogens $a$, $b$ and $c$ to occur at least once on the first row if `pathogens` $= 3$ and `N` $\geq 3$.
 Finally, `updatePop()` performs a single simulation time step, so we expect only one additional row to be populated.
 Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\@ref(testcomplex)).
@@ -425,7 +425,7 @@ For example, `updatePop()` performs stochastic and deterministic operations in o
 Firstly, `updatePop()` stochastically samples who gets infected by whom at iteration `t`.
 Then it takes those infection events and assigns the new infectious status for each individual.
 We demonstrate in \@ref(splitdeterstoch) how this could be split.
-We accept this is a fairly exaggerated example and splitting a single line of code into two functions is rare!
+We accept this is a fairly exaggerated example and that splitting a single line of code into two functions is rare.
 The more common scenario is splitting a multi-line function into smaller functions which also brings benefits of code organisation so it does not feel like extra effort. 
 \newline
 ```{r, split_deter_stoch, ref = "splitdeterstoch", codecap = "Isolation of the determistic and stochastic elements"}
@@ -451,7 +451,7 @@ We now examine some techniques for directly testing the stochastic parts of a mo
 
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
-In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which our stochastic functions become deterministic.
+In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which stochastic functions become deterministic.
 For example, samples from $X\sim\text{Bernoulli}(p)$ will always be zeroes for $p=0$ or ones for $p=1$.
 In the case of a single pathogen (\@ref(teststochdetermin)), the model is no longer stochastic.
 So initialisation with one pathogen means the second time step should equal the first.
