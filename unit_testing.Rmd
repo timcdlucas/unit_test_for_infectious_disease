@@ -635,7 +635,7 @@ We checked earlier if the `t` argument of `initialisePop()` worked by verifying 
 We can test the `fullSim()` function in the same way (\@ref(edge2)).
 However, if we try to run the same test with `t = 1` we get an error before we even get to the test.
 \newline
-```{r, edge2, ref = "edge2", codecap = "initialisePop() does not give a population with the correct number of pathogens if N is less than the number of pathogens.", eval = FALSE}
+```{r, edge2, ref = "edge2", codecap = "fullSim() does not give a population matrix with the correct number of rows if one iteration is requested.", eval = FALSE}
 > popt1 <- fullSim(t = 2, N = 5, pathogens = 3) 
 > expect_equal(dim(popt1), c(2, 5))
 
@@ -656,7 +656,7 @@ Here however, we will decide that this is a valid parameter value.
 We should change the code to handle this special case, and use out new test to check that our new code works.
 In \@ref(edge3) we use an if statement to explicitely handle the special case of `t = 1` and our test now passes.
 \newline
-```{r, edge3, ref = "edge3", codecap = "Check that pathogens is equal to N", eval = FALSE}
+```{r, edge3, ref = "edge3", codecap = "Handle the special case of t = 1 and test the new code.", eval = TRUE}
 fullSim <- function(t, N, pathogens){
   pop <- initialisePop(t, N, pathogens) 
   if(t >= 2){
