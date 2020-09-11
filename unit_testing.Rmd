@@ -618,41 +618,57 @@ expect_error(fullSim(t = 1:100, N = 4, pathogens = 3),
 
 ```
 
-## Test edge cases and special cases {-#corners}
+## Test special cases {-#corners}
 
 When writing tests it is easy to focus on standard behaviour.
-However, bugs often occur at _edge cases_---when parameters are at their extrema or at special values.
+However, bugs often occur at _special cases_---when the code behaves qualitatively differently at a certain value of a paramete or at certain combinations of parameter values.
 For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
-Code that relies on the returned object being a matrix would fail in this edge case.
-\newline
-\newline
-Similarly, special cases can be triggered with parameter sets that do not match the extrema of parameter space. 
+Code that relies on the returned object being a matrix would fail in this special case.
+These special cases can often be triggered with parameter sets that are at the edge of parameter space. 
 This is where understanding of the functional form of the model can help. 
 Consider a function `divide(x, y)` that divides `x` by `y`.
 We could test this function by noting that `y * divide(x, y)` should return `x`.
 If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
 \newline
 \newline
-We checked earlier if the `pathogens` argument of `initialisePop()` worked by verifying that the returned population had the correct number of pathogens.
-However, if we set the `pathogens` argument to be greater than the number of individuals in the population we get a population with `N` pathogens.
-The function does not therefore pass the test we defined in \@ref(testallargs).
+We checked earlier if the `t` argument of `initialisePop()` worked by verifying that the returned population had the correct dimensions  (\@ref(testallargs)).
+We can test the `fullSim()` function in the same way (\@ref(edge2)).
+However, if we try to run the same test with `t = 1` we get an error before we even get to the test.
 \newline
 ```{r, edge2, ref = "edge2", codecap = "initialisePop() does not give a population with the correct number of pathogens if N is less than the number of pathogens.", eval = FALSE}
-pop <- initialisePop(t = 10, N = 4, pathogens = 5) 
-expect_equal(length(unique(pop[1,])), 5)
+> popt1 <- fullSim(t = 2, N = 5, pathogens = 3) 
+> expect_equal(dim(popt1), c(2, 5))
+
+> popt2 <- fullSim(t = 1, N = 5, pathogens = 3)
+Error in `[<-`(`*tmp*`, t, , value = x[t - 1, infector_pathogen]) 
+  subscript out of bounds
+  
+> expect_equal(dim(popt2), c(1, 5))
 ```
 
-For edge cases like this it may be rather subjective what the correct behaviour should be.
-It might be appropriate for the function to throw an error or give a warning if the user requests more pathogens than individuals.
-Here however, we will decide that this behaviour is acceptable.
-The test above was still useful to highlight this unusual case.
-As our expected output from the function has changed, we should change our test; we now expect a population with `N` pathogens.
-We should however retain the test in \@ref(testallargs) so that we have two tests: one test checks that when `pathogens < N`, the number of unique pathogens in the population is equal to `pathogens`; the other test checks that when `pathogens > N`, the number of unique pathogens is equal to `N`.
+In general, requesting a simulation with 1 time step is not epidemiologically unmeaningful; this is not an objectively wrong use of the function. 
+The code behaves qualitatively differently for `t = 1` than for `t = 2` because the loop in \@ref(combinesimplefunc) runs from 2 to `t`.
+When `t` is 1, the population is initialised with 1 row but the code still tries to run a second iteration and tries to put the results in the second row of the population matrix even though that matrix only has 1 row.
+For special cases like this it may be rather subjective what the correct behaviour should be.
+It might be appropriate to simply declare that this parameter value is not allowed.
+This should be stated in the documentation and the function should throw an error.
+Here however, we will decide that this is a valid parameter value.
+We should change the code to handle this special case, and use out new test to check that our new code works.
+In \@ref(edge3) we use an if statement to explicitely handle the special case of `t = 1` and our test now passes.
 \newline
 ```{r, edge3, ref = "edge3", codecap = "Check that pathogens is equal to N", eval = FALSE}
-N <- 4
-pop <- initialisePop(t = 10, N = N, pathogens = N + 1) 
-expect_equal(length(unique(pop[1,])), N)
+fullSim <- function(t, N, pathogens){
+  pop <- initialisePop(t, N, pathogens) 
+  if(t >= 2){
+    for(i in seq(2, t)){
+      pop <- updatePop(pop, i, N)
+    }
+  }
+  return(pop)
+}
+
+popt2 <- fullSim(t = 1, N = 5, pathogens = 3)
+expect_equal(dim(popt2), c(1, 5))
 ```
 
 
