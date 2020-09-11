@@ -133,7 +133,12 @@ For the square root function ($\sqrt{x}$ or `sqrt(x)` in _R_), we could write a 
 However, often our function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover standard usage as well as _corner case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
-Unit testing is therefore testing code at low levels, the unit being a single function.
+The definition of unit testing is that it tests code with zero dependencies outside of the test definition.
+This is in contrast to integration testing that tests how these small units integrate with other units of code, including dependencies. 
+Testing at even higher levels includes system testing (which tests how multiple systems such as software and hardware interact) and acceptance testing (in which end-users, or whoever commissioned the software, test that it meets requirements).
+Within the scientific community however, the term unit testing is typically used in a slightly vague way and implies a combination of integration and unit testing.
+As so much scientific software relies on various dependencies, even at very low levels, the strict definition of unit testing is not necessarily useful. 
+Here we continue to use this vague definition, simply focussing on testing of code at a low level.
 This focus on low level functions is beneficial for a number of reasons. 
 First, it allows you to work out the exact expected result of a function call.
 Second, if you do find bugs, they are easier to isolate and fix if you are working at these low levels.
@@ -235,8 +240,6 @@ Thirdly, it is much easier to debug code when you know there is a bug.
 Fourthly, while plotting simulation runs is an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. 
 Additionally, manually checking plots is a time consuming and non-scalable method because a human has to perform this scan every test run.
 In summary this *ad hoc* plotting approach reduces the chances that we will catch all bugs.
-
-
 
 The cause of the bug is that `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone transmits their infection pathogen on a one-to-one basis rather than one-to-many as required by the model.
 Setting `replace = TRUE` fixes this (\@ref(correctcode)) and when we plot the proportion of each pathogen (Fig. \@ref(fig:correctplots)) we see the correct behaviour (a single pathogen drifting to dominance).
@@ -382,8 +385,9 @@ expect_true(all(is.na(pop2[-c(1:2),])))
 
 ## Combine simple functions and test them at a higher-level{-#combine}
 
-In the end an entire model only runs when its functions work together seamlessly. 
+In the end an entire model only runs when its functions work together seamlessly.
 So we next check their connections; achieved through nesting functions together, or defining them at a higher level and checking the macro aspects of the model.
+This could certainly be considered integration testing rather than unit testing.
 We define a function `fullSim()` that runs both `initialisePop()` and `updatePop()` to yield one complete simulation.
 We would expect there to be no `NA`s in the output from `fullSim()` and every element to be either $a$, $b$ or $c$.
 \newline
