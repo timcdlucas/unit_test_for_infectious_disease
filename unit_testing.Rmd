@@ -126,6 +126,8 @@ These testing concepts also apply to many other scientific fields but here we fo
 Infectious disease modelling presents specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
 There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming [@wickham2019advanced Chapter 9] and careful documentation [@wickham2015r Chapter 5] but while important, these are not the focus of this paper.
 In this primer we introduce unit testing with a demonstration of an infectious disease model.
+While a number of articles have stated that unit tests should be written (@osborne2014ten, @wilson2014best), we have not yet seen a thorough guide as to how to test the sort of code commonly written by infectious disease biologists.
+And while the basic premise of unit testing is simple, there is an art to knowing what aspects of code can and should be tested; we hope this primer will enable researchers to acquire this skill quickly.
 While we use R throughout to exemplify the unit testing framework, the concepts apply equally well to the various languages commonly used by modellers such as _Julia_ and _python_; we therefore briefly direct the reader towards available testing frameworks for those languages in Section \@ref(frameworks).
 
 
