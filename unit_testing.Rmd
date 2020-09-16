@@ -102,7 +102,7 @@ The tweet and lack of tests garnered considerable backlash (some of which may ha
 It is understandable that during the fast-moving, early stages of a pandemic, other priorities were put above testing and documenting the code.
 However, this simply reinforces that time should be taken to test and document code when it is first written so that it is already well tested for when it is needed under short deadlines.
 It is also important to note that a lack of tests is not unusual in our field, or for some of the authors of this article. 
-To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness and reliability [@den2019guidelines], yet this is not enough if the models themselves lack internal validity.
+To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness (both in terms of model uncertainty and in terms of implementation) and reliability [@den2019guidelines], yet this is not enough if the models themselves lack internal validity.
 
 
 Infectious disease modellers are rarely trained as professional programmers [@it] and recently some
@@ -123,7 +123,7 @@ Furthermore, this workflow is biased as models that show expected behaviour are 
 _Unit testing_ is a formally-defined, principled framework that compares comprehensive output scenarios from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
 Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _python_ [@python] and are standard practice in the software industry.
 These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
-Infectious disease modelling presents specific challenges, such as stochastic outputs, which are difficult to test and not covered in general unit testing literature.
+Infectious disease modelling presents specific challenges, such as stochastic outputs [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit], which are difficult to test and not covered in general unit testing literature.
 There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming [@wickham2019advanced Chapter 9] and careful documentation [@wickham2015r Chapter 5] but while important, these are not the focus of this paper.
 In this primer we introduce unit testing with a demonstration of an infectious disease model.
 While a number of articles have stated that unit tests should be written (@osborne2014ten, @wilson2014best), we have not yet seen a thorough guide as to how to test the sort of code commonly written by infectious disease biologists.
@@ -415,7 +415,7 @@ expect_true(all(pop %in% c("a", "b", "c")))
 # Stochastic code
 
 Stochastic simulations are a common feature in infectious disease models.
-Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be.
+Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit].
 We can check very broad-scale properties, like \@ref(combinesimplefunc), where we check the range of pathogen values.
 However, code could still pass and be wrong (for example the base example (\@ref(firstcode)) would still pass that test).
 There are however a number of approaches that can help.
@@ -536,6 +536,10 @@ diffProportions <- function(x){
 #   on each list element of manySims i.e. each simulation.
 expect_true(any(vapply(manySims, diffProportions, TRUE)))
 ```
+This example can be thought of more generally as having an expected distribution of an output and using a statistical test to compare the simulation results with the expectation.
+Here, we had a binomial event (were the pathogen proportions different between the first and last time step) and an expected frequency of this event (greater than zero).  
+This approach is the focus of the literature on testing stochastic code  [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit].
+If we know a property of the expected distribution of a model outcome (the mean for example) we can run the simulation of number of times and use a standard statistical test to compare the distribution of simulated outputs to the expected distribution.
 
 # Further testing
 
