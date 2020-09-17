@@ -100,9 +100,9 @@ The issue of trust was highlighted recently when Neil Ferguson, one of the leadi
 The code that was released did not include any tests [@ferg_github] but subsequent work has added documentation, while independent code reviews have supported the results of the study [@ferg_check; @it].
 The tweet and lack of tests garnered considerable backlash (some of which may have been politically motivated [@ferg_pol]), with observers from the software industry noting that code should be both documented and tested to ensure its correctness [@it].
 It is understandable that during the fast-moving, early stages of a pandemic, other priorities were put above testing and documenting the code.
-However, this simply reinforces that time should be taken to test and document code when it is first written so that it is already well tested for when it is needed under short deadlines.
+However, this simply reinforces that time should be taken to test and document code when it is first written so that it is already well tested when it is needed under short deadlines.
 It is also important to note that a lack of tests is not unusual in our field, or for some of the authors of this article. 
-To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness (both in terms of model uncertainty and in terms of implementation) and reliability [@den2019guidelines; @hollingsworth2017learning], yet this is not enough if the models themselves lack internal validity.
+To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness (both in terms of model uncertainty and in terms of implementation) [@den2019guidelines; @hollingsworth2017learning], yet this is not enough if the models themselves lack internal validity.
 
 
 Infectious disease modellers are rarely trained as professional programmers [@it] and recently some observers have made the case that this has been due to a lack of funding [@funds]. 
@@ -118,10 +118,10 @@ These increases in model complexity are accompanied with growing codebases.
 Furthermore, while there are some general packages for epidemiological modelling [@jenness2018epimodel; @santos2015epidynamics], it is very common for epidemiologists to study a new model and to therefore code it from scratch. 
 Unlike, established packages that have had time to mature and fix many bugs, newly programmed models are more prone to errors.
 As the mathematical methods depend increasingly on numerical solutions rather than analytical pen-and-paper methods, it becomes more difficult to tell if a bug is present based on model outputs alone.
-Furthermore, checking models in an _ad hoc_ way is biased as unexpected results trigger careful checks of the code while models that show expected behaviour are assumed bug-free.
+Furthermore, checking models in an _ad hoc_ way is biased as unexpected results trigger careful checks of the code while models that show expected behaviour are more likely to be assumed bug-free.
 
 
-_Unit testing_ is a formally-defined, principled framework that compares comprehensive output scenarios from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
+_Unit testing_ is a formally-defined, principled framework that compares outputs from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
 Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _python_ [@python] and are standard practice in the software industry.
 These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
 Infectious disease modelling presents specific challenges, such as stochastic outputs [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit], which are difficult to test and not covered in general unit testing literature.
@@ -136,7 +136,7 @@ For the square root function ($\sqrt{x}$ or `sqrt(x)` in _R_), we could write a 
 However, often function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
 Instead we devise tests that cover standard usage as well as _special case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
 
-The definition of unit testing is that it tests code with zero dependencies outside of the test definition.
+Strictly defined, unit testing tests code with no dependencies outside of the test definition.
 This is in contrast to integration testing that tests how these small units integrate with other units of code, including dependencies. 
 Testing at even higher levels includes system testing (which tests how multiple systems such as software and hardware interact) and acceptance testing (in which end-users, or whoever commissioned the software, test that it meets requirements).
 Within the scientific community however, the term unit testing is typically used in a slightly vague way and implies a combination of integration and unit testing.
@@ -173,7 +173,7 @@ Here we define a toy epidemiological model and then demonstrate how to effective
 Consider a multi-pathogen system, with a population of $N$ infected individuals who each get infected by a new pathogen at every time step (Fig. \ref{fig:modelexample}).
 In this toy example, we imagine that individuals are infected with exactly one pathogen at a time.
 Some aspects of this model could reflect the dynamics of a population where specific antibiotics are used regularly i.e. each time step an individual is infected, diagnosed and treated suboptimally, leaving the individual susceptible to infection from any pathogen, including the one they were just treated for.
-The aim of this model however is not to be realistic but serve as a learning tool with succinct code.
+The aim of this model however is not to be realistic but to serve as a learning tool with succinct code.
 We work through adding tests to a more realistic model in the Supplementary Material.
 
 Each individual $i$, at time $t$, is defined by the pathogen they are currently infected with $I_{it} \in \{a, b, c\}$ for a 3-pathogen system. 
@@ -329,15 +329,15 @@ In contrast, if we had defined the `initialisePop()` function incorrectly, the t
 \newline
 ```{r, test_error, ref = "testerror", codecap = "If our code is incorrect, the test will return an error.", eval = FALSE}
 
-# A broken function that does not add the pathogens.
-initialisePopBroken <- function(n_steps, N, pathogens){
-  I <- matrix(data = NA, nrow = n_steps, ncol = N)
-  return(I)
-}
+> # A broken function that does not add the pathogens.
+> initialisePopBroken <- function(n_steps, N, pathogens){
++   I <- matrix(data = NA, nrow = n_steps, ncol = N)
++  return(I)
++ }
 
-popBroken <- initialisePopBroken(n_steps = 2, N = 3, pathogens = 3) 
-expect_equal(popBroken[1,], c("a", "b", "c"))
-
+> popBroken <- initialisePopBroken(n_steps = 2, N = 3, 
+                                 pathogens = 3) 
+> expect_equal(popBroken[1,], c("a", "b", "c"))
 Error: popBroken[1, ] not equal to c("a", "b", "c").
 ```
 
@@ -393,7 +393,7 @@ expect_true(all(is.na(pop2[-c(1:2),])))
 
 In the end an entire model only runs when its functions work together seamlessly.
 So we next check their connections; achieved through nesting functions together, or defining them at a higher level and checking the macro aspects of the model.
-This could certainly be considered integration testing rather than unit testing.
+This could be considered integration testing rather than unit testing.
 We define a function `fullSim()` that runs both `initialisePop()` and `updatePop()` to yield one complete simulation.
 We would expect there to be no `NA`s in the output from `fullSim()` and every element to be either $a$, $b$ or $c$.
 \newline
@@ -410,7 +410,7 @@ pop <- fullSim(n_steps = 12, N = 20, pathogens = 3)
 
 # expect no NAs
 expect_true(!any(is.na(pop))) 
-# expect all 3 pathogens contained within
+# expect all elements to be one of a, b, or c
 expect_true(all(pop %in% c("a", "b", "c"))) 
 ```
 
@@ -426,7 +426,7 @@ There are however a number of approaches that can help.
 
 Isolate the stochastic parts of your code.
 For example, `updatePop()` performs stochastic and deterministic operations in one line (\@ref(compactfunctions)).
-Firstly, `updatePop()` stochastically samples who gets infected by whom at iteration `t`.
+First `updatePop()` stochastically samples who gets infected by whom at iteration `t`.
 Then it takes those infection events and assigns the new infectious status for each individual.
 We demonstrate in \@ref(splitdeterstoch) how this could be split.
 We accept this is a fairly exaggerated example and that splitting a single line of code into two functions is rare.
@@ -478,7 +478,7 @@ Both individuals can infect themselves, giving {1, 2}.
 Or finally both individuals can infect each other, giving {2, 1}.
 In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vector with the indices of the infector for each infectee. 
 `paste0()` then turns this length-2 vector into a length-1 string with two characters; we expect this to be one of "11", "22", "12" or "21".
-`replicate()` runs the expression 300 times, but in your unit test you should choose a value high enough so that you are confident that all of the distinct outcomes will have occurred at least once.
+`replicate()` runs the expression 300 times.
 \newline
 ```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values", results = 'hide'}
 # Collapse each draw into a single string
@@ -486,12 +486,13 @@ In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vecto
 manyPops <- 
   replicate(300, paste0(chooseInfector(N = 2), collapse = ""))
 
+# Check that all outputs are one of the four possible values
 expect_true(all(manyPops %in% c("11", "22", "12", "21")))
 ```
 
 ## Use very large samples for the stochastic part {-#largesamples}
 
-While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
+Testing can be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
 For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
 In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
@@ -515,7 +516,7 @@ If the bug occurs every ten simulations and we have not fixed it we would be con
 Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
 \newline
 \newline
-Similarly, a bug might cause an event that should be rare to happen very regularly or even every time the code is run.
+Similarly, a bug might cause an event that should be rare to instead occur very regularly or even every time the code is run.
 In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
 We would expect this to happen only very rarely.
 We can run a large number of short simulations to check that this specific bug is not still occurring by confirming that the proportion of each pathogen is not always the same between the first and last time point.
@@ -523,7 +524,8 @@ As long as we find at least one simulation where the proportions of each pathoge
 \newline
 ```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
 set.seed(11121955)
-manySims <- replicate(500, fullSim(n_steps = 20, N = 40, pathogens = 3), 
+manySims <- replicate(500, 
+                      fullSim(n_steps = 20, N = 40, pathogens = 3), 
                       simplify = FALSE)
 
 # Define a function that returns TRUE if the
@@ -539,7 +541,7 @@ diffProportions <- function(x){
 expect_true(any(vapply(manySims, diffProportions, TRUE)))
 ```
 This example can be thought of more generally as having an expected distribution of an output and using a statistical test to compare the simulation results with the expectation.
-Here, we had a binomial event (were the pathogen proportions different between the first and last time step) and an expected frequency of this event (greater than zero).  
+Here, we had a binomial event (were the pathogen proportions different between the first and last time step) and an expected frequency of this event (greater than zero).
 This approach is the focus of the literature on testing stochastic code  [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit].
 If we know a property of the expected distribution of a model outcome (the mean for example) we can run the simulation of number of times and use a standard statistical test to compare the distribution of simulated outputs to the expected distribution.
 
@@ -547,7 +549,7 @@ If we know a property of the expected distribution of a model outcome (the mean 
 
 ## Test incorrect inputs {-#testincorrect}
 
-As well as testing that functions work when given the correct inputs, we must also test that they behave sensibly when given wrong ones.
+As well as testing that functions work when given the correct inputs, we should also test that they behave sensibly when given wrong ones.
 This typically involves the user inputting argument values that do not make sense.
 This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values.
 Therefore it is useful to test that functions fail gracefully if they are given incorrect inputs.
@@ -557,7 +559,7 @@ In some cases, inputting incorrect argument values may cause the function to fai
 In other cases code may run silently giving false results or take a long time to give an error.
 Both of these cases can be serious or annoying and difficult to debug afterwards.
 In this section we find frailties in the code that are conceptually different to a bug; the model as specified is already implemented correctly.
-Instead we are making the code more user-friendly and user-safe to protect against mistakes if the code is reused by other scientists or by the developer in the future once they have forgotten the specifics of the code.
+Instead we are making the code more user-friendly and user-safe to protect against mistakes if the code is reused by other scientists or by the developer in the future.
 \newline
 \newline
 Often for these cases, the expected behaviour of the function should be to give an error.
@@ -575,14 +577,17 @@ We can first check that the code sensibly handles the user inputting a string in
 Because this expression throws an error, `expect_error()` does not throw an error and the test passes.
 \newline
 ```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect pathogen inputs", warning = FALSE}
-expect_error(initialisePop(n_steps = 10, N = 4, pathogens = "three"))
+expect_error(
+  initialisePop(n_steps = 10, N = 4, pathogens = "three"))
 ```
 
 Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
 Here we are imagining that the users intent was to run a simulation with three pathogens: 1, 2 and 3.
 \newline
 ```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
-expect_error(initialisePop(n_steps = 5, N = 4, pathogens = 1:3))
+> expect_error(initialisePop(n_steps = 5, N = 4, pathogens = 1:3))
+Error: `initialisePop(n_steps = 5, N = 4, pathogens = 1:3)` 
+  did not throw an error.
 ```
 
 This test fails because the function does not throw an error.
@@ -663,8 +668,10 @@ Error in `[<-`(`*tmp*`, t, , value = x[t - 1, infector_pathogen])
 ```
 
 In general, requesting a simulation with 1 time step is not epidemiologically unmeaningful; this is not an objectively wrong use of the function. 
-The code behaves qualitatively differently for `n_steps = 1` than for `n_steps = 2` because the loop in \@ref(combinesimplefunc) runs from 2 to `n_steps`.
-When `n_steps` is 1, the population is initialised with 1 row but the code still tries to run a second iteration and tries to put the results in the second row of the population matrix even though that matrix only has 1 row.
+The code behaves qualitatively differently for `n_steps = 1` than for `n_steps = 2` because the loop in \@ref(combinesimplefunc) runs from 2 to `n_steps` setting `t` to each value in turn.
+When `n_steps` is 2 or more, this follows the sequence $\{2, 3, ...\}$.
+When `n_steps` is 1, this instead follows the sequence $\{2, 1\}$.
+The population is initialised with 1 row but the code still tries to store the results in the second row of the population matrix.
 For special cases like this it may be rather subjective what the correct behaviour should be.
 It might be appropriate to simply declare that this parameter value is not allowed.
 This should be stated in the documentation and the function should throw an error.
@@ -692,13 +699,13 @@ expect_equal(dim(popt2), c(1, 5))
 
 Most programming languages have established testing packages.
 For _R_, there is the $\texttt{testthat}$ package as already discussed as well as other packages such as $\texttt{tinytest}$ which has the benefit of having no dependencies.
-When structuring _R_ code as standalone scripts, the tests should be saved in a separate script or scripts either in the same directory as the scripts in with functions are defined or within a subdirectory in the same project directory. 
+When structuring _R_ code as standalone scripts, the tests should be saved in one or more scripts either in the same directory as the scripts in which the functions are defined or within a subdirectory of the same project directory. 
 The testing script needs to load all the functions it is going to test (with `source()` for example) and then run the tests.
 When structuring _R_ code as a package, tests should be kept in the directory `tests/testthat`; further requirements to the structure can be found in @wickham2015r Chapter 7.
 All the tests in a package can then be run with `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to the package build.
 If the code is to be part of a package then these tools are essential to run the code within the context of a build environment.
 These tools also provide a clean environment to highlight if a test was previously relying on objects defined outside of the test script.
-Furthermore, organising code in a package provides further benefits such as tools to aid the writing of documentation, systematic handling of further dependencies and tools to track whether every line of code in the package is tested such as the \texttt{covr} package [@covr].
+Furthermore, organising code in a package provides further benefits such as tools to aid the writing of documentation, systematic handling of dependencies and tools to track whether every line of code in the package is tested such as the \texttt{covr} package [@covr].
 The practice of organising code as a package, even if there is no expectation that others will use the code, is under appreciated and underused in epidemiology.
 \newline
 \newline
@@ -715,7 +722,7 @@ For a _Julia_ package, unit tests reside in `test/runtests.jl` and tests are run
 end
 ```
 
-Finally, in _python_ we have the $\texttt{unittest}$ framework [@pythonunittest]; tests must be written into a class that inherits from the `TestCase` class.
+Finally, in _python_ tests can be performed using the $\texttt{unittest}$ framework [@pythonunittest]; tests must be written into a class that inherits from the `TestCase` class.
 The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
 Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with "`test_`".
@@ -733,15 +740,15 @@ unittest.main()
 
 # Continuous integration {#ci}
 
-If your code is under version control [@osborne2014ten; @wilson2014best] and hosted on GitHub, GitLab or BitBucket, you can automate the running of unit tests---also known as _continuous integration_.
+If your code is under version control [@osborne2014ten; @wilson2014best] and hosted online (e.g. on GitHub, GitLab or BitBucket), you can automate the running of unit tests---also known as _continuous integration_.
 In this setup, whenever you push code changes from your local computer to the online repository, any tests that you have defined get run automatically.
-Furthermore these tests can be automated irrespective of changes to your code or tests: since dependencies with other packages and knock-on changes from them into a bug in your code can be automatically found and notified to you by email.
+Furthermore these tests can be automated to run periodically so that bugs caused by changes in dependencies are flagged.
 There are various continuous integration services such as travis-ci.org, GitHub actions and GitLab pipelines.
 These services are often free on a limited basis, or free if your code is open source.
 \newline
 \newline
 We briefly describe the setup of the simplest case using Travis CI.
-Setting testing up is very straightforward for _R_ code already organised into a package and hosted openly on GitHub. 
+Setting up continuous integration is very straightforward for _R_ code already organised into a package and hosted openly on GitHub. 
 Within your version-controlled folder that contains the _R_ code, you add a one-liner file named "`.travis.yml`" that contains a description of which language the code uses.
 \newline
 ```{awk, travis, ref = "travis", codecap = "A basic travis yml file.", eval = FALSE}
@@ -756,13 +763,12 @@ More details on setting up Travis, and how to continuously track test coverage  
 # Concluding remarks
 
 It is vital that infectious disease models are coded to minimise bugs.
-Unit testing is a well-defined, principled way we can do this.
+Unit testing is a well-defined, principled way to do this.
 There are many frameworks that make aspects of unit testing automatic and more informative and these should be used where possible.
 \newline
 \newline
 The basic principles of unit testing are simple but writing good tests is a skill that takes time, practice and thought.
 However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results. 
-These qualities are important for the reproducibility of science, but are particularly relevant where code may be shared between individuals or groups, or where you wish to publish your code as a package to be used by others.
 Our aim in this paper was to demonstrate tailored results for infectious disease modelling. 
 There are number of standard programming approaches to unit testing which would be good followup reading (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best). 
 As demonstrated here, it is initially time consuming to program in this way, but over time it will become habitual and both you and the policy-makers who use your models will benefit from it.
