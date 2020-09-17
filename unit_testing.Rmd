@@ -177,10 +177,11 @@ The aim of this model however is not to be realistic but serve as a learning too
 We work through adding tests to a more realistic model in the Supplementary Material.
 
 Each individual $i$, at time $t$, is defined by the pathogen they are currently infected with $I_{it} \in \{a, b, c\}$ for a 3-pathogen system. 
-The population is therefore defined by a length $N$ state vector $\mathbf{I}_t$ = $(I_{it})_{i=[1,N]}$.
+The population is therefore defined by a length $N$ state vector $\mathbf{I}_t = (I_{it})_{i=[1,N]}$.
 At each time step, every individual's infection status is updated as:
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 That is, at each iteration, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iteration (including itself $I_{i,t-1}$).
+This model has a total of three parameters, the total number of individuals, the number of pathogen species, and the number of time steps, all of which are scalar, positive integers. 
 Certainly this toy model is naïve as it is governed by mass-action principles, ignoring contact and spatial dynamics. 
 Nevertheless it will serve its purpose. 
 Before writing any code we can consider some of the behaviour we would expect from this model.
@@ -246,7 +247,9 @@ In summary this *ad hoc* plotting approach reduces the chances that we will catc
 
 The cause of the bug is that `sample()` defaults to sampling without replacement `sample(..., replace = FALSE)`; this means everyone transmits their infection pathogen on a one-to-one basis rather than one-to-many as required by the model.
 Setting `replace = TRUE` fixes this (\@ref(correctcode)) and when we plot the proportion of each pathogen (Fig. \@ref(fig:correctplots)) we see the correct behaviour (a single pathogen drifting to dominance).
+At this point there are no further bugs in the code.
 In the subsequent sections we will develop this base example as we consider different concepts in unit testing, resulting in well-tested code by the end. 
+Despite there being no further bugs, we can examine how unit testing allows us to protect against misuse of the code and reinforce our confidence in the code.
 \newline
 ```{r, correctcode, ref = "correctcode", codecap = "Corrected base example", results = 'hide', echo = TRUE}
 N <- 12
@@ -553,10 +556,12 @@ However, it is not always obvious what constitutes an 'incorrect value' even to 
 In some cases, inputting incorrect argument values may cause the function to fail quickly. 
 In other cases code may run silently giving false results or take a long time to give an error.
 Both of these cases can be serious or annoying and difficult to debug afterwards.
+In this section we find frailties in the code that are conceptually different to a bug; the model as specified is already implemented correctly.
+Instead we are making the code more user-friendly and user-safe to protect against mistakes if the code is reused by other scientists or by the developer in the future once they have forgotten the specifics of the code.
 \newline
 \newline
 Often for these cases, the expected behaviour of the function should be to give an error.
-There is no correct output for an epidemiological model with -1 pathogens. 
+There is no correct output for an epidemiological model with -1 pathogens.
 Instead the function should give an informative error message.
 Often the simplest solution is to use defensive programming and include argument checks at the beginning of functions.
 We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
