@@ -122,30 +122,29 @@ Furthermore, checking models in an _ad hoc_ way is biased as unexpected results 
 
 
 _Unit testing_ is a formally-defined, principled framework that compares outputs from code to what the programmer expected to happen (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best).
-Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _python_ [@python] and are standard practice in the software industry.
+Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _Python_ [@python] and are standard practice in the software industry.
 These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
 Infectious disease modelling presents specific challenges, such as stochastic outputs [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit], which are difficult to test and not covered in general unit testing literature.
-There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming, version control, pair-programming and careful documentation [@osborne2014ten; @wilson2014best; @wickham2019advanced; @wickham2015r; @RECON] but while important, these are not the focus of this paper.
+There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming, version control, pair-programming and comprehensive documentation [@osborne2014ten; @wilson2014best; @wickham2019advanced; @wickham2015r; @RECON] but while important, these are not the focus of this paper.
 In this primer we introduce unit testing with a demonstration of an infectious disease model.
-While we use R throughout to exemplify the unit testing framework, the concepts apply equally well to the various languages commonly used by modellers such as _Julia_ and _python_; we therefore briefly direct the reader towards available testing frameworks for those languages in Section \@ref(frameworks).
+While we use _R_ throughout to exemplify the unit testing framework, the concepts apply equally well to the various languages commonly used by modellers such as _Julia_ and _python_; we therefore briefly direct the reader towards available testing frameworks for those languages in Section \@ref(frameworks).
 
 
 # Unit testing foundations
 At the heart of every _unit test_ is a function output, its known or expected value and a process to compare the two.
 For the square root function ($\sqrt{x}$ or `sqrt(x)` in _R_), we could write a test that runs the function for the number 4, i.e. `sqrt(x = 4)`, and compares it to the correct answer i.e. 2.
 However, often function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all. 
-Instead we devise tests that cover standard usage as well as _special case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4,"melon",NA))`?
+Instead we devise tests that cover standard usage as well as _special case_ scenarios: what do we want our function to do if given a negative number e.g. `sqrt(-1)`, or a vector argument containing strings or missing values e.g. `sqrt(c(4, "melon", NA))`?
 
-Strictly defined, unit testing tests code with no dependencies outside of the test definition.
+Strictly-defined, unit testing tests code with no dependencies outside of the test definition.
 This is in contrast to integration testing that tests how these small units integrate with other units of code, including dependencies. 
-Testing at even higher levels includes system testing (which tests how multiple systems such as software and hardware interact) and acceptance testing (in which end-users, or whoever commissioned the software, test that it meets requirements).
-Within the scientific community however, the term unit testing is typically used in a slightly vague way and implies a combination of integration and unit testing.
+Testing at even higher levels includes system testing (which tests how multiple systems such as software and hardware interact) and acceptance testing (in which end-users, or software commissioners, test that it meets requirements).
+Within the scientific community however, the term unit testing is typically used in a slightly vague way and implies a combination of integration and (strict) unit testing.
 As so much scientific software relies on various dependencies, even at very low levels, the strict definition of unit testing is not necessarily useful. 
 Here we continue to use this vague definition, simply focussing on testing of code at a low level.
-This focus on low level functions is beneficial for a number of reasons. 
-First, it allows you to work out the exact expected result of a function call.
+The first benefit of this is that it allows you to work out the exact expected result of a function call.
 Second, if you do find bugs, they are easier to isolate and fix if you are working at these low levels.
-Third, code that either calls the low level functions or relies on outputs from them is easier to in turn test and debug.
+Third, code that either calls the low-level functions or relies on outputs from them is easier to test and debug.
 
 In _R_, the \texttt{testthat} package [@testthat], provides a simple interface for testing.
 While a variety of test functions can make different comparisons, the two main ones are `expect_true()` and `expect_equal()`. 
@@ -157,10 +156,10 @@ so we would write `expect_equal(sqrt(4), 2)`.
 There are a number of ways to incorporate unit testing into your programming workflow.
 
 1. Each time you write code for a new, discrete chunk of functionality, you should write tests that confirm it does what you expect. These tests should be kept with the code it is testing (in the same directory or in a subdirectory).
-2. Whenever a bug is found in the code outside of the existing testing framework, a new test should be written to capture it. 
-Then if the bug re-emerges it will hopefully be quickly flagged so that the developor can fix it.
-3. All of these tests should be regularly run as you develop new code.
-If a change causes the older tests to break, this points to the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
+2. Whenever a bug is found outside of the existing testing framework, a new test should be written to capture it. 
+Then if the bug re-emerges it will hopefully be quickly flagged so that the developer can fix it.
+3. All of these tests should be run regularly as you develop new code.
+If a change causes the previous tests to break, this indicates the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
 
 # An example multi-pathogen re-infection model
 
@@ -174,7 +173,7 @@ Consider a multi-pathogen system, with a population of $N$ infected individuals 
 In this toy example, we imagine that individuals are infected with exactly one pathogen at a time.
 Some aspects of this model could reflect the dynamics of a population where specific antibiotics are used regularly i.e. each time step an individual is infected, diagnosed and treated suboptimally, leaving the individual susceptible to infection from any pathogen, including the one they were just treated for.
 The aim of this model however is not to be realistic but to serve as a learning tool with succinct code.
-We work through adding tests to a more realistic model in the Supplementary Material.
+We work through a more realistic model in the Supplementary Material.
 
 Each individual $i$, at time $t$, is defined by the pathogen they are currently infected with $I_{it} \in \{a, b, c\}$ for a 3-pathogen system. 
 The population is therefore defined by a length $N$ state vector $\mathbf{I}_t = (I_{it})_{i=[1,N]}$.
@@ -184,24 +183,24 @@ That is, at each iteration, the new infection status of each individual is a Uni
 This model has a total of three parameters, the total number of individuals, the number of pathogen species, and the number of time steps, all of which are scalar, positive integers. 
 Certainly this toy model is naïve as it is governed by mass-action principles, ignoring contact and spatial dynamics. 
 Nevertheless it will serve its purpose. 
-Before writing any code we can consider some of the behaviour we would expect from this model.
+Before writing any code we can consider the model's expected behaviour.
 Firstly, we would expect an individual to be repeatedly infected with different strains.
-Secondly, we would expect the proportions of the different pathogens to stochastically drift until all but one pathogen goes extinct.
+Secondly, we would expect the proportions of the different pathogens to stochastically drift, until all but one pathogen goes extinct.
 \@ref(firstcode) shows our first attempt at implementing this model.
 \newline
-```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model", results='hide'}
+```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model.", results='hide'}
 N <- 12 # infected individuals
 n_steps <- 20 # study length
 # create the matrix to store the simulation data
 I <- matrix(data = NA, nrow = n_steps, ncol = N)
 
 # Initialise the population at t=1 with repeating configuration
-I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
+I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
 
 # At each time step, everyone is re-infected 
 # by someone from the previous time step.
 for(t in seq(2, n_steps)){
-  I[t,] <- sample(x = I[t-1,], size = N)
+  I[t, ] <- sample(x = I[t-1, ], size = N)
 }
 ```
 
@@ -227,18 +226,19 @@ ggplot(d1, aes(time, as.numeric(pathogen))) +
   cbind(Time = seq_len(nrow(I))) %>% 
   pivot_longer(cols = -Time, names_to = 'Pathogen', values_to = 'Proportion') %>% 
   ggplot(aes(x = Time, y = Proportion, colour = Pathogen, linetype = Pathogen)) +
-    geom_line() +
+    ylim(0, 1) +
+    geom_line(size = 2) +
     theme_minimal() +
     theme(panel.grid.minor = element_blank(),
+          legend.key.width = unit(3,"cm"),
           text = element_text(size = 20, family = "serif"))
 
 ```
 
 Usually we would make some output plots to explore if our code is performing sensibly.
 Plotting the time course of which pathogen is infecting one individual shows repeated infection with different pathogens as expected (Fig. \@ref(fig:firstplots)).
-However, if we plot the proportion of each pathogen (Fig. \@ref(fig:incorrectplot)) we quickly see that instead of stochastically varying the proportions are identical through time and so there must be a bug that we had not originally noticed.
-This simple example demonstrates a number of points.
-Firstly, bugs can be subtle.
+However, if we plot the proportion of each pathogen (Fig. \@ref(fig:incorrectplot)) we quickly see that instead of stochastically varying, the proportions are identical through time and so there must be a bug present.
+This simple example demonstrates the firstly that bugs can be subtle.
 Secondly, it is not easy to notice an error, even in just 7 lines of code. 
 Thirdly, it is much easier to debug code when you know there is a bug. 
 Fourthly, while plotting simulation runs is an excellent way to check model behaviour, if we had only relied on Fig. \@ref(fig:firstplots) we would have missed the bug. 
@@ -257,14 +257,14 @@ n_steps <- 20
 
 I <- matrix(data = NA, nrow = n_steps, ncol = N)
 
-I[1,] <- rep(x = c("a", "b", "c"), length.out = N)
+I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
 
 for(t in seq(2, n_steps)){
-  I[t,] <- sample(x = I[t-1,], size = N, replace = TRUE)
+  I[t, ] <- sample(x = I[t-1, ], size = N, replace = TRUE)
 }
 ```
 
-```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each pathogen drifting to either dominance or extinction. Each pathogen is a different line.', out.width = "75%"}
+```{r, correctplots, echo = FALSE, fig.cap = 'The correct behaviour with the proportion of each pathogen, as a different line, drifting to dominance or extinction.', out.width = "75%"}
 
 (apply(I, 1, function(x) table(factor(x, levels = c("a", "b", "c")))) / N) %>% 
   t %>% 
@@ -272,9 +272,10 @@ for(t in seq(2, n_steps)){
   cbind(Time = seq_len(nrow(I))) %>% 
   pivot_longer(cols = -Time, names_to = 'Pathogen', values_to = 'Proportion') %>% 
   ggplot(aes(x = Time, y = Proportion, colour = Pathogen, linetype = Pathogen)) +
-    geom_line() +
+    geom_line(size = 2) +
     theme_minimal() +
     theme(panel.grid.minor = element_blank(),
+          legend.key.width = unit(3,"cm"),
           text = element_text(size = 20, family = "serif"))
 
 ```
@@ -282,24 +283,23 @@ for(t in seq(2, n_steps)){
 # Basic unit testing
 ## Write small functions {-#compactfuns}
 
-To ensure the unit tests are evaluating the exact code as run in the analysis, code should be structured in functions, which can be used to both run unit tests with and to generate results as part of a larger model codebase.
+To ensure the unit tests are evaluating the exact code as run in the analysis, code should be structured in functions, which can be used both to run unit tests and to generate results as part of a larger model codebase.
 Make your functions compact with a single clearly-defined task.
 We have defined a function, `initialisePop()`, to initialise the population and another, `updatePop()`, to run one iteration of the simulation (\@ref(compactfunctions)).
-Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the structure of the code.
-Furthermore, it facilitates other good programming practices such as defensive programming and good documentation.
-Defensive programming entails writing checks in the code such that the code will fail fast and informatively if incorrect inputs are used; checking the class and dimensions of inputs in the first few lines of a function is a good way to catch bugs early.
+Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the code structure.
+Furthermore, it facilitates other good programming practices such as defensive programming and documentation --- defensive programming, such as checking the class and dimensions of inputs in the first few lines of a function, ensures that the code will fail quickly and informatively if incorrect inputs are used.
 At this stage we have also enabled the varying of the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
-The first iteration of the simulation, `I[1,]`, is initialised with a repeating sequence of letters.
+The first iteration of the simulation, `I[1, ]`, is initialised with a repeating sequence of letters.
 \newline
 ```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
 initialisePop <- function(n_steps, N, pathogens){
   I <- matrix(data = NA, nrow = n_steps, ncol = N)
-  I[1,] <- rep(x = letters[1:pathogens], length.out = N)
+  I[1, ] <- rep(x = letters[1:pathogens], length.out = N)
   return(I)
 }
 
 updatePop <- function(x, t, N){
-  x[t,] <- sample(x = x[t-1,], size = N, replace = TRUE)
+  x[t, ] <- sample(x = x[t-1, ], size = N, replace = TRUE)
   return(x)
 }
 ```
@@ -307,21 +307,21 @@ updatePop <- function(x, t, N){
 ## Test simple cases first {-#easycases}
 
 If we start with a small population with few pathogens, we can then easily work out exactly what the initialised population should look like (\@ref(testsimplefirst)).
-When we initialise a population with three individuals and three pathogens, we will get the sequence "a", "b", "c" as seen in the first test.
+When we initialise a population with three individuals and three pathogens, we will get the sequence \texttt{"a", "b", "c"} as seen in the first test.
 When the number of individuals is greater than the number of pathogens, the sequence will be repeated as seen in the second test.
-Finally, when the number of individuals is greater than the number of pathogens, but is not a multiple of the number of pathogens, the sequence will have an incomplete repeat at the end as seen in the third test.
-In this sequence of tests, we have taken our logical understanding of what the function should do, and used it to make predictions of what the results should be.
-We then test that the result is the same as what we expect and if everything is correct the code will return no output.
+Finally, when the number of individuals is greater than, but not a multiple of, the number of pathogens, the sequence will have an incomplete repeat at the end as seen in \@ref(testsimplefirst).
+In this sequence of tests, we have taken our understanding of the function logic, and used it to make predictions of what the results should be.
+We then test that the result is as expected and if everything is correct the code will return no output.
 \newline
 ```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect", results = 'hide'}
 pop1 <- initialisePop(n_steps = 2, N = 3, pathogens = 3) 
-expect_equal(pop1[1,], c("a", "b", "c"))
+expect_equal(pop1[1, ], c("a", "b", "c"))
 
 pop2 <- initialisePop(n_steps = 2, N = 6, pathogens = 3) 
-expect_equal(pop2[1,], c("a", "b", "c", "a", "b", "c"))
+expect_equal(pop2[1, ], c("a", "b", "c", "a", "b", "c"))
 
 pop3 <- initialisePop(n_steps = 2, N = 5, pathogens = 3) 
-expect_equal(pop3[1,], c("a", "b", "c", "a", "b"))
+expect_equal(pop3[1, ], c("a", "b", "c", "a", "b"))
 
 ```
 
@@ -332,12 +332,12 @@ In contrast, if we had defined the `initialisePop()` function incorrectly, the t
 > # A broken function that does not add the pathogens.
 > initialisePopBroken <- function(n_steps, N, pathogens){
 +   I <- matrix(data = NA, nrow = n_steps, ncol = N)
-+  return(I)
++   return(I)
 + }
 
 > popBroken <- initialisePopBroken(n_steps = 2, N = 3, 
-                                 pathogens = 3) 
-> expect_equal(popBroken[1,], c("a", "b", "c"))
+                                   pathogens = 3) 
+> expect_equal(popBroken[1, ], c("a", "b", "c"))
 Error: popBroken[1, ] not equal to c("a", "b", "c").
 ```
 
@@ -360,7 +360,7 @@ pop3 <- initialisePop(n_steps = 2, N = 20, pathogens = 3)
 expect_equal(dim(pop3), c(2, 20))
 
 pop4 <- initialisePop(n_steps = 2, N = 10, pathogens = 5) 
-expect_equal(length(unique(pop4[1,])), 5)
+expect_equal(length(unique(pop4[1, ])), 5)
 ```
 
 ## Does the function logic meet your expectations? {-#complexcases}
@@ -371,25 +371,25 @@ We also expect each of the pathogens $a$, $b$ and $c$ to occur at least once on 
 Finally, `updatePop()` performs a single simulation time step, so we expect only one additional row to be populated.
 Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\@ref(testcomplex)).
 \newline
-```{r, test_complex, ref = "testcomplex", codecap = "Test more complex cases using your understanding of the system", results = 'hide'}
+```{r, test_complex, ref = "testcomplex", codecap = "Test more complex cases using your understanding of the system.", results = 'hide'}
 pop1 <- initialisePop(n_steps = 20, N = 12, pathogens = 3) 
 
-# expect all except the first row are NAs
-expect_true(all(is.na(pop1[-1,]))) 
+# expect all (except the first row) are NAs
+expect_true(all(is.na(pop1[-1, ]))) 
 
-# the unique values of pop1[1,] should be a, b, c
+# the unique values of pop1[1, ] should be a, b, c
 #   and nothing else.
-expect_true(setequal(c("a", "b", "c"), pop1[1,])) 
+expect_true(setequal(c("a", "b", "c"), pop1[1, ])) 
 
 pop2 <- updatePop(pop1, t = 2, N = 12)
-# after update expect 1st & 2nd row not to have NAs
-expect_true(all(!is.na(pop2[1:2,]))) 
+# after update, expect 1st & 2nd row not to have NAs
+expect_true(all(!is.na(pop2[1:2, ]))) 
 # and also expect that rows other than 1st & 2nd are NAs.
-expect_true(all(is.na(pop2[-c(1:2),]))) 
+expect_true(all(is.na(pop2[-c(1:2), ]))) 
 
 ```
 
-## Combine simple functions and test them at a higher-level{-#combine}
+## Combine simple functions and test them at a higher level{-#combine}
 
 In the end an entire model only runs when its functions work together seamlessly.
 So we next check their connections; achieved through nesting functions together, or defining them at a higher level and checking the macro aspects of the model.
@@ -397,7 +397,7 @@ This could be considered integration testing rather than unit testing.
 We define a function `fullSim()` that runs both `initialisePop()` and `updatePop()` to yield one complete simulation.
 We would expect there to be no `NA`s in the output from `fullSim()` and every element to be either $a$, $b$ or $c$.
 \newline
-```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check higher-level functionality", result = 'hide'}
+```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check high-level functionality.", result = 'hide'}
 fullSim <- function(n_steps, N, pathogens){
   pop <- initialisePop(n_steps, N, pathogens) 
   for(t in seq(2, n_steps)){
@@ -432,7 +432,7 @@ We demonstrate in \@ref(splitdeterstoch) how this could be split.
 We accept this is a fairly exaggerated example and that splitting a single line of code into two functions is rare.
 The more common scenario is splitting a multi-line function into smaller functions which also brings benefits of code organisation so it does not feel like extra effort. 
 \newline
-```{r, split_deter_stoch, ref = "splitdeterstoch", codecap = "Isolation of the determistic and stochastic elements"}
+```{r, split_deter_stoch, ref = "splitdeterstoch", codecap = "Isolation of the deterministic and stochastic elements."}
 chooseInfector <- function(N){
   sample(x = N, size = N, replace = TRUE)
 }
@@ -451,19 +451,19 @@ updatePop <- function(x, t, N){
 
 Now, half of `updatePop()` is deterministic so can be checked as previously discussed.
 We still have `chooseInfector()` that is irreducibly stochastic.
-We now examine some techniques for directly testing the stochastic parts of a model.
+We now examine some techniques for directly testing these stochastic parts.
 
 ## Pick a smart parameter for a deterministic result{-#deterministicparams}
 
 In the same way that we used simple parameters values in \@ref(testsimplefirst), we can often find simple cases for which stochastic functions become deterministic.
-For example, samples from $X\sim\text{Bernoulli}(p)$ will always be zeroes for $p=0$ or ones for $p=1$.
+For example, $X\sim\text{Bernoulli}(p)$ will always generate zeroes for $p=0$ or ones for $p=1$.
 In the case of a single pathogen (\@ref(teststochdetermin)), the model is no longer stochastic.
 So initialisation with one pathogen means the second time step should equal the first.
 \newline
 ```{r, test_stoch_determin, ref = "teststochdetermin", codecap = "A stochastic function can output deterministically if you can find the right parameter set.", results = 'hide'}
 pop <- initialisePop(n_steps = 2, N = 3, pathogens = 1) 
 pop <- updatePop(pop, t = 2, N = 3)
-expect_equal(pop[1,], pop[2,])
+expect_equal(pop[1, ], pop[2, ])
 ```
 
 ## Test all possible answers (if few) {-#allpossible}
@@ -496,8 +496,8 @@ Testing can be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
 For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
 In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
-With a population of one thousand, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
-As this test is now stochastic we should set the seed of the random number generator so that the test is reproducible.
+With a population of 1000, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
+As this test is now stochastic we should set the seed, using \texttt{set.seed()}, of the random number generator so that the test is reproducible.
 Setting the seed with `set.seed` means that each time the code is run, the same pseudo-random numbers will be generated.
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
@@ -603,7 +603,7 @@ initialisePop <- function(n_steps, N, pathogens){
   if(length(pathogens) > 1) stop("pathogens must have length 1")
   
   I <- matrix(data = NA, nrow = n_steps, ncol = N)
-  I[1,] <- rep(x = letters[1:pathogens], length.out = N)
+  I[1, ] <- rep(x = letters[1:pathogens], length.out = N)
   return(I)
 }
 
@@ -630,7 +630,7 @@ initialisePop <- function(n_steps, N, pathogens){
   if(length(n_steps) > 1) stop("n_steps must have length 1")
 
   I <- matrix(data = NA, nrow = n_steps, ncol = N)
-  I[1,] <- rep(x = letters[1:pathogens], length.out = N)
+  I[1, ] <- rep(x = letters[1:pathogens], length.out = N)
   return(I)
 }
 
@@ -643,7 +643,7 @@ expect_error(fullSim(n_steps = 1:100, N = 4, pathogens = 3),
 
 When writing tests it is easy to focus on standard behaviour.
 However, bugs often occur at _special cases_---when the code behaves qualitatively differently at a certain value of a paramete or at certain combinations of parameter values.
-For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
+For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[, 2:3]` returns a matrix while selecting one column e.g. `my_matrix[, 2]` returns a vector.
 Code that relies on the returned object being a matrix would fail in this special case.
 These special cases can often be triggered with parameter sets that are at the edge of parameter space. 
 This is where understanding of the functional form of the model can help. 
