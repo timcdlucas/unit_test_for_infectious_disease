@@ -497,8 +497,7 @@ This typically involves large sample sizes or numbers of stochastic runs.
 For example, the clearest test to distinguish between our original, buggy code (\@ref(firstcode)) and our correct code (\@ref(correctcode)) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
 In any given run this is never guaranteed, but the larger the population size the more likely it is to occur. 
 With a population of 1000, the probability that no individual infects two others is vanishingly rare (\@ref(teststochlargenum)).
-As this test is now stochastic we should set the seed, using \texttt{set.seed()}, of the random number generator so that the test is reproducible.
-Setting the seed with `set.seed` means that each time the code is run, the same pseudo-random numbers will be generated.
+As this test is now stochastic we should set the seed, using \texttt{set.seed()}, of the random number generator to make the test  reproducible.
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
 set.seed(10261985)
@@ -520,16 +519,17 @@ Similarly, a bug might cause an event that should be rare to instead occur very 
 In our original buggy code (\@ref(firstcode)) we found that the proportions remained identical for entire simulations.
 We would expect this to happen only very rarely.
 We can run a large number of short simulations to check that this specific bug is not still occurring by confirming that the proportion of each pathogen is not always the same between the first and last time point.
-As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we know the bug has been fixed.
+As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we can be more confident that the bug has been fixed.
 \newline
-```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
+```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently."}
 set.seed(11121955)
 manySims <- replicate(500, 
-                      fullSim(n_steps = 20, N = 40, pathogens = 3), 
+                      fullSim(n_steps = 20, N = 40, 
+                              pathogens = 3), 
                       simplify = FALSE)
 
 # Define a function that returns TRUE if the
-#   pathogen proportions are the same in the 
+#   pathogen proportions are the same at the 
 #   first and last time point and FALSE otherwise.
 diffProportions <- function(x){
   !identical(table(x[1, ]), table(x[20, ]))
@@ -541,9 +541,9 @@ diffProportions <- function(x){
 expect_true(any(vapply(manySims, diffProportions, TRUE)))
 ```
 This example can be thought of more generally as having an expected distribution of an output and using a statistical test to compare the simulation results with the expectation.
-Here, we had a binomial event (were the pathogen proportions different between the first and last time step) and an expected frequency of this event (greater than zero).
-This approach is the focus of the literature on testing stochastic code  [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit].
-If we know a property of the expected distribution of a model outcome (the mean for example) we can run the simulation of number of times and use a standard statistical test to compare the distribution of simulated outputs to the expected distribution.
+Here, we had a binomial event (was the pathogen proportions different between the first and last time step) and an expected frequency of this event (greater than zero).
+This approach is to testing stochastic code is detailed in  @vsevvcikova2006automated, @guderlei2007statistical and @patrick2017toolkit.
+If we know a property of the expected distribution (the mean for example) we can run the simulation repeatedly and use a statistical test to compare the distribution of simulated outputs to the expected distribution.
 
 # Further testing
 
@@ -551,15 +551,14 @@ If we know a property of the expected distribution of a model outcome (the mean 
 
 As well as testing that functions work when given the correct inputs, we should also test that they behave sensibly when given wrong ones.
 This typically involves the user inputting argument values that do not make sense.
-This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values.
-Therefore it is useful to test that functions fail gracefully if they are given incorrect inputs.
+This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values --- therefore it is useful to test that functions fail gracefully.
 This is especially true for external, exported functions, available to a user on a package's front-end.
 However, it is not always obvious what constitutes an 'incorrect value' even to the person who wrote the code.
 In some cases, inputting incorrect argument values may cause the function to fail quickly. 
-In other cases code may run silently giving false results or take a long time to give an error.
+In other cases code may run silently giving false results or take a long time to throw an error.
 Both of these cases can be serious or annoying and difficult to debug afterwards.
-In this section we find frailties in the code that are conceptually different to a bug; the model as specified is already implemented correctly.
-Instead we are making the code more user-friendly and user-safe to protect against mistakes if the code is reused by other scientists or by the developer in the future.
+In this section we identify frailties in the code that are conceptually different to a bug; the model as specified is already implemented correctly.
+Instead we are making the code more user-friendly and user-safe to protect against mistakes during future code re-use.
 \newline
 \newline
 Often for these cases, the expected behaviour of the function should be to give an error.
@@ -567,24 +566,24 @@ There is no correct output for an epidemiological model with -1 pathogens.
 Instead the function should give an informative error message.
 Often the simplest solution is to use defensive programming and include argument checks at the beginning of functions.
 We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
-If the expression does not throw an error the test should throw an error (as this is not the expected behaviour).
-Conversely, if the expression does throw an error the test should pass and not throw an error. 
+If the expression does not throw an error, the test should throw an error (as this is not the expected behaviour).
+Conversely, if the expression does throw an error, the test should pass and not error. 
 We can use the `expect_error()` function for this task.
-This function takes an expression as its first argument and reports an error if the given expression does not throw an error as expected.
+This function takes an expression as its first argument and reports an error if the given expression does not throw an expected error.
 \newline
 \newline
 We can first check that the code sensibly handles the user inputting a string instead of an integer for the number of pathogens.
-Because this expression throws an error, `expect_error()` does not throw an error and the test passes.
+Because this expression throws an error, `expect_error()` does not error and the test passes.
 \newline
-```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect pathogen inputs", warning = FALSE}
+```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect pathogen inputs.", warning = FALSE}
 expect_error(
   initialisePop(n_steps = 10, N = 4, pathogens = "three"))
 ```
 
 Now we contrast what happens if the user inputs a vector of pathogens to the `initialisePop()` function.
-Here we are imagining that the users intent was to run a simulation with three pathogens: 1, 2 and 3.
+Here we imagine the user intended to run a simulation with three pathogens: 1, 2 and 3.
 \newline
-```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs", eval = FALSE}
+```{r, wrong1b, ref = "wrong1b", codecap = "A failing test for incorrect pathogen inputs.", eval = FALSE}
 > expect_error(initialisePop(n_steps = 5, N = 4, pathogens = 1:3))
 Error: `initialisePop(n_steps = 5, N = 4, pathogens = 1:3)` 
   did not throw an error.
@@ -593,7 +592,7 @@ Error: `initialisePop(n_steps = 5, N = 4, pathogens = 1:3)`
 This test fails because the function does not throw an error.
 Instead the code takes the first element of `pathogens` and ignores the rest.
 Therefore, a population is created with one pathogen, not three, which is almost certainly not what the user wanted.
-Here, the safest fix is to add an explicit argument check at the top of the function as implemented below.
+Here, the safest fix is to add an explicit argument check at the top of the function (\@ref(wrong1c)).
 The same test now passes because `initialisePop()` throws an error when a vector is supplied to the `pathogens` argument.
 \newline
 ```{r, wrong1c, ref = "wrong1c", codecap = "New definition, using defensive programming, of the initialisePop() function  and a passing test for incorrect pathogen inputs"}
@@ -642,14 +641,14 @@ expect_error(fullSim(n_steps = 1:100, N = 4, pathogens = 3),
 ## Test special cases {-#corners}
 
 When writing tests it is easy to focus on standard behaviour.
-However, bugs often occur at _special cases_---when the code behaves qualitatively differently at a certain value of a paramete or at certain combinations of parameter values.
+However, bugs often occur at _special cases_---when the code behaves qualitatively differently at a certain value or certain combinations of parameter values.
 For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[, 2:3]` returns a matrix while selecting one column e.g. `my_matrix[, 2]` returns a vector.
 Code that relies on the returned object being a matrix would fail in this special case.
 These special cases can often be triggered with parameter sets that are at the edge of parameter space. 
 This is where understanding of the functional form of the model can help. 
 Consider a function `divide(x, y)` that divides `x` by `y`.
 We could test this function by noting that `y * divide(x, y)` should return `x`.
-If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
+If we write code that tests standard values of `x` and `y` such as `(2 * divide(3, 2)) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
 \newline
 \newline
 We checked earlier if the `n_steps` argument of `initialisePop()` worked by verifying that the returned population had the correct dimensions  (\@ref(testallargs)).
@@ -667,7 +666,7 @@ Error in `[<-`(`*tmp*`, t, , value = x[t - 1, infector_pathogen])
 > expect_equal(dim(popt2), c(1, 5))
 ```
 
-In general, requesting a simulation with 1 time step is not epidemiologically unmeaningful; this is not an objectively wrong use of the function. 
+In general, requesting a simulation with 1 time step is without epidemiological meaning; this is not an objectively wrong use of the function. 
 The code behaves qualitatively differently for `n_steps = 1` than for `n_steps = 2` because the loop in \@ref(combinesimplefunc) runs from 2 to `n_steps` setting `t` to each value in turn.
 When `n_steps` is 2 or more, this follows the sequence $\{2, 3, ...\}$.
 When `n_steps` is 1, this instead follows the sequence $\{2, 1\}$.
@@ -676,10 +675,10 @@ For special cases like this it may be rather subjective what the correct behavio
 It might be appropriate to simply declare that this parameter value is not allowed.
 This should be stated in the documentation and the function should throw an error.
 Here however, we will decide that this is a valid parameter value.
-We should change the code to handle this special case, and use out new test to check that our new code works.
-In \@ref(edge3) we use an if statement to explicitly handle the special case of `n_steps = 1` and our test now passes.
+We should change the code to handle this special case, and use the new test to check that our new code works.
+In \@ref(edge3) we use an \texttt{if} statement to explicitly handle the special case of `n_steps = 1` and our test now passes.
 \newline
-```{r, edge3, ref = "edge3", codecap = "Handle the special case of t = 1 and test the new code.", eval = TRUE}
+```{r, edge3, ref = "edge3", codecap = "Handle the special case of $t = 1$ and test the new code.", eval = TRUE}
 fullSim <- function(n_steps, N, pathogens){
   pop <- initialisePop(n_steps, N, pathogens) 
   if(n_steps >= 2){
@@ -699,9 +698,9 @@ expect_equal(dim(popt2), c(1, 5))
 
 Most programming languages have established testing packages.
 For _R_, there is the $\texttt{testthat}$ package as already discussed as well as other packages such as $\texttt{tinytest}$ which has the benefit of having no dependencies.
-When structuring _R_ code as standalone scripts, the tests should be saved in one or more scripts either in the same directory as the scripts in which the functions are defined or within a subdirectory of the same project directory. 
+When structuring _R_ code as standalone scripts, the tests should be saved in one or more scripts either in the same directory as the scripts in which the functions are defined, or within a subdirectory of the same project directory. 
 The testing script needs to load all the functions it is going to test (with `source()` for example) and then run the tests.
-When structuring _R_ code as a package, tests should be kept in the directory `tests/testthat`; further requirements to the structure can be found in @wickham2015r Chapter 7.
+When structuring _R_ code as a package, tests should be kept in the directory `tests/testthat`; further requirements to the structure can be found in Chapter 7 of @wickham2015r.
 All the tests in a package can then be run with `test()` from the $\texttt{devtools}$ package [@devtools] or `check()` for additional checks relevant to the package build.
 If the code is to be part of a package then these tools are essential to run the code within the context of a build environment.
 These tools also provide a clean environment to highlight if a test was previously relying on objects defined outside of the test script.
@@ -709,14 +708,13 @@ Furthermore, organising code in a package provides further benefits such as tool
 The practice of organising code as a package, even if there is no expectation that others will use the code, is under appreciated and underused in epidemiology.
 \newline
 \newline
-Other programming languages have similar testing frameworks.
-Their specifics differ but the main concept of comparing a function evaluation to the expected output remains the same.
+The testing frameworks of other programming languages differ but the main concept of comparing a function evaluation to the expected output remains the same.
 In _Julia_ there is the $\texttt{Test}$ package [@juliatest]. 
-The basic structure for tests with this package is demonstrated below.
+The basic structure for tests with this package is shown in \@ref(juliatest).
 We name the test and write a single expression that evaluates to `TRUE` or `FALSE`.
 For a _Julia_ package, unit tests reside in `test/runtests.jl` and tests are run with `Pkg.test()`.
 \newline
-```{r, juliatest, ref = "juliatest", codecap = "Julia test example", eval = FALSE}
+```{r, juliatest, ref = "juliatest", codecap = "Julia test example.", eval = FALSE}
 @testset "my_test_name" begin
   @test sqrt(4) == 2
 end
@@ -727,7 +725,7 @@ The tests must be written as methods with `self` as the first argument.
 An example test script is shown below.
 Tests should be kept in a directory called `Lib/test`, and the filename of every file with tests should begin with "`test_`".
 \newline
-```{r, testpy, ref = "testpy", codecap = "python test example", eval = FALSE}
+```{r, testpy, ref = "testpy", codecap = "Python test example.", eval = FALSE}
 import unittest
 import math
 
@@ -758,7 +756,7 @@ language:r
 This file can also be created with `use_travis()` from the $\texttt{usethis}$ package.
 You then sign up to travis-ci.org and point it to the correct GitHub repository.
 To authenticate and trigger the first automatic test you need to make a minor change to your code, commit and push to GitHub.
-More details on setting up Travis, and how to continuously track test coverage  using \texttt{covr} and codecov, can be found in @wickham2015r Chapter 14.3.
+More details on setting up Travis, and how to continuously track test coverage  using \texttt{covr} and \texttt{codecov}, can be found in Chapter 14.3 of @wickham2015r.
 
 # Concluding remarks
 
@@ -770,8 +768,8 @@ There are many frameworks that make aspects of unit testing automatic and more i
 The basic principles of unit testing are simple but writing good tests is a skill that takes time, practice and thought.
 However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results. 
 Our aim in this paper was to demonstrate tailored results for infectious disease modelling. 
-There are number of standard programming approaches to unit testing which would be good followup reading (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best). 
-As demonstrated here, it is initially time consuming to program in this way, but over time it will become habitual and both you and the policy-makers who use your models will benefit from it.
+There are number of standard programming approaches to unit testing which would be good further reading (@wickham2015r Chapter 7, @osborne2014ten, @wilson2014best). 
+As demonstrated here, it is initially time consuming to program in this way, but over time it becomes habitual and both you and the policy-makers who use your models will benefit from it.
 
 # Code availability
 
