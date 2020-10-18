@@ -9,15 +9,12 @@ author:
   - name: T Déirdre Hollingsworth
 ---
 
-```{r, setup, echo=FALSE, results = 'hide', message = FALSE}
-rm(list = ls())
+```{r, setup}
 library(knitr)
 library(ggplot2)
 library(tidyr)
 library(testthat)
-knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4, 
-                      out.extra = '', out.width = "0.6\\textwidth",
-                      fig.align='center', fig.pos = "h")
+
 set.seed(01011885)
 ```
 
@@ -25,9 +22,6 @@ set.seed(01011885)
 
 # An example multi-pathogen re-infection model
 
-```{r modelexample}
-include_graphics("figures/modelexample.png")
-```
 
 
 - Consider a multi-pathogen system, 
@@ -41,6 +35,13 @@ At each time step, every individual's infection status is updated as:
 $$I_{it} = \text{Unif}(\mathbf{I}_{t-1}).$$
 
 
+
+```{r modelexample}
+include_graphics("figures/modelexample.png")
+```
+
+
+## What do we expect to happen?
 - Firstly, we would expect an individual to be repeatedly infected with different strains.
 - Secondly, we would expect the proportions of the different pathogens to stochastically drift, until all but one pathogen goes extinct.
 
@@ -64,16 +65,12 @@ for(t in seq(2, n_steps)){
 ```
 
 ```{r firstplots}
-library(ggplot2)
-d1 <- data.frame(time = seq(n_steps), pathogen = (I[, 1]), stringsAsFactors = TRUE)
-ggplot(d1, aes(time, as.numeric(pathogen))) +
+d1 <- data.frame(time = seq(n_steps), 
+                 pathogen = as.numeric(factor((I[, 1]))))
+ggplot(d1, aes(time, pathogen)) +
   geom_path() +
   geom_point() +
-  scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) +
-  labs(y = 'Pathogen', x = 'Time') +
-  theme_minimal() +
-    theme(panel.grid.minor = element_blank(),
-          text = element_text(size = 20, family = "serif"))
+  scale_y_continuous(breaks = seq(3), labels = c('a', 'b', 'c')) 
 ```
 
 
@@ -86,11 +83,7 @@ ggplot(d1, aes(time, as.numeric(pathogen))) +
   pivot_longer(cols = -Time, names_to = 'Pathogen', values_to = 'Proportion') %>% 
   ggplot(aes(x = Time, y = Proportion, colour = Pathogen, linetype = Pathogen)) +
     ylim(0, 1) +
-    geom_line(size = 2) +
-    theme_minimal() +
-    theme(panel.grid.minor = element_blank(),
-          legend.key.width = unit(3,"cm"),
-          text = element_text(size = 20, family = "serif"))
+    geom_line(size = 2)
 
 ```
 
@@ -119,11 +112,7 @@ for(t in seq(2, n_steps)){
   cbind(Time = seq_len(nrow(I))) %>% 
   pivot_longer(cols = -Time, names_to = 'Pathogen', values_to = 'Proportion') %>% 
   ggplot(aes(x = Time, y = Proportion, colour = Pathogen, linetype = Pathogen)) +
-    geom_line(size = 2) +
-    theme_minimal() +
-    theme(panel.grid.minor = element_blank(),
-          legend.key.width = unit(3,"cm"),
-          text = element_text(size = 20, family = "serif"))
+    geom_line(size = 2) 
 
 ```
 
