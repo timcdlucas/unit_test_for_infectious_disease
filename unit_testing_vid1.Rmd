@@ -117,7 +117,7 @@ for(t in seq(2, n_steps)){
 ```
 
 # Basic unit testing
-## Write small functions {-#compactfuns}
+## Write small functions
 
 ```{r, compactfunctions}
 initialisePop <- function(n_steps, N, pathogens){
@@ -132,7 +132,7 @@ updatePop <- function(x, t, N){
 }
 ```
 
-## Test simple cases first {-#easycases}
+## Test simple cases first
 
 ```{r, test_simple_first}
 pop1 <- initialisePop(n_steps = 2, N = 3, pathogens = 3) 
@@ -162,7 +162,7 @@ expect_equal(popBroken[1, ], c("a", "b", "c"))
 ```
 
 
-## Test all arguments {-#testargs}
+## Test all arguments
 
 ```{r, test_all_args}
 pop1 <- initialisePop(n_steps = 2, N = 3, pathogens = 3) 
@@ -178,7 +178,7 @@ pop4 <- initialisePop(n_steps = 2, N = 10, pathogens = 5)
 expect_equal(length(unique(pop4[1, ])), 5)
 ```
 
-## Does the function logic meet your expectations? {-#complexcases}
+## Does the function logic meet your expectations?
 
 ```{r, test_complex}
 pop1 <- initialisePop(n_steps = 20, N = 12, pathogens = 3) 
@@ -198,7 +198,7 @@ expect_true(all(is.na(pop2[-c(1:2), ])))
 
 ```
 
-## Combine simple functions and test them at a higher level{-#combine}
+## Combine simple functions and test them at a higher level
 
 
 ```{r, combine_simple_func}
@@ -220,7 +220,7 @@ expect_true(all(pop %in% c("a", "b", "c")))
 
 # Stochastic code
 
-## Split stochastic and deterministic parts {-#splitstochastic}
+## Split stochastic and deterministic parts
 
 
 ```{r, split_deter_stoch}
@@ -244,7 +244,7 @@ Now, half of `updatePop()` is deterministic so can be checked as previously disc
 We still have `chooseInfector()` that is irreducibly stochastic.
 We now examine some techniques for directly testing these stochastic parts.
 
-## Pick a smart parameter for a deterministic result{-#deterministicparams}
+## Pick a smart parameter for a deterministic result
 
 We can often find simple cases for which stochastic functions become deterministic.
 
@@ -254,7 +254,7 @@ pop <- updatePop(pop, t = 2, N = 3)
 expect_equal(pop[1, ], pop[2, ])
 ```
 
-## Test all possible answers (if few) {-#allpossible}
+## Test all possible answers (if few)
 
 Working again with a simple parameter set, there are some cases where the code is stochastic, but with a small, finite set of outputs. 
 
@@ -268,7 +268,7 @@ manyPops <-
 expect_true(all(manyPops %in% c("11", "22", "12", "21")))
 ```
 
-## Use very large samples for the stochastic part {-#largesamples}
+## Use very large samples for the stochastic part
 
 Testing can be made easier by using very large numbers.
 
@@ -307,7 +307,7 @@ expect_true(any(vapply(manySims, diffProportions, TRUE)))
 
 # Further testing
 
-## Test incorrect inputs {-#testincorrect}
+## Test incorrect inputs
 
 ```{r, wrong1}
 expect_error(
@@ -357,7 +357,7 @@ expect_error(fullSim(n_steps = 1:100, N = 4, pathogens = 3),
 
 ```
 
-## Test special cases {-#corners}
+## Test special cases 
 
 ```{r, edge2}
 popt1 <- fullSim(n_steps = 2, N = 5, pathogens = 3) 
