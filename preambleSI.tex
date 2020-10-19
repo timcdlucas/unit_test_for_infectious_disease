@@ -1,0 +1,13 @@
+\usepackage{caption}
+\usepackage{floatrow}
+\usepackage{upquote}
+
+
+\DeclareNewFloatType{chunk}{placement=h, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{Code~S\arabic{chunk}}
+\makeatletter
+%\@addtoreset{chunk}{section}
+\makeatother
+
+\renewcommand{\thefigure}{S\arabic{figure}}

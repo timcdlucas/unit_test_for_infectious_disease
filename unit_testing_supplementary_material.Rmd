@@ -2,10 +2,11 @@
 title: |
   | Responsible modelling: Unit testing for infectious disease epidemiology.
 author: Tim CD Lucas, Timothy M Pollington, Emma L Davis and  T Déirdre Hollingsworth
+bibliography: unit_testing.bib
 output:
   bookdown::pdf_book:
     includes:
-      in_header: preamble.tex
+      in_header: preambleSI.tex
     number_sections: true
 ---
   
@@ -28,7 +29,9 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 7, fig.height = 4,
 # rmarkdown::render('unit_testing.Rmd')
 ```
 
-```{r, libs, echo=FALSE, results = 'hide', message = FALSE}
+
+# Load necessary packages
+```{r, libs, echo=TRUE, results = 'hide', message = FALSE}
 library(ggplot2)
 library(testthat)
 library(reshape2)
@@ -43,31 +46,31 @@ We again demonstrate how to effectively write unit tests for it in _R_ code.
 We aim to follow the same structure as in the main text but in this example we do not need to worry about the code being short.
 
 
-We will implement a stochastic, continuous time, SIR model using code from [EpiRecipes](http://epirecip.es/epicookbook/chapters/sir-stochastic-discretestate-continuoustime/r)  as a starting point.
+We will implement a stochastic, continuous time, SIR model using code from [EpiRecipes](http://epirecip.es/epicookbook/chapters/sir-stochastic-discretestate-continuoustime/r) [@EpiRecipes] as a starting point.
 The number of individuals in the three classes, susceptible, infectious and recovered, are described by the equations
 \begin{align}
 \frac{dS}{dt} &= - \beta S I \\
 \frac{dI}{dt} &= \phantom{-}\beta S I - \gamma I \\
 \frac{dR}{dt} &= \phantom{-}\gamma I
 \end{align}
-In order to have continuous time dynamics we use the Gillespie algorithm.
+In order to simulate continuous time dynamics we use the Gillespie algorithm.
 In each iteration of the model, exactly one event happens, either an infection or a recovery. 
-The time steps in between events are a continuous, positive number that are drawn from an exponential distribution with a rate equal to the sum of two event rates (i.e. infection and recovery).
+The time step in between events is a continuous, positive number that is drawn from an exponential distribution with a rate equal to the sum of two event rates (i.e. infection and recovery).
 \newline
-```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model", results='hide'}
+```{r first_code,  ref = "firstcode", codecap = "Base example of the multi-pathogen re-infection model.", results='hide'}
 
 # set the seed so that our simulations are
 #   reproducible.
 set.seed(20200908)
 
 # Define parameters
-beta <- 0.001 # Tranmsission parameter
+beta <- 0.001 # Transmsission parameter
 gamma <- 0.4 # Recovery parameter
 N <- 1000 # Population size
-S0 <- 990 # Starting number of susceptibles.
-I0 <- 10 # Starting number of infected.
-R0 <- N - S0 - I0 # Starting number of Recovered.
-tf <- 2000  # Run until time reaches this value.
+S0 <- 990 # Starting number of susceptibles
+I0 <- 10 # Starting number of infected
+R0 <- N - S0 - I0 # Starting number of Recovered
+tf <- 2000 # Run until time reaches this value
 
 # Initialise the simulation.
 time <- 0
@@ -128,7 +131,7 @@ results <- data.frame(time = ta, S = Sa, I = Ia, R = Ra)
 ```{r firstplots, echo = FALSE, fig.cap = 'Example simulation output from the original code.', out.width = "75%"}
 sir_out_long <- melt(results, "time")
 ggplot(sir_out_long, 
-       aes(x = time, y = value, colour = variable, group = variable))+
+       aes(x = time, y = value, colour = variable, group = variable)) +
   geom_line(lwd = 2) +
   xlab("Time") + ylab("Number")
 
@@ -143,7 +146,7 @@ To ensure the unit tests are evaluating the exact code as run in the analysis, c
 Make your functions compact with a single clearly-defined task.
 We have split the code into a number of functions that do relatively well defined tasks such as initialising the simulation, handling a single transmission event or a single recovery event as well as a large function (`runSim()`) that combines these functions. (\@ref(compactfunctions)).
 \newline
-```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
+```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions.", result = 'hide'}
 
 initialiseSim <- function(S0, I0, R0){
   sim <- list(
@@ -208,8 +211,7 @@ calcRates <- function(sim, beta, gamma){
 
 
 runSim <- function(sim, beta, gamma, tf){
-  # Run the simulation until time reaches
-  #   tf.
+  # Run the simulation until time reaches tf.
   while (sim$time < tf) {
       
       sim <- addNew(sim)
@@ -242,7 +244,7 @@ runSim <- function(sim, beta, gamma, tf){
 As an informal first check we can plot a single simulation and check that it gives similar results to the earlier plot and behaves broadly how we would expect an SIR model to behave.
 For example, we expect the number of infectious individuals to increase and then decrease again while we expect the susceptible and recovered classes to monotonically decrease and increase respectively.
 \newline
-```{r, checksim, ref = "checksim", codecap = "Run a full simulation with the code organised in functions.", result = 'hide'}
+```{r, checksim, ref = "checksim", codecap = "Run a full simulation with the code organised in functions.", fig.cap = 'Example simulation output from the refactored code.', result = 'hide'}
 sim <- initialiseSim(S0, I0, R0)
 
 simulation <- runSim(sim, beta, gamma, tf)
@@ -258,14 +260,14 @@ ggplot(sir_out_long,
 ## Test simple cases first {-#easycases}
 
 As there are quite a few functions already in our code we will not write unit tests for all of them here.
-However, in (\@ref(testsimplefirst)) we will write some tests for simple aspects of the code.
+However, in \@ref(testsimplefirst) we will write some tests for simple aspects of the code.
 For example we can confirm that the `infection()` function works as expected.
 We expect this function to increase the number of infectious individuals by one, decrease the number of susceptible individuals by one and leave the rest of the object unchanged.
 If we start with 1 susceptible and 0 infectious or recovered individuals, this function should result in 0 susceptible individuals, 1 infectious individual and 0 recovered individuals.
-We can see that the way we have written the code has separated the process of finding out what event happens from the book keeping of making the change once an event has been selected. 
-With 0 infectious individuals we would not expect to ever have an infection event, but separating the functionality of the code allows us to test that the book keeping works without worrying about other aspects.
+We can see that the way we have written the code has separated the process of finding out what event happens, from the book keeping of making the change once an event has been selected. 
+With 0 infectious individuals we would not expect to ever have an infection event, but separating the functionality of the code allows us to test that the bookkeeping works without worrying about other aspects.
 \newline
-```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect", results = 'hide'}
+```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect.", results = 'hide'}
 
 sim1 <- initialiseSim(1, 0, 0)
 sim2 <- infection(sim1)
@@ -292,7 +294,7 @@ In \@ref(testallargs) we will focus our tests on the two rates: the transmission
 Given that the SIR transmission rate is $\beta S I$ and given that $\beta$, $S$ and $I$ are all one, `pf1` should be one.
 Similarly, given a recovery rate of $\gamma I$ and with $\gamma$ set to one, `pf2` should also be one.
 \newline
-```{r, test_all_args, ref = "testallargs", codecap = "Baseline before testing all function arguments in turn", results = 'hide'}
+```{r, test_all_args, ref = "testallargs", codecap = "Baseline before testing all function arguments in turn.", results = 'hide'}
 
 sim1 <- initialiseSim(S0 = 1, I0 = 1, R0 = 0)
 r1 <- calcRates(sim = sim1, beta = 1, gamma = 1)
@@ -305,7 +307,7 @@ First we will set `beta` to 2 and so we expect `pf1` to be 2 while `pf2` should 
 Second we will set `gamma` to 2 and so we expect `pf2` to be 2 while `pf1` should not change.
 Finally, we will initialise a new simulation with  `I0 = 2` and we will then expect `pf1` and `pf2` to be equal to 2.
 
-```{r, test_all_args2, ref = "testallargs2", codecap = "Test all function arguments in turn", results = 'hide'}
+```{r, test_all_args2, ref = "testallargs2", codecap = "Test all function arguments in turn.", results = 'hide'}
 
 sim1 <- initialiseSim(S0 = 1, I0 = 1, R0 = 0)
 
@@ -364,11 +366,11 @@ So we next check their connections; achieved through nesting functions together,
 This step could be considered integration testing depending on how precisely you define unit testing versus integration testing.
 We have already defined a function `runSim()` that runs a few different smaller functions to perform one full simulation.
 We would expect the output from `runSim()` to be a dataframe with four columns and no `NA`s and we would expect no values of the time column to be greater than `tf`. 
-We would also expect all of the values in the S, I and R columns to be integers greater than or equal to zero.
-These are all higher level properties that should be true regardless of the exact realisation of the simulation.
-Furthermore, checking the maximum value in the time column is, to an extent, an emergent property that could not be tested at a lower level.
+We would also expect all of the values in the \texttt{S}, \texttt{I} and \texttt{R} columns to be integers greater than or equal to zero.
+These are all general properties that should be true regardless of the exact realisation of the simulation.
+Furthermore, checking the maximum value in the time column is, to an extent, an aggregate property that could not be tested at a lower level.
 \newline
-```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check higher-level functionality", result = 'hide'}
+```{r, combine_simple_func, ref = "combinesimplefunc", codecap = "Combine simple functions through nesting to check higher-level functionality.", result = 'hide'}
 
 set.seed(13131)
 sim <- initialiseSim(S0 = 900, I0 = 100, R0 = 0)
@@ -404,10 +406,9 @@ There are however a number of approaches that can help.
 ## Split stochastic and deterministic parts {-#splitstochastic}
 
 Isolate the stochastic parts of your code.
-For example, `nextEvent` performs stochastic and deterministic operations.
-The function is copied below (\@ref(splitdeterstoch1)) for reference.
+For example, `nextEvent` performs stochastic and deterministic operations (\@ref(splitdeterstoch1)).
 \newline
-```{r, split_deter_stoch1, ref = "splitdeterstoch1", codecap = "Isolation of the determistic and stochastic elements"}
+```{r, split_deter_stoch1, ref = "splitdeterstoch1", codecap = "Isolation of the deterministic and stochastic elements."}
 nextEvent <- function(sim, pf1, pf){
   # Stochastically select whether the event is a 
   #   transmission or recovery event.
@@ -425,14 +426,14 @@ nextEvent <- function(sim, pf1, pf){
 
 ```
 The function takes a random uniform number to determine whether an infection or recovery event takes place.
-It then performs that event, although we note we have already pulled much of the code out into the two functions `infection()` and `recovery()`.
-However, we can split this code into two functions, one (`nextEvent()`) completely deterministic, and one very small function (`chooseEvent()`) that carries out the stochastic component.
+It then performs that event, although we note that we have already pulled much of the code out into the two functions `infection()` and `recovery()`.
+However, we can split this code into two functions, one completely deterministic (`nextEvent()`), and one very small function (`chooseEvent()`) that carries out the stochastic component.
 The deterministic function can be tested using the guidelines above while in the following sections we will look at methods to test the stochastic function.
 We note that perhaps a better method here would be to make the first argument of `nextEvent()` take a random uniform number.
-In that case `nextEvent()` would be deterministic and the only stochastic code would be a single call to `runif`.
-Given that the `runif` function is a built in R function that is well tested, we would not have to test it.
+In that case `nextEvent()` would be deterministic and the only stochastic code would be a single call to `runif()`.
+Given that the `runif()` function is a base _R_ function that is well-tested, further testing is unnecessary.
 However, for demonstration purposes we have split the function as below so that we can subsequently demonstrate how to test stochastic functions.
-```{r, split_deter_stoch2, ref = "splitdeterstoch2", codecap = "Isolation of the determistic and stochastic elements"}
+```{r, split_deter_stoch2, ref = "splitdeterstoch2", codecap = "Isolation of the deterministic and stochastic elements."}
 
 chooseEvent <- function(pf1, pf){
   runif(1) < (pf1 / pf)
@@ -520,9 +521,9 @@ expect_equal(chooseEvent(5, 5), TRUE)
 
 Working again with a simple parameter set, there are some cases where the code is stochastic, but with a small, finite set of outputs. 
 So we can run the function exhaustively and check it only returns possible outputs.
-For the function `chooseEvent()` this is trivially true; for anly valid values of `pf1` and `pf` it should return either `TRUE` or `FALSE`.
+For the function `chooseEvent()` this is trivially true; for any valid values of `pf1` and `pf` it should return either `TRUE` or `FALSE`.
 \newline
-```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values", results = 'hide'}
+```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values.", results = 'hide'}
 out1 <- replicate(300, chooseEvent(1, 1))
 out2 <- replicate(300, chooseEvent(0, 1))
 out3 <- replicate(300, chooseEvent(1, 2))
@@ -537,9 +538,9 @@ expect_true(all(out3 %in% c(TRUE, FALSE)))
 
 While the previous example worked well for a small set of possible outputs, testing can conversely be made easier by using very large numbers.
 This typically involves large sample sizes or numbers of stochastic runs.
-For example, if `pf1` is positive but smaller than `pf` we expect the `chooseEvent()` to sometimes return `TRUE` and sometimes to return `FALSE`.
+For example, if `pf1` is positive but smaller than `pf`, we expect the `chooseEvent()` to sometimes return `TRUE` and sometimes to return `FALSE`.
 If we run the function only twice, we might get two `TRUE`s or two `FALSE`s.
-However, if we run the function thousands times, and `pf1` is approximately half of `pf` (i.e. infection and recovery events are equally likely) it is almost certain that we will get at least one of each logical value.
+However, if we run the function thousands of times, and `pf1` is approximately half of `pf` (i.e. infection and recovery events are equally likely) then it is almost certain that we will get at least one of each logical value.
 \newline
 ```{r, test_stoch_largenum, ref = "teststochlargenum", codecap = "Testing that the code does allow one individual to infect multiple individuals.", results='hide'}
 set.seed(10261985)
@@ -555,17 +556,17 @@ expect_true(setequal(out3, c(TRUE, FALSE)))
 If we have an event that we know should never happen, we can use a large number of simulations to provide stronger evidence that it does not stochastically occur.
 However, it can be difficult to determine how many times is reasonable to run a simulation, especially if each run of the simulation is time consuming.
 This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
-If the bug occurs every ten simulations and we have not fixed it we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
-Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
+If the bug occurs every ten simulations and we have not fixed it, we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
+Conversely, if the bug does not occur even once in 500 or 1000 simulations then we can be fairly sure we have fixed it.
 As an example of this, the number of susceptibles in an SIR model should never increase.
-So we can run the simulation a number of times and check that it doesn't occur.
+So we can run the simulation a number of times and check that it does not occur.
 However, without a previously observed bug, it is impossible to know how many runs of the simulation we would need to run before finding the bug, so in this example we will simply run 100.
 \newline
-```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently"}
+```{r, returningpathogen,ref = "returningpathogen", codecap = "Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently."}
 set.seed(11121955)
 sim <- initialiseSim(100, 4, 0)
 
-out <-  replicate(100, runSim(sim, 0.1, 0.04, 30), simplify = FALSE)
+out <- replicate(100, runSim(sim, 0.1, 0.04, 30), simplify = FALSE)
 
 # Does S ever increase?
 #   This returns TRUE if every element of the S vector is
@@ -595,9 +596,9 @@ Often for these cases, the expected behaviour of the function should be to give 
 There is no correct output for an epidemiological model with a negative number of susceptible individuals. 
 Instead the function should give an informative error message.
 Often the simplest solution is to use defensive programming and include argument checks at the beginning of functions.
-We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
-If the expression does not throw an error the test should throw an error (as this is not the expected behaviour).
-Conversely, if the expression does throw an error the test should pass and not throw an error. 
+We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error!
+If the expression does not throw an error, the test should throw an error (as this is not the expected behaviour).
+Conversely, if the expression does throw an error, the test should pass and not throw an error. 
 We can use the `expect_error()` function for this task.
 This function takes an expression as its first argument and reports an error if the given expression does not throw an error as expected.
 \newline
@@ -605,7 +606,7 @@ This function takes an expression as its first argument and reports an error if 
 We can first check that the `calcRates()` function  sensibly handles the user inputting a string instead of a number for the `beta` parameter.
 Because this expression throws an error, `expect_error()` does not throw an error and the test passes.
 \newline
-```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect parameter inputs", warning = FALSE}
+```{r, wrong1, ref = "wrong1", codecap = "Testing incorrect parameter inputs.", warning = FALSE}
 
 sim <- initialiseSim(100, 4, 0)
 expect_error(calcRates(sim, beta = 'beta', 0.04))
@@ -622,9 +623,9 @@ NAs producedError: `calcRates(sim, beta = -1, 0.04)` did not throw an error.
 
 The call to `calcRates()` did not throw an error and therefore `expect_error()` did throw an error.
 The easiest way to protect against this would be to use defensive programming and check the arguments.
-We demonstrate this is \@ref(wrong1c).
+We demonstrate this in \@ref(wrong1c).
 Here we have added two checks that confirm that `beta` and `gamma` are positive.
-Given that `calcRates()` is run thousands of times (once per iteration) it might be more sensible to run these checks only once at the top of `runSim()` but we are showing them here to avoid pasting the longer function again and for consistency with the previous two examples.
+Given that `calcRates()` is run thousands of times (once per iteration) it might be more sensible to run these checks only once at the top of `runSim()`, but we are showing them here to avoid pasting the longer function again and for consistency with the previous two examples.
 
 ```{r, wrong1c, ref = "wrong1c", codecap = "Add defensive programming so that calcRates fails when it should do.", eval = TRUE}
 
@@ -652,21 +653,21 @@ expect_error(calcRates(sim, beta = -1, 0.04))
 ## Test special cases {-#corners}
 
 When writing tests it is easy to focus on standard behaviour.
-However, bugs often occur at _special cases_---when the code behaves qualitatively differently at a certain value of a parameter or at certain combinations of parameter values.
-For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column e.g. `my_matrix[,2]` returns a vector.
+However, bugs often occur at _special cases_ --- when the code behaves qualitatively differently at a certain parameter value of a parameter or for certain combinations.
+For example, in _R_, selecting two or more columns from a matrix e.g. `my_matrix[,2:3]` returns a matrix while selecting one column, e.g. `my_matrix[,2]` returns a vector.
 Code that relies on the returned object being a matrix would fail in this special case.
 These special cases can often be triggered with parameter sets that are at the edge of parameter space. 
 This is where understanding of the functional form of the model can help. 
 Consider a function `divide(x, y)` that divides `x` by `y`.
 We could test this function by noting that `y * divide(x, y)` should return `x`.
-If we write code that tests standard values of `x` and `y` such as `2 * divide(3, 2) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
+If we write code that tests standard values of `x` and `y` such as `(2 * divide(3, 2)) == 3` we would believe the function works for nearly all values of division, unless we ever try `y = 0`.
 \newline
 \newline
 In our example we might want to test whether the code works with $\beta = 0$ and $\gamma = 0$ (\@ref(edge2)).
 We again run the simulation and test that the macro properties of the output are correct i.e. that the function returns a data frame with four columns and no NAs.
 While setting `beta = 0` works fine, setting `gamma = 0` does not.
 \newline
-```{r, edge2, ref = "edge2", codecap = "", eval = FALSE}
+```{r, edge2, ref = "edge2", codecap = "Demonstrate a failing test.", eval = FALSE}
 > sim <- initialiseSim(100, 4, 0)
 > simulation1 <- runSim(sim, beta = 0, gamma = 1, 10)
 
@@ -682,15 +683,15 @@ Error in while (sim$time < tf) { : missing value where TRUE/FALSE needed
 
 ```
 
-In general, requesting a simulation with a recovery rate of zero is not unmeaningful; this is not an objectively wrong use of the function. 
-The error occurs because once all the individuals are in the infectious class both the infection rate is zero ($\beta S I = 1 \times 0 \times 100 = 0$) and the transmission rate is zero ($\gamma I = 0 \times 100 = 0$).
-Therefore in the `rexp(1, rate = rates$pf)` in `calcRates` we are trying to draw a random number from an exponential distribution with a rate of zero which is undefined.
-Therefore `rates$dt` is set as `NaN`, `sim$time` subsequently becomes `NaN` and the expression `while (sim$time < tf)` errors because `NaN < 10` returns an NA rather than either a `TRUE` or a `FALSE`.
-For special cases like this it may be rather subjective what the correct behaviour should be.
-It might be appropriate to simply declare that this parameter value is not allowed; setting $\gamma = 0$ means this is no longer an SIR model but is instead an SI model.
+In general, requesting a simulation with a recovery rate of zero is not without meaning; this is not an objectively wrong use of the function. 
+The error occurs because once all the individuals are in the infectious class, both the infection rate is zero ($\beta S I = 1 \times 0 \times 100 = 0$) and the transmission rate is zero ($\gamma I = 0 \times 100 = 0$).
+Therefore in the `rexp(1, rate = rates$pf)` in `calcRates`, we are trying to draw a random number from an exponential distribution with a rate of zero, which is undefined.
+Therefore `rates$dt` is set as `NaN`, `sim$time` subsequently becomes `NaN` and the expression `while (sim$time < tf)` errors because `NaN < 10` returns an `NA` rather than either a `TRUE` or a `FALSE`.
+For special cases like this, it may be rather subjective what the correct behaviour should be.
+It might be appropriate to simply declare that this parameter value is not allowed; setting \texttt{gamma} as `0` means this is no longer an SIR model but is instead an SI model.
 This should be stated in the documentation and the function should throw an error.
 This is what we will do here (\@ref(edge3)).
-We change our defensive lines in `calcRates` so that `gamma` must be greater than 0 rather than great or equal than zero.
+We change our defensive lines in `calcRates()` so that `gamma` must be greater than 0 rather than greater or equal than zero.
 We then add a test that checks that this argument is checked properly.
 \newline
 ```{r, edge3, ref = "edge3", codecap = "Use defensive programming to check for gamma = 0.", eval = TRUE}
@@ -720,7 +721,7 @@ expect_error(runSim(sim, beta = 1, gamma = 0, 10),
 
 Finally we might also want to check that the function works with very large values of `beta` and `gamma`.
 \newline
-```{r, edge4, ref = "edge4", codecap = "", eval = FALSE}
+```{r, edge4, ref = "edge4", codecap = "Check very large values of beta and gamma.", eval = FALSE}
 sim <- initialiseSim(100, 4, 0)
 simulation1 <- runSim(sim, beta = 1e5, gamma = 1, 10)
 
@@ -752,4 +753,16 @@ expect_equal(ncol(simulation3), 4)
 expect_true(all(!is.na(simulation3)))
 
 ```
+
+
+## Session Info
+
+```{r, sessinfo}
+
+sessionInfo()
+```
+
+## References
+
+
 
