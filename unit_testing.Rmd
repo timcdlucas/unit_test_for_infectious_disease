@@ -25,7 +25,7 @@ abstract: |
   Yet a single coding bug may bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
   We are ethically obliged to ensure our code is as free of error as possible.
   Unit testing is a coding method to avoid such bugs, but unit testing is rarely used in epidemiology.
-  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models. 
+  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models with the aim of increasing uptake of this methodology in our field.
 keywords: unit testing, software development, reproducible science, computational models
 bibliography: unit_testing.bib
 output:
@@ -100,7 +100,6 @@ The issue of trust was highlighted recently when Neil Ferguson, one of the leadi
 The code that was released did not include any tests [@ferg_github] but subsequent work has added documentation, while independent code reviews have supported the results of the study [@ferg_check; @it].
 The tweet and lack of tests garnered considerable backlash (some of which may have been politically motivated [@ferg_pol]), with observers from the software industry noting that code should be both documented and tested to ensure its correctness [@it].
 It is understandable that during the fast-moving, early stages of a pandemic, other priorities were put above testing and documenting the code.
-However, this simply reinforces that time should be taken to test and document code when it is first written so that it is already well tested when it is needed under short deadlines.
 It is also important to note that a lack of tests is not unusual in our field, or for some of the authors of this article. 
 To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 [@spim]) as a means to provide scientific robustness (both in terms of model uncertainty and in terms of implementation) [@den2019guidelines; @hollingsworth2017learning], yet this is not enough if the models themselves lack internal validity.
 
@@ -125,7 +124,7 @@ _Unit testing_ is a formally-defined, principled framework that compares outputs
 Ready-to-run frameworks for unit testing are available in _R_ [@R], _Julia_ [@bezanson2017julia] and _Python_ [@python] and are standard practice in the software industry.
 These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
 Infectious disease modelling presents specific challenges, such as stochastic outputs [@vsevvcikova2006automated; @guderlei2007statistical; @patrick2017toolkit], which are difficult to test and not covered in general unit testing literature.
-There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming, version control, pair-programming and comprehensive documentation [@osborne2014ten; @wilson2014best; @wickham2019advanced; @wickham2015r; @RECON] but while important, these are not the focus of this paper.
+There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming, version control, pair-programming and comprehensive documentation [@osborne2014ten; @wilson2014best; @wickham2019advanced; @wickham2015r; @RECON] and these are important complements to the methods in this paper.
 In this primer we introduce unit testing with a demonstration of an infectious disease model.
 While we use _R_ throughout to exemplify the unit testing framework, the concepts apply equally well to the various languages commonly used by modellers such as _Julia_ and _python_; we therefore briefly direct the reader towards available testing frameworks for those languages in Section \@ref(frameworks).
 
@@ -251,7 +250,7 @@ At this point there are no further bugs in the code.
 In the subsequent sections we will develop this base example as we consider different concepts in unit testing, resulting in well-tested code by the end. 
 Despite there being no further bugs, we can examine how unit testing allows us to protect against misuse of the code and reinforce our confidence in the code.
 \newline
-```{r, correctcode, ref = "correctcode", codecap = "Corrected base example", results = 'hide', echo = TRUE}
+```{r, correctcode, ref = "correctcode", codecap = "Corrected base example.", results = 'hide', echo = TRUE}
 N <- 12
 n_steps <- 20
 
@@ -291,7 +290,7 @@ Furthermore, it facilitates other good programming practices such as defensive p
 At this stage we have also enabled the varying of the number of pathogens using the `pathogens` argument in the `initialisePop()` function.
 The first iteration of the simulation, `I[1, ]`, is initialised with a repeating sequence of letters.
 \newline
-```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions", result = 'hide'}
+```{r, compactfunctions, ref = "compactfunctions", codecap = "Organising code into small functions.", result = 'hide'}
 initialisePop <- function(n_steps, N, pathogens){
   I <- matrix(data = NA, nrow = n_steps, ncol = N)
   I[1, ] <- rep(x = letters[1:pathogens], length.out = N)
@@ -313,7 +312,7 @@ Finally, when the number of individuals is greater than, but not a multiple of, 
 In this sequence of tests, we have taken our understanding of the function logic, and used it to make predictions of what the results should be.
 We then test that the result is as expected and if everything is correct the code will return no output.
 \newline
-```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect", results = 'hide'}
+```{r, test_simple_first, ref = "testsimplefirst", codecap = "Using simple parameter sets we can work out beforehand what results to expect.", results = 'hide'}
 pop1 <- initialisePop(n_steps = 2, N = 3, pathogens = 3) 
 expect_equal(pop1[1, ], c("a", "b", "c"))
 
@@ -349,7 +348,7 @@ First we initialise the population, and then alter each argument in turn (\@ref(
 Arguments `n_steps` and `N` directly change the expected dimension of the returned matrix so we check that the output of the function is the expected size.
 For the `pathogens` argument we test that the number of pathogens is equal to the number requested.
 \newline
-```{r, test_all_args, ref = "testallargs", codecap = "Test all function arguments in turn", results = 'hide'}
+```{r, test_all_args, ref = "testallargs", codecap = "Test all function arguments in turn.", results = 'hide'}
 pop1 <- initialisePop(n_steps = 2, N = 3, pathogens = 3) 
 expect_equal(dim(pop1), c(2, 3))
 
@@ -480,7 +479,7 @@ In (\@ref(teststochfewvalues)), `chooseInfector(N = 2)` returns a length-2 vecto
 `paste0()` then turns this length-2 vector into a length-1 string with two characters; we expect this to be one of "11", "22", "12" or "21".
 `replicate()` runs the expression 300 times.
 \newline
-```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values", results = 'hide'}
+```{r, test_stoch_fewvalues, ref = "teststochfewvalues", codecap = "Testing stochastic output when it only covers a few finite values.", results = 'hide'}
 # Collapse each draw into a single string
 #   to make comparisons easier.
 manyPops <- 
@@ -595,7 +594,7 @@ Therefore, a population is created with one pathogen, not three, which is almost
 Here, the safest fix is to add an explicit argument check at the top of the function (\@ref(wrong1c)).
 The same test now passes because `initialisePop()` throws an error when a vector is supplied to the `pathogens` argument.
 \newline
-```{r, wrong1c, ref = "wrong1c", codecap = "New definition, using defensive programming, of the initialisePop() function  and a passing test for incorrect pathogen inputs"}
+```{r, wrong1c, ref = "wrong1c", codecap = "New definition, using defensive programming, of the initialisePop() function  and a passing test for incorrect pathogen inputs."}
 initialisePop <- function(n_steps, N, pathogens){
   
   # Add a defensive argument check
