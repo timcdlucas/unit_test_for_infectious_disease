@@ -1,0 +1,1107 @@
+\documentclass[]{elsarticle} %review=doublespace preprint=single 5p=2 column
+%%% Begin My package additions %%%%%%%%%%%%%%%%%%%
+\usepackage[hyphens]{url}
+
+
+
+\usepackage{lineno} % add
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage{graphicx}
+\usepackage{booktabs} % book-quality tables
+%%%%%%%%%%%%%%%% end my additions to header
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \usepackage{fontspec}
+  \ifxetex
+    \usepackage{xltxtra,xunicode}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\bibliographystyle{elsarticle-harv}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={},
+            colorlinks=false,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+
+\setcounter{secnumdepth}{5}
+% Pandoc toggle for numbering sections (defaults to be off)
+
+
+% Pandoc header
+\usepackage{caption}
+\usepackage{floatrow}
+\usepackage{upquote}
+
+
+\DeclareNewFloatType{chunk}{placement=h, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{Code~\arabic{chunk}}
+\makeatletter
+%\@addtoreset{chunk}{section}
+\makeatother
+
+
+
+\begin{document}
+\begin{frontmatter}
+
+  \title{Responsible modelling: Unit testing for infectious disease epidemiology.}
+    \author[Big Data Institute]{Tim CD Lucas}
+   \ead{timcdlucas@gmail.com} 
+    \author[Big Data Institute]{Timothy M Pollington}
+  
+    \author[Big Data Institute]{Emma L Davis}
+  
+    \author[Big Data Institute]{T Déirdre Hollingsworth}
+  
+      \address[Big Data Institute]{Big Data Institute, Li Ka Shing Centre for Health Information and Discovery, University of Oxford, UK}
+    \address[Imperial]{Centre for Environment and Health, School of Public Health, Imperial College, UK}
+    \address[MathSys CDT]{MathSys CDT, University of Warwick, UK}
+    
+  \begin{abstract}
+  Infectious disease epidemiology is increasingly reliant on large-scale computation and inference.
+  Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases including malaria and tuberculosis.
+  Yet a coding bug may bias results, yielding incorrect conclusions and actions causing avoidable harm.
+  We are ethically obliged to make our code as free of error as possible.
+  Unit testing is a coding method to avoid such bugs, but it is rarely used in epidemiology.
+  We demonstrate how unit testing can handle the particular quirks of infectious disease models and aim to increase uptake of this methodology in our field.
+  \end{abstract}
+   \begin{keyword} unit testing, software development, reproducible science, computational models\end{keyword}
+ \end{frontmatter}
+
+\newpage
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+\linenumbers
+
+Modelling is an important tool for understanding fundamental biological processes in infectious disease dynamics, evaluating potential intervention efficacy and forecasting disease burden.
+At the time of writing, infectious disease modellers are playing a central role in the interpretation of available data on the COVID-19 pandemic to inform policy design and evaluation (IHME COVID-19 health service utilization forecasting team and Murray 2020; Ferguson et al. 2020; Hellewell et al. 2020).
+Similarly, policy on endemic infectious diseases, such as duration and frequency of control programmes and spatial prioritisation, is also directed by models (Behrend et al. 2020).
+Such research builds on a long history of modelling for policy (Heesterbeek et al. 2015) and a general understanding of the dynamics of infectious disease systems.
+
+Given the importance of modelling results, it is vital that the code they rely on is both coded correctly and trusted.
+Bugs can be caused by typos, code behaving in unexpected ways, or logical flaws in the construction of the code.
+Outside of epidemiology, bugs have been found in code that had been used by many researchers (Bhandari Neupane et al. 2019) and may lead to retractions (Clinical Oncology 2016).
+Bugs have also been found in highly influential work; a paper that informed austerity policies globally was found to have a crucial computational mistake (Herndon, Ash, and Pollin 2014).
+In engineering bugs caused the Mars Climate orbiter and the Mariner 1 spacecraft to become lost or destroyed (NASA 2020; Board 1999).
+We do not know of high profile cases of infectious disease models being found to have bugs once published, but as code is not always shared and little post-publication testing of code occurs, this likely represents a failure of detection.
+The issue of trust was highlighted recently when Neil Ferguson, one of the leading modellers informing UK COVID-19 government policy, tweeted:
+
+\begin{quote}
+``I'm conscious that lots of people would like to see and run the pandemic simulation code we are using to model control measures against COVID-19. To explain the background - I wrote the code (thousands of lines of undocumented C) 13+ years ago to model flu pandemics\ldots{}'' (Ferguson 2020).
+\end{quote}
+
+The code that was released did not include any tests (Ferguson and MRC Centre for Global Infectious Disease Analysis 2020) but subsequent work has added documentation, while independent code reviews have supported the results of the study (Eglen 2020; BCS, The Chartered Institute for IT 2020).
+The tweet and lack of tests garnered considerable backlash (some of which may have been politically motivated (Chawla 2020)), with observers from the software industry noting that code should be both documented and tested to ensure its correctness (BCS, The Chartered Institute for IT 2020).
+It is understandable that during the fast-moving, early stages of a pandemic, other priorities were put above testing and documenting the code.
+It is also important to note that a lack of tests is not unusual in our field, or for some of the authors of this article.
+To guard against error, policy-makers now standardly request analyses from multiple modelling groups (as is the case in the UK for COVID-19 (SPI-M 2020)) as a means to provide scientific robustness (both in terms of model uncertainty and in terms of implementation) (Den Boon et al. 2019; Hollingsworth and Medley 2017), yet this is not enough if the models themselves lack internal validity.
+
+Infectious disease modellers are rarely trained as professional programmers (BCS, The Chartered Institute for IT 2020) and recently some observers have made the case that this has been due to a lack of funding (Baker 2020).
+Epidemiological groups such as RECON (Csardi et al. 2020), and broader groups such as rOpenSci, have however started providing support for scientist to develop better coding practices.
+The communities built around these groups are an invaluable resource for new programmers.
+It is also notable that while a number of articles have stated that unit tests should be written (Osborne et al. 2014; Wilson et al. 2014; Csardi et al. 2020) there are few texts available which demonstrate the use of unit testing to check infectious disease models.
+While the basic premise of unit testing is simple, there is an art to knowing what aspects of code can and should be tested.
+Guides that enable researchers to acquire this skill quickly will benefit the field.
+
+Whilst there are many drivers and attempts to address the problem with code robustness, today's models are increasingly moving from mean-field ordinary differential equation approximations to individual-based models with complex, data-driven contact processes (Willem et al. 2017; Ferguson et al. 2006).
+These increases in model complexity are accompanied with growing codebases.
+Furthermore, while there are some general packages for epidemiological modelling (Jenness, Goodreau, and Morris 2018; Santos Baquero and Silveira Marques 2020), it is very common for epidemiologists to study a new model and to therefore code it from scratch.
+Unlike, established packages that have had time to mature and fix many bugs, newly programmed models are more prone to errors.
+As the mathematical methods depend increasingly on numerical solutions rather than analytical pen-and-paper methods, it becomes more difficult to tell if a bug is present based on model outputs alone.
+Furthermore, checking models in an \emph{ad hoc} way is biased as unexpected results trigger careful checks of the code while models that show expected behaviour are more likely to be assumed bug-free.
+
+\emph{Unit testing} is a formally-defined, principled framework that compares outputs from code to what the programmer expected to happen (Wickham (2015) Chapter 7, Osborne et al. (2014), Wilson et al. (2014)).
+Ready-to-run frameworks for unit testing are available in \emph{R} (R Core Team 2018), \emph{Julia} (Bezanson, Edelman, Karpinski, and Shah 2017) and \emph{Python} (Python Core Team 2015a) and are standard practice in the software industry.
+These testing concepts also apply to many other scientific fields but here we focus on infectious diseases.
+Infectious disease modelling presents specific challenges, such as stochastic outputs (Ševčíková et al. 2006; Guderlei and Mayer 2007; Patrick, Donnelly, and Gilligan 2017), which are difficult to test and not covered in general unit testing literature.
+There are a number of other programming techniques that should be used in conjunction with unit testing, such as defensive programming, version control, pair-programming and comprehensive documentation (Osborne et al. 2014; Wilson et al. 2014; Wickham 2019, 2015; Csardi et al. 2020) and these are important complements to the methods in this paper.
+In this primer we introduce unit testing with a demonstration of an infectious disease model.
+While we use \emph{R} throughout to exemplify the unit testing framework, the concepts apply equally well to the various languages commonly used by modellers such as \emph{Julia} and \emph{python}; we therefore briefly direct the reader towards available testing frameworks for those languages in Section \ref{frameworks}.
+
+\hypertarget{unit-testing-foundations}{%
+\section{Unit testing foundations}\label{unit-testing-foundations}}
+
+At the heart of every \emph{unit test} is a function output, its known or expected value and a process to compare the two.
+For the square root function (\(\sqrt{x}\) or \texttt{sqrt(x)} in \emph{R}), we could write a test that runs the function for the number 4, i.e.~\texttt{sqrt(x\ =\ 4)}, and compares it to the correct answer i.e.~2.
+However, often function arguments will cover an infinite range of possibilities and we cannot exhaustively check them all.
+Instead we devise tests that cover standard usage as well as \emph{special case} scenarios: what do we want our function to do if given a negative number e.g.~\texttt{sqrt(-1)}, or a vector argument containing strings or missing values e.g.~\texttt{sqrt(c(4,\ "melon",\ NA))}?
+
+Strictly-defined, unit testing tests code with no dependencies outside of the test definition.
+This is in contrast to integration testing that tests how these small units integrate with other units of code, including dependencies.
+Testing at even higher levels includes system testing (which tests how multiple systems such as software and hardware interact) and acceptance testing (in which end-users, or software commissioners, test that it meets requirements).
+Within the scientific community however, the term unit testing is typically used in a slightly vague way and implies a combination of integration and (strict) unit testing.
+As so much scientific software relies on various dependencies, even at very low levels, the strict definition of unit testing is not necessarily useful.
+Here we continue to use this vague definition, simply focussing on testing of code at a low level.
+The first benefit of this is that it allows you to work out the exact expected result of a function call.
+Second, if you do find bugs, they are easier to isolate and fix if you are working at these low levels.
+Third, code that either calls the low-level functions or relies on outputs from them is easier to test and debug.
+
+In \emph{R}, the \texttt{testthat} package (Wickham 2011), provides a simple interface for testing.
+While a variety of test functions can make different comparisons, the two main ones are \texttt{expect\_true()} and \texttt{expect\_equal()}.
+\texttt{expect\_true()} takes one argument: an expression that should evaluate to \texttt{TRUE}.
+For the square root example above, we would write \texttt{expect\_true(sqrt(4)\ ==\ 2)}.
+\texttt{expect\_equal()} takes two arguments, an expression and the expected output;
+so we would write \texttt{expect\_equal(sqrt(4),\ 2)}.
+
+There are a number of ways to incorporate unit testing into your programming workflow.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Each time you write code for a new, discrete chunk of functionality, you should write tests that confirm it does what you expect. These tests should be kept with the code it is testing (in the same directory or in a subdirectory).
+\item
+  Whenever a bug is found outside of the existing testing framework, a new test should be written to capture it.
+  Then if the bug re-emerges it will hopefully be quickly flagged so that the developer can fix it.
+\item
+  All of these tests should be run regularly as you develop new code.
+  If a change causes the previous tests to break, this indicates the introduction of an error in the new code, or implies that the older code could not generalise to the adapted environment.
+\end{enumerate}
+
+\hypertarget{an-example-multi-pathogen-re-infection-model}{%
+\section{An example multi-pathogen re-infection model}\label{an-example-multi-pathogen-re-infection-model}}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=150px,]{modelexample} 
+
+}
+
+\caption{The 3-pathogen system with arrows showing the possible transitions at every time step.}\label{fig:modelexample}
+\end{figure}
+
+Here we define a toy epidemiological model and then demonstrate how to effectively write unit tests for it in \emph{R} code.
+Consider a multi-pathogen system, with a population of \(N\) infected individuals who each get infected by a new pathogen at every time step (Fig. \ref{fig:modelexample}).
+In this toy example, we imagine that individuals are infected with exactly one pathogen at a time.
+Some aspects of this model could reflect the dynamics of a population where specific antibiotics are used regularly i.e.~each time step an individual is infected, diagnosed and treated suboptimally, leaving the individual susceptible to infection from any pathogen, including the one they were just treated for.
+The aim of this model however is not to be realistic but to serve as a learning tool with succinct code.
+We work through a more realistic model in the Supplementary Material.
+
+Each individual \(i\), at time \(t\), is defined by the pathogen they are currently infected with \(I_{it} \in \{a, b, c\}\) for a 3-pathogen system.
+The population is therefore defined by a length \(N\) state vector \(\mathbf{I}_t = (I_{it})_{i=[1,N]}\).
+At each time step, every individual's infection status is updated as:
+\[I_{it} = \text{Unif}(\mathbf{I}_{t-1}).\]
+That is, at each iteration, the new infection status of each individual is a Uniform random sample from the set of infection statuses in the previous iteration (including itself \(I_{i,t-1}\)).
+This model has a total of three parameters, the total number of individuals, the number of pathogen species, and the number of time steps, all of which are scalar, positive integers.
+Certainly this toy model is naïve as it is governed by mass-action principles, ignoring contact and spatial dynamics.
+Nevertheless it will serve its purpose.
+Before writing any code we can consider the model's expected behaviour.
+Firstly, we would expect an individual to be repeatedly infected with different strains.
+Secondly, we would expect the proportions of the different pathogens to stochastically drift, until all but one pathogen goes extinct.
+\ref{firstcode} shows our first attempt at implementing this model.
+\newline
+\captionof{chunk}{Base example of the multi-pathogen re-infection model.}\label{firstcode}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{N <-}\StringTok{ }\DecValTok{12} \CommentTok{# infected individuals}
+\NormalTok{n_steps <-}\StringTok{ }\DecValTok{20} \CommentTok{# study length}
+\CommentTok{# create the matrix to store the simulation data}
+\NormalTok{I <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n_steps, }\DataTypeTok{ncol =}\NormalTok{ N)}
+
+\CommentTok{# Initialise the population at t=1 with repeating configuration}
+\NormalTok{I[}\DecValTok{1}\NormalTok{, ] <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{), }\DataTypeTok{length.out =}\NormalTok{ N)}
+
+\CommentTok{# At each time step, everyone is re-infected }
+\CommentTok{# by someone from the previous time step.}
+\ControlFlowTok{for}\NormalTok{(t }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, n_steps))\{}
+\NormalTok{  I[t, ] <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ I[t}\DecValTok{-1}\NormalTok{, ], }\DataTypeTok{size =}\NormalTok{ N)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.75\linewidth,]{firstplots-1} 
+
+}
+
+\caption{Infection profile for individual 1, who is initially infected with pathogen $a$ but then reinfected with different pathogens}\label{fig:firstplots}
+\end{figure}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.75\linewidth,]{incorrectplot-1} 
+
+}
+
+\caption{ The proportion of each pathogen through time as given by Code 1. Each pathogen is a different line but are overplotted. The proportions of each pathogen do not stochastically drift as we would expect.}\label{fig:incorrectplot}
+\end{figure}
+
+Usually we would make some output plots to explore if our code is performing sensibly.
+Plotting the time course of which pathogen is infecting one individual shows repeated infection with different pathogens as expected (Fig. \ref{fig:firstplots}).
+However, if we plot the proportion of each pathogen (Fig. \ref{fig:incorrectplot}) we quickly see that instead of stochastically varying, the proportions are identical through time and so there must be a bug present.
+This simple example demonstrates the firstly that bugs can be subtle.
+Secondly, it is not easy to notice an error, even in just 7 lines of code.
+Thirdly, it is much easier to debug code when you know there is a bug.
+Fourthly, while plotting simulation runs is an excellent way to check model behaviour, if we had only relied on Fig. \ref{fig:firstplots} we would have missed the bug.
+Additionally, manually checking plots is a time consuming and non-scalable method because a human has to perform this scan every test run.
+In summary this \emph{ad hoc} plotting approach reduces the chances that we will catch all bugs.
+
+The cause of the bug is that \texttt{sample()} defaults to sampling without replacement \texttt{sample(...,\ replace\ =\ FALSE)}; this means everyone transmits their infection pathogen on a one-to-one basis rather than one-to-many as required by the model.
+Setting \texttt{replace\ =\ TRUE} fixes this (\ref{correctcode}) and when we plot the proportion of each pathogen (Fig. \ref{fig:correctplots}) we see the correct behaviour (a single pathogen drifting to dominance).
+At this point there are no further bugs in the code.
+In the subsequent sections we will develop this base example as we consider different concepts in unit testing, resulting in well-tested code by the end.
+Despite there being no further bugs, we can examine how unit testing allows us to protect against misuse of the code and reinforce our confidence in the code.
+\newline
+\captionof{chunk}{Corrected base example.}\label{correctcode}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{N <-}\StringTok{ }\DecValTok{12}
+\NormalTok{n_steps <-}\StringTok{ }\DecValTok{20}
+
+\NormalTok{I <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n_steps, }\DataTypeTok{ncol =}\NormalTok{ N)}
+
+\NormalTok{I[}\DecValTok{1}\NormalTok{, ] <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{), }\DataTypeTok{length.out =}\NormalTok{ N)}
+
+\ControlFlowTok{for}\NormalTok{(t }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, n_steps))\{}
+\NormalTok{  I[t, ] <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ I[t}\DecValTok{-1}\NormalTok{, ], }\DataTypeTok{size =}\NormalTok{ N, }\DataTypeTok{replace =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=0.75\linewidth,]{correctplots-1} 
+
+}
+
+\caption{The correct behaviour with the proportion of each pathogen, as a different line, drifting to dominance or extinction.}\label{fig:correctplots}
+\end{figure}
+
+\hypertarget{basic-unit-testing}{%
+\section{Basic unit testing}\label{basic-unit-testing}}
+
+\hypertarget{compactfuns}{%
+\subsection*{Write small functions}\label{compactfuns}}
+\addcontentsline{toc}{subsection}{Write small functions}
+
+To ensure the unit tests are evaluating the exact code as run in the analysis, code should be structured in functions, which can be used both to run unit tests and to generate results as part of a larger model codebase.
+Make your functions compact with a single clearly-defined task.
+We have defined a function, \texttt{initialisePop()}, to initialise the population and another, \texttt{updatePop()}, to run one iteration of the simulation (\ref{compactfunctions}).
+Organising the codebase into these bite-sized operations makes following the programming flow easier as well as understanding the code structure.
+Furthermore, it facilitates other good programming practices such as defensive programming and documentation --- defensive programming, such as checking the class and dimensions of inputs in the first few lines of a function, ensures that the code will fail quickly and informatively if incorrect inputs are used.
+At this stage we have also enabled the varying of the number of pathogens using the \texttt{pathogens} argument in the \texttt{initialisePop()} function.
+The first iteration of the simulation, \texttt{I{[}1,\ {]}}, is initialised with a repeating sequence of letters.
+\newline
+\captionof{chunk}{Organising code into small functions.}\label{compactfunctions}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{initialisePop <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n_steps, N, pathogens)\{}
+\NormalTok{  I <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n_steps, }\DataTypeTok{ncol =}\NormalTok{ N)}
+\NormalTok{  I[}\DecValTok{1}\NormalTok{, ] <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ letters[}\DecValTok{1}\OperatorTok{:}\NormalTok{pathogens], }\DataTypeTok{length.out =}\NormalTok{ N)}
+  \KeywordTok{return}\NormalTok{(I)}
+\NormalTok{\}}
+
+\NormalTok{updatePop <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, t, N)\{}
+\NormalTok{  x[t, ] <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x[t}\DecValTok{-1}\NormalTok{, ], }\DataTypeTok{size =}\NormalTok{ N, }\DataTypeTok{replace =} \OtherTok{TRUE}\NormalTok{)}
+  \KeywordTok{return}\NormalTok{(x)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{easycases}{%
+\subsection*{Test simple cases first}\label{easycases}}
+\addcontentsline{toc}{subsection}{Test simple cases first}
+
+If we start with a small population with few pathogens, we can then easily work out exactly what the initialised population should look like (\ref{testsimplefirst}).
+When we initialise a population with three individuals and three pathogens, we will get the sequence \texttt{"a", "b", "c"} as seen in the first test.
+When the number of individuals is greater than the number of pathogens, the sequence will be repeated as seen in the second test.
+Finally, when the number of individuals is greater than, but not a multiple of, the number of pathogens, the sequence will have an incomplete repeat at the end as seen in \ref{testsimplefirst}.
+In this sequence of tests, we have taken our understanding of the function logic, and used it to make predictions of what the results should be.
+We then test that the result is as expected and if everything is correct the code will return no output.
+\newline
+\captionof{chunk}{Using simple parameter sets we can work out beforehand what results to expect.}\label{testsimplefirst}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pop1 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{3}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(pop1[}\DecValTok{1}\NormalTok{, ], }\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{))}
+
+\NormalTok{pop2 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{6}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(pop2[}\DecValTok{1}\NormalTok{, ], }\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{, }\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{))}
+
+\NormalTok{pop3 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{5}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(pop3[}\DecValTok{1}\NormalTok{, ], }\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{, }\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+In contrast, if we had defined the \texttt{initialisePop()} function incorrectly, the test would fail and return an error.
+\newline
+\captionof{chunk}{If our code is incorrect, the test will return an error.}\label{testerror}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OperatorTok{>}\StringTok{ }\CommentTok{# A broken function that does not add the pathogens.}
+\ErrorTok{>}\StringTok{ }\NormalTok{initialisePopBroken <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n_steps, N, pathogens)\{}
+\OperatorTok{+}\StringTok{   }\NormalTok{I <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n_steps, }\DataTypeTok{ncol =}\NormalTok{ N)}
+\OperatorTok{+}\StringTok{   }\KeywordTok{return}\NormalTok{(I)}
+\OperatorTok{+}\StringTok{ }\NormalTok{\}}
+
+\OperatorTok{>}\StringTok{ }\NormalTok{popBroken <-}\StringTok{ }\KeywordTok{initialisePopBroken}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{3}\NormalTok{, }
+                                   \DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\OperatorTok{>}\StringTok{ }\KeywordTok{expect_equal}\NormalTok{(popBroken[}\DecValTok{1}\NormalTok{, ], }\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{))}
+\NormalTok{Error}\OperatorTok{:}\StringTok{ }\NormalTok{popBroken[}\DecValTok{1}\NormalTok{, ] not equal to }\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{).}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{testargs}{%
+\subsection*{Test all arguments}\label{testargs}}
+\addcontentsline{toc}{subsection}{Test all arguments}
+
+\texttt{initialisePop()} has three arguments to check.
+First we initialise the population, and then alter each argument in turn (\ref{testallargs}).
+Arguments \texttt{n\_steps} and \texttt{N} directly change the expected dimension of the returned matrix so we check that the output of the function is the expected size.
+For the \texttt{pathogens} argument we test that the number of pathogens is equal to the number requested.
+\newline
+\captionof{chunk}{Test all function arguments in turn.}\label{testallargs}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pop1 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{3}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{dim}\NormalTok{(pop1), }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+
+\NormalTok{pop2 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{6}\NormalTok{, }\DataTypeTok{N =} \DecValTok{3}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{dim}\NormalTok{(pop2), }\KeywordTok{c}\NormalTok{(}\DecValTok{6}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+
+\NormalTok{pop3 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{20}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{dim}\NormalTok{(pop3), }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{20}\NormalTok{))}
+
+\NormalTok{pop4 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{10}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{5}\NormalTok{) }
+\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(pop4[}\DecValTok{1}\NormalTok{, ])), }\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{complexcases}{%
+\subsection*{Does the function logic meet your expectations?}\label{complexcases}}
+\addcontentsline{toc}{subsection}{Does the function logic meet your expectations?}
+
+We can also cover cases that expose deviations from the logical structure of the system.
+After initialising the population, we expect all the rows other than the first to contain \texttt{NA}.
+We also expect each of the pathogens \(a\), \(b\) and \(c\) to occur at least once on the first row if \texttt{pathogens} \(= 3\) and \texttt{N} \(\geq 3\).
+Finally, \texttt{updatePop()} performs a single simulation time step, so we expect only one additional row to be populated.
+Instead of testing by their numerical values, we verify logical statements of the results within our macro understanding of the model system (\ref{testcomplex}).
+\newline
+\captionof{chunk}{Test more complex cases using your understanding of the system.}\label{testcomplex}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pop1 <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{20}\NormalTok{, }\DataTypeTok{N =} \DecValTok{12}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+
+\CommentTok{# expect all (except the first row) are NAs}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{all}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(pop1[}\OperatorTok{-}\DecValTok{1}\NormalTok{, ]))) }
+
+\CommentTok{# the unique values of pop1[1, ] should be a, b, c}
+\CommentTok{#   and nothing else.}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{setequal}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{), pop1[}\DecValTok{1}\NormalTok{, ])) }
+
+\NormalTok{pop2 <-}\StringTok{ }\KeywordTok{updatePop}\NormalTok{(pop1, }\DataTypeTok{t =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{12}\NormalTok{)}
+\CommentTok{# after update, expect 1st & 2nd row not to have NAs}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{all}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(pop2[}\DecValTok{1}\OperatorTok{:}\DecValTok{2}\NormalTok{, ]))) }
+\CommentTok{# and also expect that rows other than 1st & 2nd are NAs.}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{all}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(pop2[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{2}\NormalTok{), ]))) }
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{combine}{%
+\subsection*{Combine simple functions and test them at a higher level}\label{combine}}
+\addcontentsline{toc}{subsection}{Combine simple functions and test them at a higher level}
+
+In the end an entire model only runs when its functions work together seamlessly.
+So we next check their connections; achieved through nesting functions together, or defining them at a higher level and checking the macro aspects of the model.
+This could be considered integration testing rather than unit testing.
+We define a function \texttt{fullSim()} that runs both \texttt{initialisePop()} and \texttt{updatePop()} to yield one complete simulation.
+We would expect there to be no \texttt{NA}s in the output from \texttt{fullSim()} and every element to be either \(a\), \(b\) or \(c\).
+\newline
+\captionof{chunk}{Combine simple functions through nesting to check high-level functionality.}\label{combinesimplefunc}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fullSim <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n_steps, N, pathogens)\{}
+\NormalTok{  pop <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(n_steps, N, pathogens) }
+  \ControlFlowTok{for}\NormalTok{(t }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, n_steps))\{}
+\NormalTok{    pop <-}\StringTok{ }\KeywordTok{updatePop}\NormalTok{(pop, t, N)}
+\NormalTok{  \}}
+  \KeywordTok{return}\NormalTok{(pop)}
+\NormalTok{\}}
+
+\NormalTok{pop <-}\StringTok{ }\KeywordTok{fullSim}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{12}\NormalTok{, }\DataTypeTok{N =} \DecValTok{20}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{)}
+
+\CommentTok{# expect no NAs}
+\KeywordTok{expect_true}\NormalTok{(}\OperatorTok{!}\KeywordTok{any}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(pop))) }
+\CommentTok{# expect all elements to be one of a, b, or c}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{all}\NormalTok{(pop }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{))) }
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{stochastic-code}{%
+\section{Stochastic code}\label{stochastic-code}}
+
+Stochastic simulations are a common feature in infectious disease models.
+Stochastic events are difficult to test effectively because, by definition, we do not know beforehand what the result will be (Ševčíková et al. 2006; Guderlei and Mayer 2007; Patrick, Donnelly, and Gilligan 2017).
+We can check very broad-scale properties, like \ref{combinesimplefunc}, where we check the range of pathogen values.
+However, code could still pass and be wrong (for example the base example (\ref{firstcode}) would still pass that test).
+There are however a number of approaches that can help.
+
+\hypertarget{splitstochastic}{%
+\subsection*{Split stochastic and deterministic parts}\label{splitstochastic}}
+\addcontentsline{toc}{subsection}{Split stochastic and deterministic parts}
+
+Isolate the stochastic parts of your code.
+For example, \texttt{updatePop()} performs stochastic and deterministic operations in one line (\ref{compactfunctions}).
+First \texttt{updatePop()} stochastically samples who gets infected by whom at iteration \texttt{t}.
+Then it takes those infection events and assigns the new infectious status for each individual.
+We demonstrate in \ref{splitdeterstoch} how this could be split.
+We accept this is a fairly exaggerated example and that splitting a single line of code into two functions is rare.
+The more common scenario is splitting a multi-line function into smaller functions which also brings benefits of code organisation so it does not feel like extra effort.
+\newline
+\captionof{chunk}{Isolation of the deterministic and stochastic elements.}\label{splitdeterstoch}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{chooseInfector <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(N)\{}
+  \KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ N, }\DataTypeTok{size =}\NormalTok{ N, }\DataTypeTok{replace =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{updateInfectionStatus <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, t, infector_pathogen)\{}
+\NormalTok{  x[t, ] <-}\StringTok{ }\NormalTok{x[t }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{, infector_pathogen]}
+  \KeywordTok{return}\NormalTok{(x)}
+\NormalTok{\}}
+
+\NormalTok{updatePop <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, t, N)\{}
+\NormalTok{  infector_pathogen <-}\StringTok{ }\KeywordTok{chooseInfector}\NormalTok{(N)}
+\NormalTok{  x <-}\StringTok{ }\KeywordTok{updateInfectionStatus}\NormalTok{(x, t, infector_pathogen)}
+  \KeywordTok{return}\NormalTok{(x)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Now, half of \texttt{updatePop()} is deterministic so can be checked as previously discussed.
+We still have \texttt{chooseInfector()} that is irreducibly stochastic.
+We now examine some techniques for directly testing these stochastic parts.
+
+\hypertarget{deterministicparams}{%
+\subsection*{Pick a smart parameter for a deterministic result}\label{deterministicparams}}
+\addcontentsline{toc}{subsection}{Pick a smart parameter for a deterministic result}
+
+In the same way that we used simple parameters values in \ref{testsimplefirst}, we can often find simple cases for which stochastic functions become deterministic.
+For example, \(X\sim\text{Bernoulli}(p)\) will always generate zeroes for \(p=0\) or ones for \(p=1\).
+In the case of a single pathogen (\ref{teststochdetermin}), the model is no longer stochastic.
+So initialisation with one pathogen means the second time step should equal the first.
+\newline
+\captionof{chunk}{A stochastic function can output deterministically if you can find the right parameter set.}\label{teststochdetermin}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pop <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{3}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{1}\NormalTok{) }
+\NormalTok{pop <-}\StringTok{ }\KeywordTok{updatePop}\NormalTok{(pop, }\DataTypeTok{t =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{3}\NormalTok{)}
+\KeywordTok{expect_equal}\NormalTok{(pop[}\DecValTok{1}\NormalTok{, ], pop[}\DecValTok{2}\NormalTok{, ])}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{allpossible}{%
+\subsection*{Test all possible answers (if few)}\label{allpossible}}
+\addcontentsline{toc}{subsection}{Test all possible answers (if few)}
+
+Working again with a simple parameter set, there are some cases where the code is stochastic, but with a small, finite set of outputs.
+So we can run the function exhaustively and check it returns all of the possible outputs.
+For a population of two people, \texttt{chooseInfector()} returns a length-2 vector with the possible elements of 1 or 2.
+There are four possibilities when drawing who is infected by whom.
+Both individuals can be infected by individual 1, giving the vector \{1, 1\}.
+Both individuals can be infected by individual 2, giving \{2, 2\}.
+Both individuals can infect themselves, giving \{1, 2\}.
+Or finally both individuals can infect each other, giving \{2, 1\}.
+In (\ref{teststochfewvalues}), \texttt{chooseInfector(N\ =\ 2)} returns a length-2 vector with the indices of the infector for each infectee.
+\texttt{paste0()} then turns this length-2 vector into a length-1 string with two characters; we expect this to be one of ``11'', ``22'', ``12'' or ``21''.
+\texttt{replicate()} runs the expression 300 times.
+\newline
+\captionof{chunk}{Testing stochastic output when it only covers a few finite values.}\label{teststochfewvalues}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Collapse each draw into a single string}
+\CommentTok{#   to make comparisons easier.}
+\NormalTok{manyPops <-}\StringTok{ }
+\StringTok{  }\KeywordTok{replicate}\NormalTok{(}\DecValTok{300}\NormalTok{, }\KeywordTok{paste0}\NormalTok{(}\KeywordTok{chooseInfector}\NormalTok{(}\DataTypeTok{N =} \DecValTok{2}\NormalTok{), }\DataTypeTok{collapse =} \StringTok{""}\NormalTok{))}
+
+\CommentTok{# Check that all outputs are one of the four possible values}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{all}\NormalTok{(manyPops }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"11"}\NormalTok{, }\StringTok{"22"}\NormalTok{, }\StringTok{"12"}\NormalTok{, }\StringTok{"21"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{largesamples}{%
+\subsection*{Use very large samples for the stochastic part}\label{largesamples}}
+\addcontentsline{toc}{subsection}{Use very large samples for the stochastic part}
+
+Testing can be made easier by using very large numbers.
+This typically involves large sample sizes or numbers of stochastic runs.
+For example, the clearest test to distinguish between our original, buggy code (\ref{firstcode}) and our correct code (\ref{correctcode}) is that in the correct code there is the possibility for an individual to infect more than one individual in a single time step.
+In any given run this is never guaranteed, but the larger the population size the more likely it is to occur.
+With a population of 1000, the probability that no individual infects two others is vanishingly rare (\ref{teststochlargenum}).
+As this test is now stochastic we should set the seed, using \texttt{set.seed()}, of the random number generator to make the test reproducible.
+\newline
+\captionof{chunk}{Testing that the code does allow one individual to infect multiple individuals.}\label{teststochlargenum}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{10261985}\NormalTok{)}
+\NormalTok{n <-}\StringTok{ }\FloatTok{1e3}
+\NormalTok{infector_pathogen <-}\StringTok{ }\KeywordTok{chooseInfector}\NormalTok{(n)}
+
+\CommentTok{# Test if an individual infects more than one individual, }
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{any}\NormalTok{(}\KeywordTok{duplicated}\NormalTok{(infector_pathogen)))}
+\end{Highlighting}
+\end{Shaded}
+
+If we have an event that we know should never happen, we can use a large number of simulations to provide stronger evidence that it does not stochastically occur.
+However, it can be difficult to determine how many times is reasonable to run a simulation, especially if time is short.
+This strategy works best when we have a specific bug that occurs relatively frequently (perhaps once every ten simulations or so).
+If the bug occurs every ten simulations and we have not fixed it we would be confident that it will occur at least once if we run the simulation 500 or 1000 times.
+Conversely, if the bug does not occur even once in 500 or 1000 simulations we can be fairly sure we have fixed it.
+\newline
+\newline
+Similarly, a bug might cause an event that should be rare to instead occur very regularly or even every time the code is run.
+In our original buggy code (\ref{firstcode}) we found that the proportions remained identical for entire simulations.
+We would expect this to happen only very rarely.
+We can run a large number of short simulations to check that this specific bug is not still occurring by confirming that the proportion of each pathogen is not always the same between the first and last time point.
+As long as we find at least one simulation where the proportions of each pathogen are different between the first and last iteration, we can be more confident that the bug has been fixed.
+\newline
+\captionof{chunk}{Assessing if a bug fix was a likely success with large code runs, when the bug was appearing relatively frequently.}\label{returningpathogen}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{11121955}\NormalTok{)}
+\NormalTok{manySims <-}\StringTok{ }\KeywordTok{replicate}\NormalTok{(}\DecValTok{500}\NormalTok{, }
+                      \KeywordTok{fullSim}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{20}\NormalTok{, }\DataTypeTok{N =} \DecValTok{40}\NormalTok{, }
+                              \DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{), }
+                      \DataTypeTok{simplify =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{# Define a function that returns TRUE if the}
+\CommentTok{#   pathogen proportions are the same at the }
+\CommentTok{#   first and last time point and FALSE otherwise.}
+\NormalTok{diffProportions <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x)\{}
+  \OperatorTok{!}\KeywordTok{identical}\NormalTok{(}\KeywordTok{table}\NormalTok{(x[}\DecValTok{1}\NormalTok{, ]), }\KeywordTok{table}\NormalTok{(x[}\DecValTok{20}\NormalTok{, ]))}
+\NormalTok{\}}
+
+\CommentTok{# Check that at least one simulation had non-identical}
+\CommentTok{#   proportions. sapply runs the function diffProportions }
+\CommentTok{#   on each list element of manySims i.e. each simulation.}
+\KeywordTok{expect_true}\NormalTok{(}\KeywordTok{any}\NormalTok{(}\KeywordTok{vapply}\NormalTok{(manySims, diffProportions, }\OtherTok{TRUE}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+This example can be thought of more generally as having an expected distribution of an output and using a statistical test to compare the simulation results with the expectation.
+Here, we had a binomial event (was the pathogen proportions different between the first and last time step) and an expected frequency of this event (greater than zero).
+This approach is to testing stochastic code is detailed in Ševčíková et al. (2006), Guderlei and Mayer (2007) and Patrick, Donnelly, and Gilligan (2017).
+If we know a property of the expected distribution (the mean for example) we can run the simulation repeatedly and use a statistical test to compare the distribution of simulated outputs to the expected distribution.
+
+\hypertarget{further-testing}{%
+\section{Further testing}\label{further-testing}}
+
+\hypertarget{testincorrect}{%
+\subsection*{Test incorrect inputs}\label{testincorrect}}
+\addcontentsline{toc}{subsection}{Test incorrect inputs}
+
+As well as testing that functions work when given the correct inputs, we should also test that they behave sensibly when given wrong ones.
+This typically involves the user inputting argument values that do not make sense.
+This may be, for example, because the inputted argument values are the wrong class, in the wrong numeric range or have missing data values --- therefore it is useful to test that functions fail gracefully.
+This is especially true for external, exported functions, available to a user on a package's front-end.
+However, it is not always obvious what constitutes an `incorrect value' even to the person who wrote the code.
+In some cases, inputting incorrect argument values may cause the function to fail quickly.
+In other cases code may run silently giving false results or take a long time to throw an error.
+Both of these cases can be serious or annoying and difficult to debug afterwards.
+In this section we identify frailties in the code that are conceptually different to a bug; the model as specified is already implemented correctly.
+Instead we are making the code more user-friendly and user-safe to protect against mistakes during future code re-use.
+\newline
+\newline
+Often for these cases, the expected behaviour of the function should be to give an error.
+There is no correct output for an epidemiological model with -1 pathogens.
+Instead the function should give an informative error message.
+Often the simplest solution is to use defensive programming and include argument checks at the beginning of functions.
+We then have to write slightly unintuitive tests for an expression where the expected behaviour is an error.
+If the expression does not throw an error, the test should throw an error (as this is not the expected behaviour).
+Conversely, if the expression does throw an error, the test should pass and not error.
+We can use the \texttt{expect\_error()} function for this task.
+This function takes an expression as its first argument and reports an error if the given expression does not throw an expected error.
+\newline
+\newline
+We can first check that the code sensibly handles the user inputting a string instead of an integer for the number of pathogens.
+Because this expression throws an error, \texttt{expect\_error()} does not error and the test passes.
+\newline
+\captionof{chunk}{Testing incorrect pathogen inputs.}\label{wrong1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{expect_error}\NormalTok{(}
+  \KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{10}\NormalTok{, }\DataTypeTok{N =} \DecValTok{4}\NormalTok{, }\DataTypeTok{pathogens =} \StringTok{"three"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Now we contrast what happens if the user inputs a vector of pathogens to the \texttt{initialisePop()} function.
+Here we imagine the user intended to run a simulation with three pathogens: 1, 2 and 3.
+\newline
+\captionof{chunk}{A failing test for incorrect pathogen inputs.}\label{wrong1b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OperatorTok{>}\StringTok{ }\KeywordTok{expect_error}\NormalTok{(}\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{5}\NormalTok{, }\DataTypeTok{N =} \DecValTok{4}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{))}
+\NormalTok{Error}\OperatorTok{:}\StringTok{ `}\DataTypeTok{initialisePop(n_steps = 5, N = 4, pathogens = 1:3)}\StringTok{`} 
+\NormalTok{  did not throw an error.}
+\end{Highlighting}
+\end{Shaded}
+
+This test fails because the function does not throw an error.
+Instead the code takes the first element of \texttt{pathogens} and ignores the rest.
+Therefore, a population is created with one pathogen, not three, which is almost certainly not what the user wanted.
+Here, the safest fix is to add an explicit argument check at the top of the function (\ref{wrong1c}).
+The same test now passes because \texttt{initialisePop()} throws an error when a vector is supplied to the \texttt{pathogens} argument.
+\newline
+\captionof{chunk}{New definition, using defensive programming, of the initialisePop() function  and a passing test for incorrect pathogen inputs.}\label{wrong1c}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{initialisePop <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n_steps, N, pathogens)\{}
+  
+  \CommentTok{# Add a defensive argument check}
+  \ControlFlowTok{if}\NormalTok{(}\KeywordTok{length}\NormalTok{(pathogens) }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{) }\KeywordTok{stop}\NormalTok{(}\StringTok{"pathogens must have length 1"}\NormalTok{)}
+  
+\NormalTok{  I <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n_steps, }\DataTypeTok{ncol =}\NormalTok{ N)}
+\NormalTok{  I[}\DecValTok{1}\NormalTok{, ] <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ letters[}\DecValTok{1}\OperatorTok{:}\NormalTok{pathogens], }\DataTypeTok{length.out =}\NormalTok{ N)}
+  \KeywordTok{return}\NormalTok{(I)}
+\NormalTok{\}}
+
+\KeywordTok{expect_error}\NormalTok{(}\KeywordTok{initialisePop}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{5}\NormalTok{, }\DataTypeTok{N =} \DecValTok{4}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+We can similarly check how the code handles a user inputting a vector of numbers to the \texttt{n\_steps} argument (perhaps thinking it needed a vector of all time points to run).
+In \ref{wrong1c}, \texttt{initialisePop()} does not throw an error if a vector is supplied to \texttt{n\_steps}.
+However, \texttt{fullSim()} does throw an error if a vector is supplied to \texttt{n\_steps}.
+While it is a good thing that \texttt{fullSim()} throws an error, the error message is not very informative.
+If the code that runs before the error is thrown (in this case the \texttt{initialisePop()} function) takes a long time, it can also be time consuming to work out what threw the error.
+It is also a signature of fragile code that the error is coincidental; a small change in the code might stop the error from occurring.
+These considerations all point towards defensive programming as a good solution.
+We can add an additional argument check to \texttt{initialisePop()}.
+Importantly, we then want to check that \texttt{fullSim()} errors in the correct place (i.e.~in \texttt{initialisePop()} rather than afterwards).
+We can achieve this using the \texttt{regexp} argument of \texttt{expect\_error()} that compares the actual error message to the expected error messages.
+The test will only pass if the error message contains the string provided.
+\newline
+\captionof{chunk}{Another new definition of the initialisePop() function and a passing test for the fullSim() function.}\label{wrong2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{initialisePop <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n_steps, N, pathogens)\{}
+  
+  \CommentTok{# Argument checks}
+  \ControlFlowTok{if}\NormalTok{(}\KeywordTok{length}\NormalTok{(pathogens) }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{) }\KeywordTok{stop}\NormalTok{(}\StringTok{"pathogens must have length 1"}\NormalTok{)}
+  \ControlFlowTok{if}\NormalTok{(}\KeywordTok{length}\NormalTok{(n_steps) }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{) }\KeywordTok{stop}\NormalTok{(}\StringTok{"n_steps must have length 1"}\NormalTok{)}
+
+\NormalTok{  I <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n_steps, }\DataTypeTok{ncol =}\NormalTok{ N)}
+\NormalTok{  I[}\DecValTok{1}\NormalTok{, ] <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ letters[}\DecValTok{1}\OperatorTok{:}\NormalTok{pathogens], }\DataTypeTok{length.out =}\NormalTok{ N)}
+  \KeywordTok{return}\NormalTok{(I)}
+\NormalTok{\}}
+
+\KeywordTok{expect_error}\NormalTok{(}\KeywordTok{fullSim}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{1}\OperatorTok{:}\DecValTok{100}\NormalTok{, }\DataTypeTok{N =} \DecValTok{4}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{), }
+             \DataTypeTok{regexp =} \StringTok{"n_steps must have"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{corners}{%
+\subsection*{Test special cases}\label{corners}}
+\addcontentsline{toc}{subsection}{Test special cases}
+
+When writing tests it is easy to focus on standard behaviour.
+However, bugs often occur at \emph{special cases}---when the code behaves qualitatively differently at a certain value or certain combinations of parameter values.
+For example, in \emph{R}, selecting two or more columns from a matrix e.g.~\texttt{my\_matrix{[},\ 2:3{]}} returns a matrix while selecting one column e.g.~\texttt{my\_matrix{[},\ 2{]}} returns a vector.
+Code that relies on the returned object being a matrix would fail in this special case.
+These special cases can often be triggered with parameter sets that are at the edge of parameter space.
+This is where understanding of the functional form of the model can help.
+Consider a function \texttt{divide(x,\ y)} that divides \texttt{x} by \texttt{y}.
+We could test this function by noting that \texttt{y\ *\ divide(x,\ y)} should return \texttt{x}.
+If we write code that tests standard values of \texttt{x} and \texttt{y} such as \texttt{(2\ *\ divide(3,\ 2))\ ==\ 3} we would believe the function works for nearly all values of division, unless we ever try \texttt{y\ =\ 0}.
+\newline
+\newline
+We checked earlier if the \texttt{n\_steps} argument of \texttt{initialisePop()} worked by verifying that the returned population had the correct dimensions (\ref{testallargs}).
+We can test the \texttt{fullSim()} function in the same way (\ref{edge2}).
+However, if we try to run the same test with \texttt{n\_steps\ =\ 1} we get an error before we even get to the test.
+\newline
+\captionof{chunk}{fullSim() does not give a population matrix with the correct number of rows if one iteration is requested.}\label{edge2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OperatorTok{>}\StringTok{ }\NormalTok{popt1 <-}\StringTok{ }\KeywordTok{fullSim}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{2}\NormalTok{, }\DataTypeTok{N =} \DecValTok{5}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{) }
+\OperatorTok{>}\StringTok{ }\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{dim}\NormalTok{(popt1), }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+
+\OperatorTok{>}\StringTok{ }\NormalTok{popt2 <-}\StringTok{ }\KeywordTok{fullSim}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{1}\NormalTok{, }\DataTypeTok{N =} \DecValTok{5}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{)}
+\NormalTok{Error }\ControlFlowTok{in} \StringTok{`}\DataTypeTok{[<-}\StringTok{`}\NormalTok{(}\StringTok{`}\DataTypeTok{*tmp*}\StringTok{`}\NormalTok{, t, , }\DataTypeTok{value =}\NormalTok{ x[t }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{, infector_pathogen]) }
+\NormalTok{  subscript out of bounds}
+  
+\OperatorTok{>}\StringTok{ }\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{dim}\NormalTok{(popt2), }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+In general, requesting a simulation with 1 time step is without epidemiological meaning; this is not an objectively wrong use of the function.
+The code behaves qualitatively differently for \texttt{n\_steps\ =\ 1} than for \texttt{n\_steps\ =\ 2} because the loop in \ref{combinesimplefunc} runs from 2 to \texttt{n\_steps} setting \texttt{t} to each value in turn.
+When \texttt{n\_steps} is 2 or more, this follows the sequence \(\{2, 3, ...\}\).
+When \texttt{n\_steps} is 1, this instead follows the sequence \(\{2, 1\}\).
+The population is initialised with 1 row but the code still tries to store the results in the second row of the population matrix.
+For special cases like this it may be rather subjective what the correct behaviour should be.
+It might be appropriate to simply declare that this parameter value is not allowed.
+This should be stated in the documentation and the function should throw an error.
+Here however, we will decide that this is a valid parameter value.
+We should change the code to handle this special case, and use the new test to check that our new code works.
+In \ref{edge3} we use an \texttt{if} statement to explicitly handle the special case of \texttt{n\_steps\ =\ 1} and our test now passes.
+\newline
+\captionof{chunk}{Handle the special case of $t = 1$ and test the new code.}\label{edge3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fullSim <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n_steps, N, pathogens)\{}
+\NormalTok{  pop <-}\StringTok{ }\KeywordTok{initialisePop}\NormalTok{(n_steps, N, pathogens) }
+  \ControlFlowTok{if}\NormalTok{(n_steps }\OperatorTok{>=}\StringTok{ }\DecValTok{2}\NormalTok{)\{}
+    \ControlFlowTok{for}\NormalTok{(t }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, n_steps))\{}
+\NormalTok{      pop <-}\StringTok{ }\KeywordTok{updatePop}\NormalTok{(pop, t, N)}
+\NormalTok{    \}}
+\NormalTok{  \}}
+  \KeywordTok{return}\NormalTok{(pop)}
+\NormalTok{\}}
+
+\NormalTok{popt2 <-}\StringTok{ }\KeywordTok{fullSim}\NormalTok{(}\DataTypeTok{n_steps =} \DecValTok{1}\NormalTok{, }\DataTypeTok{N =} \DecValTok{5}\NormalTok{, }\DataTypeTok{pathogens =} \DecValTok{3}\NormalTok{)}
+\KeywordTok{expect_equal}\NormalTok{(}\KeywordTok{dim}\NormalTok{(popt2), }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{frameworks}{%
+\section{Unit testing frameworks}\label{frameworks}}
+
+Most programming languages have established testing packages.
+For \emph{R}, there is the \(\texttt{testthat}\) package as already discussed as well as other packages such as \(\texttt{tinytest}\) which has the benefit of having no dependencies.
+When structuring \emph{R} code as standalone scripts, the tests should be saved in one or more scripts either in the same directory as the scripts in which the functions are defined, or within a subdirectory of the same project directory.
+The testing script needs to load all the functions it is going to test (with \texttt{source()} for example) and then run the tests.
+When structuring \emph{R} code as a package, tests should be kept in the directory \texttt{tests/testthat}; further requirements to the structure can be found in Chapter 7 of Wickham (2015).
+All the tests in a package can then be run with \texttt{test()} from the \(\texttt{devtools}\) package (Wickham et al. 2019) or \texttt{check()} for additional checks relevant to the package build.
+If the code is to be part of a package then these tools are essential to run the code within the context of a build environment.
+These tools also provide a clean environment to highlight if a test was previously relying on objects defined outside of the test script.
+Furthermore, organising code in a package provides further benefits such as tools to aid the writing of documentation, systematic handling of dependencies and tools to track whether every line of code in the package is tested such as the \texttt{covr} package (Hester 2020).
+The practice of organising code as a package, even if there is no expectation that others will use the code, is under appreciated and underused in epidemiology.
+\newline
+\newline
+The testing frameworks of other programming languages differ but the main concept of comparing a function evaluation to the expected output remains the same.
+In \emph{Julia} there is the \(\texttt{Test}\) package (Bezanson, Edelman, Karpinski, Shah, et al. 2017).
+The basic structure for tests with this package is shown in \ref{juliatest}.
+We name the test and write a single expression that evaluates to \texttt{TRUE} or \texttt{FALSE}.
+For a \emph{Julia} package, unit tests reside in \texttt{test/runtests.jl} and tests are run with \texttt{Pkg.test()}.
+\newline
+\captionof{chunk}{Julia test example.}\label{juliatest}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\OperatorTok{@}\NormalTok{testset }\StringTok{"my_test_name"}\NormalTok{ begin}
+  \OperatorTok{@}\NormalTok{test }\KeywordTok{sqrt}\NormalTok{(}\DecValTok{4}\NormalTok{) }\OperatorTok{==}\StringTok{ }\DecValTok{2}
+\NormalTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+Finally, in \emph{python} tests can be performed using the \(\texttt{unittest}\) framework (Python Core Team 2015b); tests must be written into a class that inherits from the \texttt{TestCase} class.
+The tests must be written as methods with \texttt{self} as the first argument.
+An example test script is shown below.
+Tests should be kept in a directory called \texttt{Lib/test}, and the filename of every file with tests should begin with ``\texttt{test\_}''.
+\newline
+\captionof{chunk}{Python test example.}\label{testpy}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{import unittest}
+\NormalTok{import math}
+
+\NormalTok{class }\KeywordTok{TestMaths}\NormalTok{(unittest.TestCase)}\OperatorTok{:}
+\StringTok{    }\NormalTok{def }\KeywordTok{test_sqrt}\NormalTok{(self)}\OperatorTok{:}
+\StringTok{        }\KeywordTok{self.assertEqual}\NormalTok{(}\KeywordTok{math.sqrt}\NormalTok{(}\DecValTok{4}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+
+\KeywordTok{unittest.main}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{ci}{%
+\section{Continuous integration}\label{ci}}
+
+If your code is under version control (Osborne et al. 2014; Wilson et al. 2014) and hosted online (e.g.~on GitHub, GitLab or BitBucket), you can automate the running of unit tests---also known as \emph{continuous integration}.
+In this setup, whenever you push code changes from your local computer to the online repository, any tests that you have defined get run automatically.
+Furthermore these tests can be automated to run periodically so that bugs caused by changes in dependencies are flagged.
+There are various continuous integration services such as travis-ci.org, GitHub actions and GitLab pipelines.
+These services are often free on a limited basis, or free if your code is open source.
+\newline
+\newline
+We briefly describe the setup of the simplest case using Travis CI.
+Setting up continuous integration is very straightforward for \emph{R} code already organised into a package and hosted openly on GitHub.
+Within your version-controlled folder that contains the \emph{R} code, you add a one-liner file named ``\texttt{.travis.yml}'' that contains a description of which language the code uses.
+\newline
+\captionof{chunk}{A basic travis yml file.}\label{travis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{language}\OperatorTok{:}\NormalTok{r}
+\end{Highlighting}
+\end{Shaded}
+
+This file can also be created with \texttt{use\_travis()} from the \(\texttt{usethis}\) package.
+You then sign up to travis-ci.org and point it to the correct GitHub repository.
+To authenticate and trigger the first automatic test you need to make a minor change to your code, commit and push to GitHub.
+More details on setting up Travis, and how to continuously track test coverage using \texttt{covr} and \texttt{codecov}, can be found in Chapter 14.3 of Wickham (2015).
+
+\hypertarget{concluding-remarks}{%
+\section{Concluding remarks}\label{concluding-remarks}}
+
+It is vital that infectious disease models are coded to minimise bugs.
+Unit testing is a well-defined, principled way to do this.
+There are many frameworks that make aspects of unit testing automatic and more informative and these should be used where possible.
+\newline
+\newline
+The basic principles of unit testing are simple but writing good tests is a skill that takes time, practice and thought.
+However, ensuring your code is robust and well-tested saves time and effort in the long run and helps prevent spurious results.
+Our aim in this paper was to demonstrate tailored results for infectious disease modelling.
+There are number of standard programming approaches to unit testing which would be good further reading (Wickham (2015) Chapter 7, Osborne et al. (2014), Wilson et al. (2014)).
+As demonstrated here, it is initially time consuming to program in this way, but over time it becomes habitual and both you and the policy-makers who use your models will benefit from it.
+
+\hypertarget{code-availability}{%
+\section{Code availability}\label{code-availability}}
+
+Please see the fully-reproducible and version-controlled code at \url{www.github.com/timcdlucas/unit_test_for_infectious_disease}.
+
+\hypertarget{funding-sources}{%
+\section{Funding sources}\label{funding-sources}}
+
+TMP, TDH, TCDL and ELD gratefully acknowledge funding of the NTD Modelling Consortium by the Bill \& Melinda Gates Foundation (BMGF) (grant number OPP1184344).
+Views, opinions, assumptions or any other information set out in this article should not be
+attributed to BMGF or any person connected with them.
+TMP's PhD is supported by the Engineering \& Physical Sciences Research Council, Medical
+Research Council and University of Warwick (grant number EP/L015374/1).
+TMP thanks the Big Data Institute for hosting him during this work.
+All funders had no role in the study design, collection, analysis, interpretation of data,
+writing of the report, or decision to submit the manuscript for publication.
+
+\hypertarget{contributions-credit-statement}{%
+\section{Contributions: CRediT statement}\label{contributions-credit-statement}}
+
+Conceptualization: TCDL TMP
+
+Data curation: TCDL
+
+Formal Analysis: TCDL
+
+Funding acquisition: TDH
+
+Investigation: TCDL
+
+Methodology: TCDL
+
+Project administration: TCDL
+
+Software: TCDL TMP
+
+Validation: TMP
+
+Visualization: TCDL TMP
+
+Writing -- original draft: TCDL
+
+Writing -- review \& editing: TCDL TMP ELD TDH
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-funds}{}%
+Baker, Simon. 2020. ``Pandemic Response Shines Spotlight on Coding in Science.'' \url{https://www.timeshighereducation.com/news/pandemic-response-shines-spotlight-coding-science}.
+
+\leavevmode\hypertarget{ref-it}{}%
+BCS, The Chartered Institute for IT. 2020. ``Professionalising Software Development in Scientific Research.'' \url{https://www.bcs.org/media/5780/professionalising-software-development.pdf}.
+
+\leavevmode\hypertarget{ref-behrend2020modelling}{}%
+Behrend, Matthew R, María-Gloria Basáñez, Jonathan ID Hamley, Travis C Porco, Wilma A Stolk, Martin Walker, Sake J de Vlas, and NTD Modelling Consortium. 2020. ``Modelling for Policy: The Five Principles of the Neglected Tropical Diseases Modelling Consortium.'' \emph{PLoS Neglected Tropical Diseases} 14 (4): e0008033.
+
+\leavevmode\hypertarget{ref-bezanson2017julia}{}%
+Bezanson, Jeff, Alan Edelman, Stefan Karpinski, and Viral B Shah. 2017. ``\emph{Julia}: A Fresh Approach to Numerical Computing.'' \emph{SIAM Rev.} 59 (1): 65--98. \url{https://doi.org/10.1137/141000671}.
+
+\leavevmode\hypertarget{ref-juliatest}{}%
+Bezanson, Jeff, Alan Edelman, Stefan Karpinski, Viral B Shah, and other contributers. 2017. \emph{\texttt{test} V1.4.1: Simple Unit Testing Functionality in Julia}. \url{https://github.com/JuliaLang/julia/blob/master/stdlib/Test/src/Test.jl}.
+
+\leavevmode\hypertarget{ref-bhandari2019characterization}{}%
+Bhandari Neupane, Jayanti, Ram P Neupane, Yuheng Luo, Wesley Y Yoshida, Rui Sun, and Philip G Williams. 2019. ``Characterization of Leptazolines A--D, Polar Oxazolines from the Cyanobacterium Leptolyngbya Sp., Reveals a Glitch with the `Willoughby--Hoye' Scripts for Calculating NMR Chemical Shifts.'' \emph{Organic Letters} 21 (20): 8449--53.
+
+\leavevmode\hypertarget{ref-board1999mars}{}%
+Board, Mishap Investigation. 1999. ``Mars Climate Orbiter Mishap Investigation Board Phase I Report November 10, 1999.''
+
+\leavevmode\hypertarget{ref-ferg_pol}{}%
+Chawla, Dalmeet Singh. 2020. ``Critiqued Coronavirus Simulation Gets Thumbs up from Code-Checking Efforts.'' \url{https://www.nature.com/articles/d41586-020-01685-y}; Nature.
+
+\leavevmode\hypertarget{ref-retract}{}%
+Clinical Oncology, American Society of. 2016. ``Retraction.'' \emph{Journal of Clinical Oncology} 34 (27): 3358--9. \url{https://doi.org/10.1200/JCO.2016.69.0875}.
+
+\leavevmode\hypertarget{ref-RECON}{}%
+Csardi, Gabor, Rich FitzJohn, Thibaut Jombart, Zhian N. Kamvar, and Noam Ross. 2020. ``RECON Guidelines. Best Practices for Package Development.'' \url{https://www.repidemicsconsortium.org/resources/guidelines/}.
+
+\leavevmode\hypertarget{ref-den2019guidelines}{}%
+Den Boon, Saskia, Mark Jit, Marc Brisson, Graham Medley, Philippe Beutels, Richard White, Stefan Flasche, et al. 2019. ``Guidelines for Multi-Model Comparisons of the Impact of Infectious Disease Interventions.'' \emph{BMC Medicine} 17 (1): 163.
+
+\leavevmode\hypertarget{ref-ferg_check}{}%
+Eglen, Stephen J. 2020. ``CODECHECK Certificate for Paper: Report 9: Impact of Non-Pharmaceutical Interventions (NPIs) to Reduce COVID-19 Mortality and Healthcare Demand. March 16, 2020.''
+
+\leavevmode\hypertarget{ref-ferg_tweet}{}%
+Ferguson, Neil M. 2020. ``Tweet from @Neil\_ferguson.'' \url{https://twitter.com/neil_ferguson/status/1241835454707699713}.
+
+\leavevmode\hypertarget{ref-ferguson2006strategies}{}%
+Ferguson, Neil M, Derek AT Cummings, Christophe Fraser, James C Cajka, Philip C Cooley, and Donald S Burke. 2006. ``Strategies for Mitigating an Influenza Pandemic.'' \emph{Nature} 442 (7101): 448--52.
+
+\leavevmode\hypertarget{ref-imperial}{}%
+Ferguson, Neil M, Daniel Laydon, Gemma Nedjati-Gilani, Natsuko Imai, Kylie Ainslie, Marc Baguelin, Sangeeta Bhatia, et al. 2020. ``Impact of Non-Pharmaceutical Interventions (NPIs) to Reduce COVID-19 Mortality and Healthcare Demand.'' \url{https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/covid-19/report-9-impact-of-npis-on-covid-19/}.
+
+\leavevmode\hypertarget{ref-ferg_github}{}%
+Ferguson, Neil M, and MRC Centre for Global Infectious Disease Analysis. 2020. ``covid-sim.'' \url{https://github.com/mrc-ide/covid-sim}.
+
+\leavevmode\hypertarget{ref-guderlei2007statistical}{}%
+Guderlei, Ralph, and Johannes Mayer. 2007. ``Statistical Metamorphic Testing Testing Programs with Random Output by Means of Statistical Hypothesis Tests and Metamorphic Testing.'' In \emph{Seventh International Conference on Quality Software (Qsic 2007)}, 404--9. IEEE.
+
+\leavevmode\hypertarget{ref-heesterbeek2015modeling}{}%
+Heesterbeek, Hans, Roy M Anderson, Viggo Andreasen, Shweta Bansal, Daniela De Angelis, Chris Dye, Ken TD Eames, et al. 2015. ``Modeling Infectious Disease Dynamics in the Complex Landscape of Global Health.'' \emph{Science} 347 (6227).
+
+\leavevmode\hypertarget{ref-hellewell2020feasibility}{}%
+Hellewell, Joel, Sam Abbott, Amy Gimma, Nikos I Bosse, Christopher I Jarvis, Timothy W Russell, James D Munday, et al. 2020. ``Feasibility of Controlling COVID-19 Outbreaks by Isolation of Cases and Contacts.'' \emph{Lancet}.
+
+\leavevmode\hypertarget{ref-herndon2014does}{}%
+Herndon, Thomas, Michael Ash, and Robert Pollin. 2014. ``Does High Public Debt Consistently Stifle Economic Growth? A Critique of Reinhart and Rogoff.'' \emph{Cambridge Journal of Economics} 38 (2): 257--79.
+
+\leavevmode\hypertarget{ref-covr}{}%
+Hester, Jim. 2020. \emph{Covr: Test Coverage for Packages}. \url{https://CRAN.R-project.org/package=covr}.
+
+\leavevmode\hypertarget{ref-hollingsworth2017learning}{}%
+Hollingsworth, TD, and GF Medley. 2017. ``Learning from Multi-Model Comparisons: Collaboration Leads to Insights, but Limitations Remain.'' \emph{Epidemics} 18. \url{https://doi.org/10.1016/j.epidem.2017.02.014}.
+
+\leavevmode\hypertarget{ref-ihme}{}%
+IHME COVID-19 health service utilization forecasting team, and Christopher JL Murray. 2020. ``Forecasting COVID-19 Impact on Hospital Bed-Days, ICU-days, Ventilator Days and Deaths by US State in the Next 4 Months.'' \emph{medRxiv}. \url{https://doi.org/10.1101/2020.03.27.20043752}.
+
+\leavevmode\hypertarget{ref-jenness2018epimodel}{}%
+Jenness, Samuel M, Steven M Goodreau, and Martina Morris. 2018. ``EpiModel: An R Package for Mathematical Modeling of Infectious Disease over Networks.'' \emph{Journal of Statistical Software} 84.
+
+\leavevmode\hypertarget{ref-nasa}{}%
+NASA. 2020. ``Mariner 1.'' \url{https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=MARIN1}.
+
+\leavevmode\hypertarget{ref-osborne2014ten}{}%
+Osborne, James M, Miguel O Bernabeu, Maria Bruna, Ben Calderhead, Jonathan Cooper, Neil Dalchau, Sara-Jane Dunn, et al. 2014. ``Ten Simple Rules for Effective Computational Research.'' \emph{PLoS Comput. Biol.} 10 (3).
+
+\leavevmode\hypertarget{ref-patrick2017toolkit}{}%
+Patrick, Matthew, Ruairi Donnelly, and Christopher A Gilligan. 2017. ``A Toolkit for Testing Stochastic Simulations Against Statistical Oracles.'' In \emph{2017 Ieee International Conference on Software Testing, Verification and Validation (Icst)}, 448--53. IEEE.
+
+\leavevmode\hypertarget{ref-python}{}%
+Python Core Team. 2015a. \emph{\textup{Python} V3.8.2: A Dynamic, Open Source Programming Language}. Python Software Foundation. \url{https://www.python.org/}.
+
+\leavevmode\hypertarget{ref-pythonunittest}{}%
+---------. 2015b. \emph{\texttt{unittest} V3.8.2: Unit Testing Framework}. \url{https://docs.python.org/3/library/unittest.html}.
+
+\leavevmode\hypertarget{ref-R}{}%
+R Core Team. 2018. \emph{\textup{R} V3.6.3: A Language and Environment for Statistical Computing}. Vienna, Austria: R Foundation for Statistical Computing. \url{https://www.R-project.org/}.
+
+\leavevmode\hypertarget{ref-santos2015epidynamics}{}%
+Santos Baquero, Oswaldo, and Fernando Silveira Marques. 2020. \emph{EpiDynamics: Dynamic Models in Epidemiology}. \url{https://CRAN.R-project.org/package=EpiDynamics}.
+
+\leavevmode\hypertarget{ref-spim}{}%
+SPI-M. 2020. ``Scientific Pandemic Influenza Group on Modelling (Spi-M).'' \url{https://www.gov.uk/government/groups/scientific-pandemic-influenza-subgroup-on-modelling}.
+
+\leavevmode\hypertarget{ref-vsevvcikova2006automated}{}%
+Ševčíková, Hana, Alan Borning, David Socha, and Wolf-Gideon Bleek. 2006. ``Automated Testing of Stochastic Systems: A Statistically Grounded Approach.'' In \emph{Proceedings of the 2006 International Symposium on Software Testing and Analysis}, 215--24.
+
+\leavevmode\hypertarget{ref-testthat}{}%
+Wickham, Hadley. 2011. ``\texttt{testthat} V.2.3.2: Get Started with Testing.'' \emph{R. J.} 3: 5--10. \url{https://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf}.
+
+\leavevmode\hypertarget{ref-wickham2015r}{}%
+---------. 2015. \emph{R Packages: Organize, Test, Document, and Share Your Code}. O'Reilly Media, Inc.
+
+\leavevmode\hypertarget{ref-wickham2019advanced}{}%
+---------. 2019. \emph{Advanced R First Edition}. CRC press. \url{http://adv-r.had.co.nz/Exceptions-Debugging.html}.
+
+\leavevmode\hypertarget{ref-devtools}{}%
+Wickham, Hadley, Jim Hester, Winston Chang, RStudio, and R Core Team. 2019. \emph{\texttt{devtools} V2.3.0: Tools to Make Developing R Packages Easier}. \url{https://CRAN.R-project.org/package=devtools}.
+
+\leavevmode\hypertarget{ref-willem2017lessons}{}%
+Willem, Lander, Frederik Verelst, Joke Bilcke, Niel Hens, and Philippe Beutels. 2017. ``Lessons from a Decade of Individual-Based Models for Infectious Disease Transmission: a Systematic Review (2006-2015).'' \emph{BMC Infect. Dis.} 17 (1): 612.
+
+\leavevmode\hypertarget{ref-wilson2014best}{}%
+Wilson, Greg, Dhavide A Aruliah, C Titus Brown, Neil P Chue Hong, Matt Davis, Richard T Guy, Steven HD Haddock, et al. 2014. ``Best Practices for Scientific Computing.'' \emph{PLoS Biol.} 12 (1).
+
+
+\end{document}
+
+
