@@ -21,11 +21,11 @@ address:
     address: MathSys CDT, University of Warwick, UK
 abstract: |
   Infectious disease epidemiology is increasingly reliant on large-scale computation and inference. 
-  Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases such as malaria and tuberculosis. 
-  Yet a single coding bug may bias results, leading to incorrect conclusions and wrong actions that could cause avoidable harm.
-  We are ethically obliged to ensure our code is as free of error as possible.
-  Unit testing is a coding method to avoid such bugs, but unit testing is rarely used in epidemiology.
-  We demonstrate through simple examples how unit testing can handle the particular quirks of infectious disease models with the aim of increasing uptake of this methodology in our field.
+  Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases including malaria and tuberculosis. 
+  Yet a coding bug may bias results, yielding incorrect conclusions and actions causing avoidable harm.
+  We are ethically obliged to make our code as free of error as possible.
+  Unit testing is a coding method to avoid such bugs, but it is rarely used in epidemiology.
+  We demonstrate how unit testing can handle the particular quirks of infectious disease models and aim to increase uptake of this methodology in our field.
 keywords: unit testing, software development, reproducible science, computational models
 bibliography: unit_testing.bib
 output:
