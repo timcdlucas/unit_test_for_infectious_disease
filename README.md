@@ -9,7 +9,7 @@ disease epidemiology.*](insert DOI) is available to run in [R Markdown (includin
 As these analysis notes are an integral part of the paper and do not have their own DOI, we kindly request that you cite the full paper as follows:
 
 > @ARTICLE{Lucas2020,
- author={Lucas, T.C.D. and Pollingon, T.M. and Davis, E.L. and Hollingsworth, T.D.},  
+ author={Lucas, T.C.D. and Pollington, T.M. and Davis, E.L. and Hollingsworth, T.D.},  
  year={2020},  
  title={{Responsible modelling: Unit testing for infectious disease epidemiology.}},  
  journal={Epidemics},  
