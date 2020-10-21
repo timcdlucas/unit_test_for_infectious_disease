@@ -1,6 +1,5 @@
 ---
-title: |
-  | Responsible modelling: Unit testing for infectious disease epidemiology.
+title: Responsible modelling: Unit testing for infectious disease epidemiology.
 author: 
   - name: Tim CD Lucas
     email: timcdlucas@gmail.com
@@ -10,19 +9,27 @@ author:
 ---
 
 ```{r, setup}
-library(knitr)
 library(ggplot2)
 library(tidyr)
+
+# A package for testing
 library(testthat)
 
 set.seed(01011885)
 ```
 
 
+# A unit test
+
+```{r, a_unit_test}
+
+expect_equal(sqrt(4), 10)
+expect_equal(sqrt(4), 2)
+
+```
+
 
 # An example multi-pathogen re-infection model
-
-
 
 - Consider a multi-pathogen system, 
 - with a population of $N$ infected individuals 
@@ -56,6 +63,7 @@ I <- matrix(data = NA, nrow = n_steps, ncol = N)
 
 # Initialise the population at t=1 with repeating configuration
 I[1, ] <- rep(x = c("a", "b", "c"), length.out = N)
+I[1, ]
 
 # At each time step, everyone is re-infected 
 # by someone from the previous time step.
