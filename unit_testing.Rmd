@@ -2,23 +2,10 @@
 title: |
   | Responsible modelling: Unit testing for infectious disease epidemiology.
 author: 
-  - name: Tim CD Lucas
-    email: timcdlucas@gmail.com
-    affiliation: [Big Data Institute, Imperial]
-    corresponding: timcdlucas@gmail.com
-  - name: Timothy M Pollington
-    affiliation: [Big Data Institute, MathSys CDT]
-  - name: Emma L Davis
-    affiliation: Big Data Institute
-  - name:  T Déirdre Hollingsworth
-    affiliation: Big Data Institute
-address:
-  - code: Big Data Institute
-    address: Big Data Institute, Li Ka Shing Centre for Health Information and Discovery, University of Oxford, UK
-  - code: Imperial
-    address: Centre for Environment and Health, School of Public Health, Imperial College, UK
-  - code: MathSys CDT
-    address: MathSys CDT, University of Warwick, UK
+  - Tim CD Lucas^[Big Data Institute, Li Ka Shing Centre for Health Information and Discovery, University of Oxford, UK. Centre for Environment and Health, School of Public Health, Imperial College, UK. timcdlucas@gmail.com]
+  - Timothy M Pollington^[Big Data Institute, Li Ka Shing Centre for Health Information and Discovery. MathSys CDT, University of Warwick, UK]
+  - Emma L Davis^[Big Data Institute, Li Ka Shing Centre for Health Information and Discovery]
+  - T Déirdre Hollingsworth^[Big Data Institute, Li Ka Shing Centre for Health Information and Discovery]
 abstract: |
   Infectious disease epidemiology is increasingly reliant on large-scale computation and inference. 
   Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases including malaria and tuberculosis. 
@@ -29,8 +16,9 @@ abstract: |
 keywords: unit testing, software development, reproducible science, computational models
 bibliography: unit_testing.bib
 output:
-  bookdown::pdf_book:
-    base_format: rticles::elsevier_article
+  bookdown::pdf_document2:
+    keep_tex: true
+    toc: false
     includes:
       in_header: preamble.tex
     number_sections: true
