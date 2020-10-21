@@ -1,47 +1,37 @@
-% Options for packages loaded elsewhere
-\PassOptionsToPackage{unicode}{hyperref}
-\PassOptionsToPackage{hyphens}{url}
-%
-\documentclass[
-]{article}
+\documentclass[]{elsarticle} %review=doublespace preprint=single 5p=2 column
+%%% Begin My package additions %%%%%%%%%%%%%%%%%%%
+\usepackage[hyphens]{url}
+
+
+
+\usepackage{lineno} % add
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage{graphicx}
+\usepackage{booktabs} % book-quality tables
+%%%%%%%%%%%%%%%% end my additions to header
+
+\usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
-  \usepackage[T1]{fontenc}
-  \usepackage[utf8]{inputenc}
-  \usepackage{textcomp} % provide euro and other symbols
-\else % if luatex or xetex
-  \usepackage{unicode-math}
-  \defaultfontfeatures{Scale=MatchLowercase}
-  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
-\fi
-% Use upquote if available, for straight quotes in verbatim environments
+\usepackage{fixltx2e} % provides \textsubscript
+% use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-\IfFileExists{microtype.sty}{% use microtype if available
-  \usepackage[]{microtype}
-  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
-}{}
-\makeatletter
-\@ifundefined{KOMAClassName}{% if non-KOMA class
-  \IfFileExists{parskip.sty}{%
-    \usepackage{parskip}
-  }{% else
-    \setlength{\parindent}{0pt}
-    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
-}{% if KOMA class
-  \KOMAoptions{parskip=half}}
-\makeatother
-\usepackage{xcolor}
-\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
-\hypersetup{
-  pdfauthor={Tim CD Lucas; Timothy M Pollington; Emma L Davis; T Déirdre Hollingsworth},
-  pdfkeywords={unit testing, software development, reproducible science, computational models},
-  hidelinks,
-  pdfcreator={LaTeX via pandoc}}
-\urlstyle{same} % disable monospaced font for URLs
-\usepackage[margin=1in]{geometry}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \usepackage{fontspec}
+  \ifxetex
+    \usepackage{xltxtra,xunicode}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\bibliographystyle{elsarticle-harv}
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -82,32 +72,29 @@
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\usepackage{longtable,booktabs}
-% Correct order of tables after \paragraph or \subparagraph
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
-\makeatother
-% Allow footnotes in longtable head/foot
-\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
-\makesavenoteenv{longtable}
-\usepackage{graphicx,grffile}
-\makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
-% Set default figure placement to htbp
-\makeatletter
-\def\fps@figure{htbp}
-\makeatother
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{longtable}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={},
+            colorlinks=false,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+
 \setcounter{secnumdepth}{5}
+% Pandoc toggle for numbering sections (defaults to be off)
+
+
+% Pandoc header
 \usepackage{caption}
 \usepackage{floatrow}
 \usepackage{upquote}
@@ -120,20 +107,34 @@
 %\@addtoreset{chunk}{section}
 \makeatother
 
-\title{Responsible modelling: Unit testing for infectious disease epidemiology.}
-\author{Tim CD Lucas\footnote{Big Data Institute, Li Ka Shing Centre for Health Information and Discovery, University of Oxford, UK. Centre for Environment and Health, School of Public Health, Imperial College, UK. \href{mailto:timcdlucas@gmail.com}{\nolinkurl{timcdlucas@gmail.com}}} \and Timothy M Pollington\footnote{Big Data Institute, Li Ka Shing Centre for Health Information and Discovery. MathSys CDT, University of Warwick, UK} \and Emma L Davis\footnote{Big Data Institute, Li Ka Shing Centre for Health Information and Discovery} \and T Déirdre Hollingsworth\footnote{Big Data Institute, Li Ka Shing Centre for Health Information and Discovery}}
-\date{}
+
 
 \begin{document}
-\maketitle
-\begin{abstract}
-Infectious disease epidemiology is increasingly reliant on large-scale computation and inference.
-Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases including malaria and tuberculosis.
-Yet a coding bug may bias results, yielding incorrect conclusions and actions causing avoidable harm.
-We are ethically obliged to make our code as free of error as possible.
-Unit testing is a coding method to avoid such bugs, but it is rarely used in epidemiology.
-We demonstrate how unit testing can handle the particular quirks of infectious disease models and aim to increase uptake of this methodology in our field.
-\end{abstract}
+\begin{frontmatter}
+
+  \title{Responsible modelling: Unit testing for infectious disease epidemiology.}
+    \author[Big Data Institute]{Tim CD Lucas}
+   \ead{timcdlucas@gmail.com} 
+    \author[Big Data Institute]{Timothy M Pollington}
+  
+    \author[Big Data Institute]{Emma L Davis}
+  
+    \author[Big Data Institute]{T Déirdre Hollingsworth}
+  
+      \address[Big Data Institute]{Big Data Institute, Li Ka Shing Centre for Health Information and Discovery, University of Oxford, UK}
+    \address[Imperial]{Centre for Environment and Health, School of Public Health, Imperial College, UK}
+    \address[MathSys CDT]{MathSys CDT, University of Warwick, UK}
+    
+  \begin{abstract}
+  Infectious disease epidemiology is increasingly reliant on large-scale computation and inference.
+  Models have guided health policy for epidemics including COVID-19 and Ebola and endemic diseases including malaria and tuberculosis.
+  Yet a coding bug may bias results, yielding incorrect conclusions and actions causing avoidable harm.
+  We are ethically obliged to make our code as free of error as possible.
+  Unit testing is a coding method to avoid such bugs, but it is rarely used in epidemiology.
+  We demonstrate how unit testing can handle the particular quirks of infectious disease models and aim to increase uptake of this methodology in our field.
+  \end{abstract}
+   \begin{keyword} unit testing, software development, reproducible science, computational models\end{keyword}
+ \end{frontmatter}
 
 \newpage
 
@@ -1100,4 +1101,7 @@ Willem, Lander, Frederik Verelst, Joke Bilcke, Niel Hens, and Philippe Beutels. 
 \leavevmode\hypertarget{ref-wilson2014best}{}%
 Wilson, Greg, Dhavide A Aruliah, C Titus Brown, Neil P Chue Hong, Matt Davis, Richard T Guy, Steven HD Haddock, et al. 2014. ``Best Practices for Scientific Computing.'' \emph{PLoS Biol.} 12 (1).
 
+
 \end{document}
+
+
